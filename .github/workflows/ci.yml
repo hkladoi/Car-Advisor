@@ -135,7 +135,7 @@ jobs:
       - name: Fetch immutable official source snapshots
         run: |
           mkdir -p .tmp
-          docker compose run --rm --no-deps --volume "$PWD/.tmp:/app/.tmp" ingestion-worker \
+          docker compose run --rm --no-deps --user "$(id -u):$(id -g)" --volume "$PWD/.tmp:/app/.tmp" ingestion-worker \
             python -m ingestion.cli fetch-seed \
             --registry /app/data/source-registry.v1.json \
             --seed /app/data/seed/v1.2-initial-vehicles.json \
@@ -161,7 +161,7 @@ jobs:
           --seed /app/data/seed/v1.5-registration-rules.json
       - name: Fetch and publish V1.5 legal/region snapshots
         run: |
-          docker compose run --rm --no-deps --volume "$PWD/.tmp:/app/.tmp" ingestion-worker \
+          docker compose run --rm --no-deps --user "$(id -u):$(id -g)" --volume "$PWD/.tmp:/app/.tmp" ingestion-worker \
             python -m ingestion.cli fetch-registration-seed \
             --registry /app/data/source-registry.v1.json \
             --seed /app/data/seed/v1.5-registration-rules.json \
@@ -182,7 +182,7 @@ jobs:
           --seed /app/data/seed/v1.6-energy.json
       - name: Fetch and publish V1.6 energy snapshots
         run: |
-          docker compose run --rm --no-deps --volume "$PWD/.tmp:/app/.tmp" ingestion-worker \
+          docker compose run --rm --no-deps --user "$(id -u):$(id -g)" --volume "$PWD/.tmp:/app/.tmp" ingestion-worker \
             python -m ingestion.cli fetch-energy-seed \
             --registry /app/data/source-registry.v1.json \
             --seed /app/data/seed/v1.6-energy.json \
