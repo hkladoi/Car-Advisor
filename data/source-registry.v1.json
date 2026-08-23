@@ -556,6 +556,20 @@
       "terms_note": "Reference/as-of information only. Preserve rate period, lender attribution, conditions, and change disclaimer; never imply credit approval or a guaranteed offer."
     },
     {
+      "id": "open-charge-map",
+      "name": "Open Charge Map Vietnam charging locations",
+      "owner": "Open Charge Map",
+      "category": "charging-poi",
+      "url": "https://api.openchargemap.io/v3/poi",
+      "allowed_domains": ["api.openchargemap.io"],
+      "authority": "TrustedSecondary",
+      "content_type": "Json",
+      "refresh_hours": 168,
+      "priority": 100,
+      "robots_note": "Official API only; weekly bounded country-code paging when an operator key is configured.",
+      "terms_note": "CC BY attribution is mandatory. Location and connector reference data only; never use OCM usage-cost text as an authoritative tariff."
+    },
+    {
       "id": "brave-discovery",
       "name": "Brave Search discovery only",
       "owner": "Brave Software",

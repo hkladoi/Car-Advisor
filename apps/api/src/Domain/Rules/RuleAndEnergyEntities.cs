@@ -46,6 +46,19 @@ public enum ChargingPromotionBenefit
     SessionCredit,
 }
 
+public enum ChargingLocationCoverage
+{
+    ReferenceOnly,
+}
+
+public enum ChargingLocationConfidence
+{
+    Unknown,
+    Low,
+    Medium,
+    High,
+}
+
 public sealed class Region : SourcedEntity
 {
     public string Code { get; set; } = string.Empty;
@@ -114,4 +127,57 @@ public sealed class ChargingPromotion : EffectiveSourcedEntity
     public string CapsJson { get; set; } = "{}";
     public decimal? BenefitValue { get; set; }
     public string? Currency { get; set; }
+}
+
+/// <summary>
+/// Cached charging-location reference data. Open Charge Map records are never
+/// treated as charging-tariff facts; a tariff can only be exposed after an
+/// explicit reviewed mapping to an authoritative ChargingProvider.
+/// </summary>
+public sealed class ChargingStation : Entity
+{
+    public string ExternalSource { get; set; } = "OpenChargeMap";
+    public int ExternalId { get; set; }
+    public string? ExternalUuid { get; set; }
+    public Guid SourceSnapshotId { get; set; }
+    public Guid? ChargingProviderId { get; set; }
+    public DateTimeOffset? ProviderMappingReviewedAt { get; set; }
+    public string? ProviderMappingReviewedBy { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? AddressLine1 { get; set; }
+    public string? AddressLine2 { get; set; }
+    public string? Town { get; set; }
+    public string? StateOrProvince { get; set; }
+    public string? Postcode { get; set; }
+    public string CountryCode { get; set; } = "VN";
+    public decimal Latitude { get; set; }
+    public decimal Longitude { get; set; }
+    public string? OperatorName { get; set; }
+    public string? UsageType { get; set; }
+    public string? OperationalStatus { get; set; }
+    public bool? IsOperational { get; set; }
+    public int? NumberOfPoints { get; set; }
+    public int? ExternalDataQualityLevel { get; set; }
+    public ChargingLocationCoverage Coverage { get; set; } = ChargingLocationCoverage.ReferenceOnly;
+    public ChargingLocationConfidence Confidence { get; set; } = ChargingLocationConfidence.Unknown;
+    public string? RelatedUrl { get; set; }
+    public DateTimeOffset? ExternalUpdatedAt { get; set; }
+    public DateTimeOffset? LastConfirmedAt { get; set; }
+    public DateTimeOffset ImportedAt { get; set; }
+    public DateTimeOffset LastSeenAt { get; set; }
+    public bool Active { get; set; } = true;
+}
+
+public sealed class ChargingStationConnector : Entity
+{
+    public Guid ChargingStationId { get; set; }
+    public int ExternalId { get; set; }
+    public string? ConnectorType { get; set; }
+    public string? ChargingLevel { get; set; }
+    public string? CurrentType { get; set; }
+    public string? OperationalStatus { get; set; }
+    public decimal? PowerKw { get; set; }
+    public int? Amps { get; set; }
+    public int? Voltage { get; set; }
+    public int? Quantity { get; set; }
 }

@@ -49,6 +49,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<ChargingProvider> ChargingProviders => Set<ChargingProvider>();
     public DbSet<ChargingTariff> ChargingTariffs => Set<ChargingTariff>();
     public DbSet<ChargingPromotion> ChargingPromotions => Set<ChargingPromotion>();
+    public DbSet<ChargingStation> ChargingStations => Set<ChargingStation>();
+    public DbSet<ChargingStationConnector> ChargingStationConnectors => Set<ChargingStationConnector>();
     public DbSet<Source> Sources => Set<Source>();
     public DbSet<SourceSnapshot> SourceSnapshots => Set<SourceSnapshot>();
     public DbSet<SourceFact> SourceFacts => Set<SourceFact>();
@@ -84,6 +86,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         configurationBuilder.Properties<EnergyType>().HaveConversion<string>().HaveMaxLength(24);
         configurationBuilder.Properties<ChargingNetworkType>().HaveConversion<string>().HaveMaxLength(24);
         configurationBuilder.Properties<ChargingPromotionBenefit>().HaveConversion<string>().HaveMaxLength(32);
+        configurationBuilder.Properties<ChargingLocationCoverage>().HaveConversion<string>().HaveMaxLength(32);
+        configurationBuilder.Properties<ChargingLocationConfidence>().HaveConversion<string>().HaveMaxLength(16);
         configurationBuilder.Properties<SourceAuthorityLevel>().HaveConversion<string>().HaveMaxLength(32);
         configurationBuilder.Properties<SourceContentType>().HaveConversion<string>().HaveMaxLength(24);
         configurationBuilder.Properties<ChangeRiskLevel>().HaveConversion<string>().HaveMaxLength(16);

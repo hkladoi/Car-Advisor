@@ -41,6 +41,8 @@ def schedule_definitions(source: RegistrySource) -> tuple[ScheduleDefinition, ..
         definitions = (ScheduleDefinition("electricity_tariff", _DAILY),)
     elif category in {"charging-price", "charging-promotion"}:
         definitions = (ScheduleDefinition("charging_tariff_promotion", _DAILY),)
+    elif category == "charging-poi":
+        definitions = (ScheduleDefinition("charging_poi_locations", _WEEKLY),)
     elif category == "registration-rule":
         definitions = (ScheduleDefinition("registration_legal_rules", _DAILY),)
     elif category in {"vehicle-energy", "administrative-region"}:
@@ -54,6 +56,8 @@ def schedule_definitions(source: RegistrySource) -> tuple[ScheduleDefinition, ..
 
 
 def job_for_schedule(source: RegistrySource, schedule: ScheduleDefinition) -> IngestionJob:
+    if schedule.monitor_kind == "charging_poi_locations":
+        return IngestionJob.charging_poi(source.id)
     if schedule.monitor_kind == "new_model_discovery":
         return IngestionJob.discovery(
             brand=source.owner,

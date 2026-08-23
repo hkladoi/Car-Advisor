@@ -6,6 +6,7 @@ using VietnamCarPlatform.Domain.Admin;
 using VietnamCarPlatform.Domain.Common;
 using VietnamCarPlatform.Domain.Commerce;
 using VietnamCarPlatform.Domain.Sources;
+using VietnamCarPlatform.Domain.Rules;
 using VietnamCarPlatform.Infrastructure.Persistence;
 
 namespace VietnamCarPlatform.Api.UnitTests;
@@ -100,6 +101,24 @@ public sealed class DomainSchemaTests
             check => check.Name == "ck_monitoring_alerts_lifecycle");
         Assert.Contains(designModel.FindEntityType(typeof(MonitoringAlert))!.GetIndexes(),
             index => index.IsUnique && index.Properties.Single().Name == nameof(MonitoringAlert.Fingerprint));
+    }
+
+    [Fact]
+    public void ChargingLocationsCannotBecomeUnreviewedTariffAuthority()
+    {
+        using var db = CreateContext();
+        var designModel = db.GetService<IDesignTimeModel>().Model;
+        var station = designModel.FindEntityType(typeof(ChargingStation))!;
+
+        Assert.Contains(station.GetCheckConstraints(), check => check.Name == "ck_charging_stations_reference_coverage");
+        Assert.Contains(station.GetCheckConstraints(), check => check.Name == "ck_charging_stations_provider_mapping");
+        Assert.Contains(station.GetIndexes(), index => index.IsUnique
+            && index.Properties.Select(property => property.Name)
+                .SequenceEqual([nameof(ChargingStation.ExternalSource), nameof(ChargingStation.ExternalId)]));
+        Assert.DoesNotContain(station.GetProperties(), property =>
+            property.Name.Contains("Tariff", StringComparison.OrdinalIgnoreCase)
+            || property.Name.Contains("Price", StringComparison.OrdinalIgnoreCase)
+            || property.Name.Contains("Cost", StringComparison.OrdinalIgnoreCase));
     }
 
     private static AppDbContext CreateContext()

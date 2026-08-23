@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-23
 
-Overall: **IN PROGRESS — V2.6**
+Overall: **IN PROGRESS — V2.7**
 
 ## Governing decisions
 
@@ -38,7 +38,7 @@ No material conflict between the two source documents has been found so far.
 - [x] V2.3 Structured extraction — PASS 2026-08-23
 - [x] V2.4 Change detection, review and rollback — PASS 2026-08-23
 - [x] V2.5 Automated monitoring — PASS 2026-08-23
-- [ ] V2.6 Charging and map enrichment
+- [x] V2.6 Charging and map enrichment — PASS 2026-08-23
 - [ ] V2.7 Price and offer history UX
 - [ ] V2.8 Full-market coverage
 - [ ] V2 FINAL GATE
@@ -264,3 +264,71 @@ Gate commands/evidence:
   leaks. API, web, PostgreSQL, Redis, MinIO, worker and scheduler containers are
   healthy; deterministic gate failure rows remain as local operational evidence
   while both alerts finish in `Resolved` state.
+
+## V2.6 gate — PASS
+
+Implemented evidence:
+
+- A bounded, retrying, server-only Open Charge Map v3 adapter synchronizes only
+  Vietnam POIs, stores the canonical response as an immutable source snapshot,
+  then transactionally normalizes stations and connectors. A failed, incomplete
+  or non-Vietnam response preserves the last published station set.
+- Station quality is explicitly `ReferenceOnly` with Unknown/Low/Medium/High
+  confidence derived from OCM data quality. The public API and `/charging` page
+  disclose coverage, staleness, snapshot time, confidence, and visible Open
+  Charge Map/CC BY attribution.
+- OCM `UsageCost` is deliberately discarded. A charging tariff is returned only
+  after a reviewed station-to-provider mapping and only from an effective
+  `ChargingTariff` with `SourceFact`/`SourceSnapshot` provenance. The schema and
+  gate assert that station tables cannot contain price, tariff or cost fields.
+- Optional Goong geocoding executes server-side only on explicit user search,
+  with bounded response, timeout, hashed Redis cache, rate limit and sanitized
+  degraded response. No key or request URL is logged, and neither REST nor map
+  tile credentials are placed in browser code or API capability responses.
+- The charging page reads the cached station API, can filter by bounding box,
+  connector and power, and renders a responsive coordinate plot without
+  pre-geocoding the dataset. Missing optional credentials or an empty station
+  cache produces an honest unavailable/empty state; no synthetic fallback is
+  inserted.
+- The scheduler queues one weekly POI refresh only when the OCM key is configured.
+  The manual `enqueue-charging-poi` command also fails before queue mutation when
+  the key is absent. Core catalog endpoints never depend on OCM or Goong.
+
+Official contracts checked on 2026-08-23:
+
+- <https://openchargemap.org/develop>
+- <https://openchargemap.org/develop/api>
+- <https://github.com/openchargemap/ocm-system>
+- <https://docs.goong.io/rest/geocode/>
+- <https://docs.goong.io/rest/api-key/>
+
+Gate commands/evidence:
+
+- Worker suite — 69 passed, covering OCM v3 query/pagination, response bounds,
+  Vietnamese coordinate/country validation, confidence, idempotent repository
+  behavior, failure retention, credential absence and credential redaction.
+- API Release build succeeds with zero warnings; 53 tests pass. Web lint, 8
+  tests and production build pass, including `/charging`. The prior Vitest
+  `window is not defined` unhandled scheduler error no longer reproduces.
+- Migration `20260823050109_AddV26ChargingMapData` passed up → down → up against
+  local PostgreSQL. EF reports no pending model changes.
+- `scripts/verify_v2_6_charging.py` passes against all seven healthy Compose
+  services. It verifies DB constraints, cached-reference semantics, invalid bbox
+  handling, provider-only tariff policy, optional-provider degraded behavior,
+  non-exposed keys, scheduler policy, OpenAPI paths and catalog independence.
+- Desktop and 390×844 mobile `/charging` flows were exercised in a real Chromium
+  browser: address search returned the expected `GOONG_NOT_CONFIGURED` state,
+  cached content remained usable, all requests were HTTP 200 and the console had
+  zero warnings/errors.
+
+Credential note: both optional keys are absent locally, so no paid/provider live
+call was fabricated. Production OCM and Goong paths call their real documented
+endpoints; transport doubles are confined to contract tests. Supplying keys in
+`docs/CODEX-SECRETS.local.md` enables the next real sync without a code change.
+
+Recorded design decision: PostGIS was not introduced for this bounded,
+Vietnam-only milestone because the design makes it optional when needed; indexed
+latitude/longitude bounding-box filters meet the current acceptance path. Goong
+map tiles are also not exposed to the browser because the product's stricter
+server-secret rule takes priority; a coordinate plot plus on-demand server
+geocoding preserves map usefulness without leaking credentials.

@@ -19,7 +19,7 @@ Decisions and gate evidence belong in `docs/status/`.
 ## Current state
 
 - V1.0–V1.10 and the V1 FINAL GATE are complete.
-- V2.1–V2.5 are complete; V2.6 charging and map enrichment is next. See
+- V2.1–V2.6 are complete; V2.7 price and offer history UX is next. See
   `docs/status/v2-status.md`.
 - V3 must not start until the V2 FINAL GATE passes; see
   `docs/status/v3-status.md`.
@@ -88,6 +88,19 @@ enrichment and observability: `GOONG_API_KEY`, `GOONG_MAPTILES_KEY`,
 Discovery must fail explicitly when its key is absent; the public product must
 remain available.
 
+V2.6 provider behavior is optional and server-only. With
+`OPEN_CHARGE_MAP_API_KEY` configured, the scheduler refreshes Vietnam reference
+POIs weekly; an operator can request an immediate run with:
+
+```powershell
+docker compose exec -T ingestion-worker python -m ingestion.cli enqueue-charging-poi --registry /app/data/source-registry.v1.json
+```
+
+`GOONG_API_KEY` enables on-demand server geocoding. `GOONG_MAPTILES_KEY` remains
+reserved and is never exposed by the current web/API path. OCM costs are never
+tariff facts; only reviewed provider mappings backed by first-party tariff
+provenance may show a tariff.
+
 Optional difficult-page extraction may use a local OpenAI-compatible endpoint
 through `LOCAL_LLM_BASE_URL`, `LOCAL_LLM_MODEL` and `LOCAL_LLM_API_KEY`. It is
 disabled unless both URL and model are set; deterministic extraction always runs
@@ -105,6 +118,7 @@ dotnet build VietnamCarPlatform.sln --configuration Release
 dotnet test VietnamCarPlatform.sln --configuration Release
 python -m pip install -r workers/ingestion/requirements.txt
 python -m pytest workers/ingestion/tests
+python scripts/verify_v2_6_charging.py
 docker compose up --build -d --wait
 docker compose ps
 docker compose logs -f api ingestion-worker ingestion-scheduler

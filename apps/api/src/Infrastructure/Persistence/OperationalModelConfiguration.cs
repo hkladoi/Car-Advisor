@@ -288,6 +288,61 @@ internal static class OperationalModelConfiguration
             entity.HasIndex(value => value.EligibilityJson).HasMethod("gin").HasOperators("jsonb_path_ops");
             entity.HasIndex(value => new { value.ProviderId, value.BrandId, value.ModelId, value.EffectiveFrom });
         });
+
+        modelBuilder.Entity<ChargingStation>(entity =>
+        {
+            entity.ToTable("charging_stations", table =>
+            {
+                table.HasCheckConstraint("ck_charging_stations_external_source", "external_source = 'OpenChargeMap'");
+                table.HasCheckConstraint("ck_charging_stations_external_id", "external_id > 0");
+                table.HasCheckConstraint("ck_charging_stations_coordinates", "latitude BETWEEN -90 AND 90 AND longitude BETWEEN -180 AND 180");
+                table.HasCheckConstraint("ck_charging_stations_country", "country_code = 'VN'");
+                table.HasCheckConstraint("ck_charging_stations_points", "number_of_points IS NULL OR number_of_points >= 0");
+                table.HasCheckConstraint("ck_charging_stations_data_quality", "external_data_quality_level IS NULL OR external_data_quality_level BETWEEN 1 AND 5");
+                table.HasCheckConstraint("ck_charging_stations_reference_coverage", "coverage = 'ReferenceOnly'");
+                table.HasCheckConstraint("ck_charging_stations_provider_mapping", "(charging_provider_id IS NULL AND provider_mapping_reviewed_at IS NULL AND provider_mapping_reviewed_by IS NULL) OR (charging_provider_id IS NOT NULL AND provider_mapping_reviewed_at IS NOT NULL AND NULLIF(BTRIM(provider_mapping_reviewed_by), '') IS NOT NULL)");
+            });
+            entity.Property(value => value.ExternalSource).HasMaxLength(40);
+            entity.Property(value => value.ExternalUuid).HasMaxLength(100);
+            entity.Property(value => value.ProviderMappingReviewedBy).HasMaxLength(320);
+            entity.Property(value => value.Name).HasMaxLength(240);
+            entity.Property(value => value.AddressLine1).HasMaxLength(1000);
+            entity.Property(value => value.AddressLine2).HasMaxLength(1000);
+            entity.Property(value => value.Town).HasMaxLength(160);
+            entity.Property(value => value.StateOrProvince).HasMaxLength(160);
+            entity.Property(value => value.Postcode).HasMaxLength(40);
+            entity.Property(value => value.CountryCode).HasMaxLength(2);
+            entity.Property(value => value.Latitude).HasPrecision(9, 6);
+            entity.Property(value => value.Longitude).HasPrecision(9, 6);
+            entity.Property(value => value.OperatorName).HasMaxLength(240);
+            entity.Property(value => value.UsageType).HasMaxLength(160);
+            entity.Property(value => value.OperationalStatus).HasMaxLength(160);
+            entity.Property(value => value.RelatedUrl).HasMaxLength(2048);
+            entity.HasOne<SourceSnapshot>().WithMany().HasForeignKey(value => value.SourceSnapshotId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<ChargingProvider>().WithMany().HasForeignKey(value => value.ChargingProviderId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(value => new { value.ExternalSource, value.ExternalId }).IsUnique();
+            entity.HasIndex(value => new { value.Active, value.Latitude, value.Longitude });
+            entity.HasIndex(value => new { value.ChargingProviderId, value.ProviderMappingReviewedAt });
+            entity.HasIndex(value => value.LastSeenAt);
+        });
+
+        modelBuilder.Entity<ChargingStationConnector>(entity =>
+        {
+            entity.ToTable("charging_station_connectors", table =>
+            {
+                table.HasCheckConstraint("ck_charging_station_connectors_external_id", "external_id > 0");
+                table.HasCheckConstraint("ck_charging_station_connectors_power", "power_kw IS NULL OR power_kw BETWEEN 0 AND 1000");
+                table.HasCheckConstraint("ck_charging_station_connectors_electrical", "(amps IS NULL OR amps BETWEEN 0 AND 1000) AND (voltage IS NULL OR voltage BETWEEN 0 AND 10000) AND (quantity IS NULL OR quantity BETWEEN 0 AND 500)");
+            });
+            entity.Property(value => value.ConnectorType).HasMaxLength(160);
+            entity.Property(value => value.ChargingLevel).HasMaxLength(120);
+            entity.Property(value => value.CurrentType).HasMaxLength(120);
+            entity.Property(value => value.OperationalStatus).HasMaxLength(160);
+            entity.Property(value => value.PowerKw).HasPrecision(9, 3);
+            entity.HasOne<ChargingStation>().WithMany().HasForeignKey(value => value.ChargingStationId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(value => new { value.ChargingStationId, value.ExternalId }).IsUnique();
+            entity.HasIndex(value => new { value.ConnectorType, value.PowerKw });
+        });
     }
 
     private static void ConfigureProfiles(ModelBuilder modelBuilder)

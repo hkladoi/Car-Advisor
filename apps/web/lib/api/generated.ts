@@ -548,6 +548,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/charging/stations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["SearchCachedChargingStations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/compare/calculate": {
         parameters: {
             query?: never;
@@ -590,6 +606,38 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["CalculatePurchaseFinancing"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/maps/geocode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GeocodeAddressWithOptionalGoong"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/maps/capabilities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetMapCapabilities"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1304,6 +1352,25 @@ export interface components {
             effectiveTo?: string | null;
             source?: components["schemas"]["RuleSourceReference"];
         };
+        AuthoritativeChargingTariffReference: {
+            /** Format: uuid */
+            providerId?: string;
+            providerName?: string | null;
+            providerOfficialUrl?: string | null;
+            /** Format: double */
+            amountPerKwh?: number | null;
+            /** Format: double */
+            amountPerSession?: number | null;
+            /** Format: double */
+            overstayAmountPerMinute?: number | null;
+            currency?: string | null;
+            taxIncluded?: boolean;
+            /** Format: date-time */
+            effectiveFrom?: string;
+            /** Format: date-time */
+            effectiveTo?: string | null;
+            sourceUrl?: string | null;
+        };
         BrandItem: {
             /** Format: uuid */
             id?: string;
@@ -1399,6 +1466,77 @@ export interface components {
             fuelLitresPer100Km?: number | null;
             /** Format: double */
             electricKwhPer100Km?: number | null;
+        };
+        ChargingConnectorReference: {
+            connectorType?: string | null;
+            chargingLevel?: string | null;
+            currentType?: string | null;
+            operationalStatus?: string | null;
+            /** Format: double */
+            powerKw?: number | null;
+            /** Format: int32 */
+            quantity?: number | null;
+        };
+        ChargingDatasetReference: {
+            provider?: string | null;
+            coverage?: string | null;
+            geographicCompleteness?: string | null;
+            attribution?: string | null;
+            licenseUrl?: string | null;
+            /** Format: date-time */
+            lastSyncedAt?: string | null;
+            isStale?: boolean;
+            tariffPolicy?: string | null;
+        };
+        ChargingLocationSourceReference: {
+            name?: string | null;
+            url?: string | null;
+            /** Format: date-time */
+            fetchedAt?: string;
+            contentHash?: string | null;
+            attribution?: string | null;
+            licenseUrl?: string | null;
+        };
+        ChargingStationListResponse: {
+            data?: components["schemas"]["ChargingStationReference"][] | null;
+            /** Format: int32 */
+            count?: number;
+            dataset?: components["schemas"]["ChargingDatasetReference"];
+            /** Format: date-time */
+            generatedAt?: string;
+        };
+        ChargingStationReference: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: int32 */
+            openChargeMapId?: number;
+            name?: string | null;
+            addressLine1?: string | null;
+            addressLine2?: string | null;
+            town?: string | null;
+            stateOrProvince?: string | null;
+            postcode?: string | null;
+            /** Format: double */
+            latitude?: number;
+            /** Format: double */
+            longitude?: number;
+            operatorName?: string | null;
+            usageType?: string | null;
+            operationalStatus?: string | null;
+            isOperational?: boolean | null;
+            /** Format: int32 */
+            numberOfPoints?: number | null;
+            coverage?: string | null;
+            confidence?: string | null;
+            confidenceBasis?: string | null;
+            /** Format: date-time */
+            externalUpdatedAt?: string | null;
+            /** Format: date-time */
+            lastSeenAt?: string;
+            connectors?: components["schemas"]["ChargingConnectorReference"][] | null;
+            tariff?: components["schemas"]["AuthoritativeChargingTariffReference"];
+            tariffAuthority?: string | null;
+            source?: components["schemas"]["ChargingLocationSourceReference"];
         };
         ColorDetail: {
             code?: string | null;
@@ -1787,6 +1925,21 @@ export interface components {
             rightsStatus?: string | null;
             rightsNote?: string | null;
         };
+        GeocodeResponse: {
+            results?: components["schemas"]["GeocodeResult"][] | null;
+            provider?: string | null;
+            cached?: boolean;
+            /** Format: date-time */
+            generatedAt?: string;
+        };
+        GeocodeResult: {
+            formattedAddress?: string | null;
+            /** Format: double */
+            latitude?: number;
+            /** Format: double */
+            longitude?: number;
+            placeId?: string | null;
+        };
         InputPriceReference: {
             /** Format: uuid */
             priceId?: string;
@@ -1810,6 +1963,14 @@ export interface components {
             fieldPath?: string | null;
             rawValue?: string | null;
             source?: components["schemas"]["RuleSourceReference"];
+        };
+        MapCapabilitiesResponse: {
+            cachedChargingLocationsEnabled?: boolean;
+            goongGeocodingEnabled?: boolean;
+            goongMapTilesConfigured?: boolean;
+            mapTilesKeyExposed?: boolean;
+            mapMode?: string | null;
+            degradedMode?: string | null;
         };
         MoneyRange: {
             /** Format: double */
@@ -3746,6 +3907,44 @@ export interface operations {
             };
         };
     };
+    SearchCachedChargingStations: {
+        parameters: {
+            query?: {
+                MinLatitude?: number;
+                MinLongitude?: number;
+                MaxLatitude?: number;
+                MaxLongitude?: number;
+                Limit?: number;
+                Operational?: boolean;
+                ConnectorType?: string;
+                MinimumPowerKw?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChargingStationListResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     CompareTrims: {
         parameters: {
             query?: never;
@@ -3886,6 +4085,66 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    GeocodeAddressWithOptionalGoong: {
+        parameters: {
+            query: {
+                address: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeocodeResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    GetMapCapabilities: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MapCapabilitiesResponse"];
                 };
             };
         };

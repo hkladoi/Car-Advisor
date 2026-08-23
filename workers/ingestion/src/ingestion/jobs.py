@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 class IngestionJob(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    job_type: Literal["source_staleness_check", "known_url_fetch", "source_discovery"]
+    job_type: Literal["source_staleness_check", "known_url_fetch", "source_discovery", "charging_poi_sync"]
     run_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     requested_at: datetime
     monitor_kind: str = Field(default="source_refresh", min_length=1, max_length=100)
@@ -34,6 +34,15 @@ class IngestionJob(BaseModel):
         return cls(
             job_type="known_url_fetch",
             monitor_kind=monitor_kind,
+            source_id=source_id,
+            requested_at=datetime.now(UTC),
+        )
+
+    @classmethod
+    def charging_poi(cls, source_id: str = "open-charge-map") -> "IngestionJob":
+        return cls(
+            job_type="charging_poi_sync",
+            monitor_kind="charging_poi_locations",
             source_id=source_id,
             requested_at=datetime.now(UTC),
         )
@@ -64,6 +73,8 @@ class IngestionJob(BaseModel):
     def require_source_for_fetch(self) -> "IngestionJob":
         if self.job_type == "known_url_fetch" and not self.source_id:
             raise ValueError("known_url_fetch requires source_id")
+        if self.job_type == "charging_poi_sync" and not self.source_id:
+            raise ValueError("charging_poi_sync requires source_id")
         if self.job_type == "source_discovery" and (
             not self.brand or not self.data_type or not self.allowed_domains
         ):

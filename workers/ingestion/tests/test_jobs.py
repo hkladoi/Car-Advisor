@@ -101,3 +101,14 @@ def test_brand_registry_schedule_builds_bounded_discovery_instead_of_fetch() -> 
     assert job.allowed_domains == registry_source.allowed_domains
     assert job.known_urls == [registry_source.url]
     assert job.source_id == registry_source.id
+
+
+def test_charging_poi_schedule_uses_provider_adapter_job() -> None:
+    registry_source = source("charging-poi", refresh_hours=168)
+    schedule = schedule_definitions(registry_source)[0]
+
+    job = job_for_schedule(registry_source, schedule)
+
+    assert job.job_type == "charging_poi_sync"
+    assert job.monitor_kind == "charging_poi_locations"
+    assert job.source_id == registry_source.id

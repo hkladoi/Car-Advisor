@@ -35,6 +35,11 @@ async def run_scheduler(settings: Settings) -> None:
                 if not source.automated_fetch and source.category != "brand-registry":
                     continue
                 for schedule in schedule_definitions(source):
+                    if (
+                        schedule.monitor_kind == "charging_poi_locations"
+                        and not settings.open_charge_map_api_key.get_secret_value().strip()
+                    ):
+                        continue
                     lease_key = f"ingestion:next-fetch:{schedule.monitor_kind}:{source.id}"
                     acquired = await client.set(
                         lease_key,

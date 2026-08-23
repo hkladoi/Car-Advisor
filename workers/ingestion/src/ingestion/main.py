@@ -19,6 +19,7 @@ from ingestion.discovery import (
     QueryTemplateCatalog,
 )
 from ingestion.fetcher import KnownUrlFetcher
+from ingestion.fetcher import Snapshot
 from ingestion.extraction import (
     CandidateFactRepository,
     CatalogEntityRepository,
@@ -30,6 +31,7 @@ from ingestion.extraction import (
 from ingestion.logging import configure_logging
 from ingestion.metadata import SnapshotMetadataRepository
 from ingestion.monitoring import MonitoringRepository
+from ingestion.open_charge_map import ChargingPoiRepository, OpenChargeMapClient
 from ingestion.parsers import DomainParserRegistry, ParserCoordinator, ParserProfileRegistry
 from ingestion.registry import SourceRegistry
 from ingestion.settings import Settings
@@ -86,6 +88,16 @@ async def run_worker(settings: Settings) -> None:
         settings.postgres_dsn,
         settings.parser_failure_alert_threshold,
     )
+    open_charge_map = OpenChargeMapClient(
+        settings.open_charge_map_api_key.get_secret_value(),
+        settings.ingestion_user_agent,
+        timeout_seconds=settings.open_charge_map_timeout_seconds,
+        retries=settings.open_charge_map_retries,
+        page_size=settings.open_charge_map_page_size,
+        max_stations=settings.open_charge_map_max_stations,
+        max_response_bytes=settings.open_charge_map_max_response_bytes,
+    )
+    charging_poi_repository = ChargingPoiRepository(settings.postgres_dsn)
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
     for event in (signal.SIGINT, signal.SIGTERM):
@@ -113,8 +125,93 @@ async def run_worker(settings: Settings) -> None:
                 monitor_kind=job.monitor_kind,
                 source_id=job.source_id,
             )
+            if job.job_type == "charging_poi_sync":
+                try:
+                    result = await open_charge_map.fetch_vietnam()
+                    object_key = (
+                        f"sources/open-charge-map/sha256/{result.content_hash}.json"
+                    )
+                    existed = await asyncio.to_thread(storage.exists, object_key)
+                    if not existed:
+                        await asyncio.to_thread(storage.ensure_bucket)
+                        await asyncio.to_thread(
+                            storage.put_bytes,
+                            object_key,
+                            result.snapshot_bytes,
+                            "application/json",
+                        )
+                    snapshot = Snapshot(
+                        source_id=source.id,
+                        source_url=source.url,
+                        final_url=source.url,
+                        fetched_at=result.fetched_at,
+                        content_hash=result.content_hash,
+                        object_key=object_key,
+                        http_status=result.http_status,
+                        content_type="application/json",
+                        etag=None,
+                        last_modified=None,
+                        size_bytes=len(result.snapshot_bytes),
+                        fetch_method="open-charge-map-api-v3",
+                    )
+                    snapshot_id = await asyncio.to_thread(
+                        metadata_repository.record, source, snapshot
+                    )
+                    await asyncio.to_thread(
+                        metadata_repository.mark_parsed,
+                        snapshot_id,
+                        "open-charge-map/v3",
+                    )
+                    outcome = await asyncio.to_thread(
+                        charging_poi_repository.synchronize,
+                        result.stations,
+                        snapshot_id,
+                        result.fetched_at,
+                        complete=result.complete,
+                    )
+                    await asyncio.to_thread(
+                        monitoring_repository.succeed,
+                        job,
+                        http_status=result.http_status,
+                        parse_status="normalized",
+                        content_changed=not existed,
+                    )
+                    await client.rpush(
+                        settings.snapshot_event_queue,
+                        json.dumps(asdict(snapshot), default=str, ensure_ascii=False),
+                    )
+                    await client.ltrim(settings.snapshot_event_queue, -10_000, -1)
+                    logger.info(
+                        "charging_poi_sync_complete",
+                        source_id=source.id,
+                        stations=outcome.imported_stations,
+                        connectors=outcome.imported_connectors,
+                        rejected_records=result.rejected_records,
+                        deactivated=outcome.deactivated_stations,
+                        complete=result.complete,
+                        page_count=result.page_count,
+                        content_hash=result.content_hash,
+                    )
+                except Exception as error:
+                    await asyncio.to_thread(
+                        monitoring_repository.fail, job, "charging_poi", error
+                    )
+                    logger.exception(
+                        "charging_poi_sync_failed",
+                        source_id=job.source_id,
+                        error_type=type(error).__name__,
+                    )
+                continue
             if job.job_type == "source_staleness_check":
-                monitored_sources = [source for source in registry.sources if source.automated_fetch]
+                monitored_sources = [
+                    source
+                    for source in registry.sources
+                    if source.automated_fetch
+                    and (
+                        source.category != "charging-poi"
+                        or settings.open_charge_map_api_key.get_secret_value().strip()
+                    )
+                ]
                 try:
                     stale = await asyncio.to_thread(
                         metadata_repository.find_stale_sources, monitored_sources
@@ -337,6 +434,7 @@ async def run_worker(settings: Settings) -> None:
                     error_type=type(error).__name__,
                 )
     finally:
+        await open_charge_map.close()
         await client.aclose()
         logger.info("worker_stopped")
 

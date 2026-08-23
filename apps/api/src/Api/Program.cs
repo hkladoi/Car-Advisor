@@ -9,6 +9,7 @@ using OpenTelemetry.Trace;
 using VietnamCarPlatform.Api.Features.Affordability;
 using VietnamCarPlatform.Api.Features.Admin;
 using VietnamCarPlatform.Api.Features.Catalog;
+using VietnamCarPlatform.Api.Features.Charging;
 using VietnamCarPlatform.Api.Features.Compare;
 using VietnamCarPlatform.Api.Features.Energy;
 using VietnamCarPlatform.Api.Features.Financing;
@@ -28,6 +29,7 @@ builder.Logging.AddJsonConsole(options =>
     options.TimestampFormat = "yyyy-MM-ddTHH:mm:ss.fffZ";
     options.UseUtcTimestamp = true;
 });
+builder.Logging.AddFilter("System.Net.Http.HttpClient", LogLevel.Warning);
 
 builder.WebHost.UseSentry(options =>
 {
@@ -52,6 +54,21 @@ builder.Services.Configure<AffordabilityOptions>(builder.Configuration.GetSectio
 builder.Services.AddScoped<IAffordabilityService, AffordabilityService>();
 builder.Services.AddScoped<IFinancingService, FinancingService>();
 builder.Services.AddScoped<ICompareService, CompareService>();
+builder.Services.AddScoped<IChargingService, ChargingService>();
+var goongOptions = new GoongOptions
+{
+    ApiKey = builder.Configuration["GOONG_API_KEY"] ?? string.Empty,
+    MapTilesKey = builder.Configuration["GOONG_MAPTILES_KEY"] ?? string.Empty,
+    CacheSeconds = Math.Clamp(builder.Configuration.GetValue("GOONG_CACHE_SECONDS", 86_400), 60, 2_592_000),
+};
+builder.Services.AddSingleton(goongOptions);
+builder.Services.AddHttpClient<IGoongGeocodingClient, GoongGeocodingClient>(client =>
+{
+    client.BaseAddress = new Uri("https://rsapi.goong.io/");
+    client.Timeout = TimeSpan.FromSeconds(Math.Clamp(
+        builder.Configuration.GetValue("GOONG_TIMEOUT_SECONDS", 5), 1, 30));
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("VietnamCarPlatform/0.1");
+});
 builder.Services.AddScoped<IAdminAuthService, AdminAuthService>();
 builder.Services.AddScoped<IAdminCatalogService, AdminCatalogService>();
 builder.Services.AddScoped<IAdminManualImportService, AdminManualImportService>();
@@ -78,6 +95,16 @@ builder.Services.AddRateLimiter(options =>
                 QueueLimit = 0,
                 AutoReplenishment = true,
             }));
+    options.AddPolicy("map-geocode", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 20,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true,
+            }));
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 builder.Services.AddSwaggerGen(options =>
@@ -96,7 +123,13 @@ builder.Services.AddOpenTelemetry()
     {
         tracing
             .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation();
+            .AddHttpClientInstrumentation(options =>
+            {
+                // Goong requires the server key in the query string. Do not emit
+                // those request URLs to tracing backends.
+                options.FilterHttpRequestMessage = request =>
+                    !string.Equals(request.RequestUri?.Host, "rsapi.goong.io", StringComparison.OrdinalIgnoreCase);
+            });
 
         var otlpEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
         if (Uri.TryCreate(otlpEndpoint, UriKind.Absolute, out var endpoint))
@@ -165,6 +198,7 @@ app.MapEnergyEndpoints();
 app.MapAffordabilityEndpoints();
 app.MapFinancingEndpoints();
 app.MapCompareEndpoints();
+app.MapChargingEndpoints();
 app.MapAdminEndpoints();
 
 app.MapHealthChecks("/health/live", new HealthCheckOptions

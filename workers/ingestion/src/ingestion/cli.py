@@ -17,6 +17,7 @@ from ingestion.discovery import (
     QueryTemplateCatalog,
 )
 from ingestion.fetcher import KnownUrlFetcher, Snapshot
+from ingestion.jobs import IngestionJob
 from ingestion.gate import evaluate_seed_gate
 from ingestion.manifest import read_snapshot_manifest, write_snapshot_manifest
 from ingestion.registry import SourceRegistry
@@ -74,6 +75,12 @@ def _parser() -> argparse.ArgumentParser:
     )
     validate_parsers.add_argument("--registry", type=Path, required=True)
     validate_parsers.add_argument("--parsers", type=Path, required=True)
+
+    enqueue_charging = subparsers.add_parser(
+        "enqueue-charging-poi",
+        help="Queue one real Open Charge Map Vietnam sync when the optional server key is configured",
+    )
+    enqueue_charging.add_argument("--registry", type=Path, required=True)
 
     for command, help_text in (
         ("validate-registration-seed", "Validate reviewed V1.5 registration rules"),
@@ -169,9 +176,30 @@ async def _discover_source(args: argparse.Namespace, registry: SourceRegistry, s
         await client.aclose()
 
 
+async def _enqueue_charging_poi(settings: Settings) -> dict[str, str]:
+    if not settings.open_charge_map_api_key.get_secret_value().strip():
+        raise ValueError("OPEN_CHARGE_MAP_API_KEY is not configured; no sync job was queued")
+    client = redis.from_url(settings.redis_url, decode_responses=True)
+    try:
+        job = IngestionJob.charging_poi()
+        await client.rpush(settings.ingestion_queue, job.model_dump_json())
+        return {"run_id": str(job.run_id), "job_type": job.job_type, "monitor_kind": job.monitor_kind}
+    finally:
+        await client.aclose()
+
+
 def main() -> None:
     args = _parser().parse_args()
     registry = SourceRegistry.load(args.registry)
+    if args.command == "enqueue-charging-poi":
+        registry.by_id("open-charge-map")
+        try:
+            result = asyncio.run(_enqueue_charging_poi(Settings()))
+        except ValueError as exc:
+            parser = _parser()
+            parser.error(str(exc))
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     if args.command == "validate-parser-registry":
         profiles = ParserProfileRegistry.load(args.parsers)
         parsers = DomainParserRegistry(profiles)

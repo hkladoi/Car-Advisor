@@ -1803,6 +1803,100 @@
         }
       }
     },
+    "/api/v1/charging/stations": {
+      "get": {
+        "tags": [
+          "Charging"
+        ],
+        "operationId": "SearchCachedChargingStations",
+        "parameters": [
+          {
+            "name": "MinLatitude",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "MinLongitude",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "MaxLatitude",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "MaxLongitude",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "Limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Operational",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ConnectorType",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "MinimumPowerKw",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChargingStationListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/compare/calculate": {
       "post": {
         "tags": [
@@ -1966,6 +2060,76 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/maps/geocode": {
+      "get": {
+        "tags": [
+          "Maps"
+        ],
+        "operationId": "GeocodeAddressWithOptionalGoong",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeocodeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/maps/capabilities": {
+      "get": {
+        "tags": [
+          "Maps"
+        ],
+        "operationId": "GetMapCapabilities",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MapCapabilitiesResponse"
                 }
               }
             }
@@ -4010,6 +4174,59 @@
         },
         "additionalProperties": false
       },
+      "AuthoritativeChargingTariffReference": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "providerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "providerOfficialUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "amountPerKwh": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "amountPerSession": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "overstayAmountPerMinute": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "taxIncluded": {
+            "type": "boolean"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "sourceUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "BrandItem": {
         "type": "object",
         "properties": {
@@ -4360,6 +4577,235 @@
             "type": "number",
             "format": "double",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChargingConnectorReference": {
+        "type": "object",
+        "properties": {
+          "connectorType": {
+            "type": "string",
+            "nullable": true
+          },
+          "chargingLevel": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "operationalStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "powerKw": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChargingDatasetReference": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverage": {
+            "type": "string",
+            "nullable": true
+          },
+          "geographicCompleteness": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribution": {
+            "type": "string",
+            "nullable": true
+          },
+          "licenseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastSyncedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isStale": {
+            "type": "boolean"
+          },
+          "tariffPolicy": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChargingLocationSourceReference": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "fetchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contentHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribution": {
+            "type": "string",
+            "nullable": true
+          },
+          "licenseUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChargingStationListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChargingStationReference"
+            },
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dataset": {
+            "$ref": "#/components/schemas/ChargingDatasetReference"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChargingStationReference": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "openChargeMapId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine1": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine2": {
+            "type": "string",
+            "nullable": true
+          },
+          "town": {
+            "type": "string",
+            "nullable": true
+          },
+          "stateOrProvince": {
+            "type": "string",
+            "nullable": true
+          },
+          "postcode": {
+            "type": "string",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "operatorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "usageType": {
+            "type": "string",
+            "nullable": true
+          },
+          "operationalStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "isOperational": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "numberOfPoints": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "coverage": {
+            "type": "string",
+            "nullable": true
+          },
+          "confidence": {
+            "type": "string",
+            "nullable": true
+          },
+          "confidenceBasis": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalUpdatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastSeenAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "connectors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChargingConnectorReference"
+            },
+            "nullable": true
+          },
+          "tariff": {
+            "$ref": "#/components/schemas/AuthoritativeChargingTariffReference"
+          },
+          "tariffAuthority": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/ChargingLocationSourceReference"
           }
         },
         "additionalProperties": false
@@ -5511,6 +5957,52 @@
         },
         "additionalProperties": false
       },
+      "GeocodeResponse": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeocodeResult"
+            },
+            "nullable": true
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "cached": {
+            "type": "boolean"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "GeocodeResult": {
+        "type": "object",
+        "properties": {
+          "formattedAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "placeId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "InputPriceReference": {
         "type": "object",
         "properties": {
@@ -5574,6 +6066,32 @@
           },
           "source": {
             "$ref": "#/components/schemas/RuleSourceReference"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MapCapabilitiesResponse": {
+        "type": "object",
+        "properties": {
+          "cachedChargingLocationsEnabled": {
+            "type": "boolean"
+          },
+          "goongGeocodingEnabled": {
+            "type": "boolean"
+          },
+          "goongMapTilesConfigured": {
+            "type": "boolean"
+          },
+          "mapTilesKeyExposed": {
+            "type": "boolean"
+          },
+          "mapMode": {
+            "type": "string",
+            "nullable": true
+          },
+          "degradedMode": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
