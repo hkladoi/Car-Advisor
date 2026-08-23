@@ -1327,6 +1327,72 @@
         }
       }
     },
+    "/api/v1/admin/monitoring": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminMonitoring",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminMonitoringResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/monitoring/alerts/{id}/acknowledge": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "AcknowledgeAdminMonitoringAlert",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
     "/api/v1/admin/audit": {
       "get": {
         "tags": [
@@ -2688,6 +2754,223 @@
           "stagedAt": {
             "type": "string",
             "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminMonitorKindResponse": {
+        "type": "object",
+        "properties": {
+          "monitorKind": {
+            "type": "string",
+            "nullable": true
+          },
+          "runsLast24Hours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "succeededLast24Hours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "successRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "lastStartedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastSucceededAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminMonitoringAlertResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alertType": {
+            "type": "string",
+            "nullable": true
+          },
+          "severity": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "jobRunId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurrenceCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstTriggeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastTriggeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "acknowledgedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminMonitoringResponse": {
+        "type": "object",
+        "properties": {
+          "runsLast24Hours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "succeededLast24Hours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedLast24Hours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "partialLast24Hours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contentChangesLast24Hours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "openAlerts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "highCriticalAlerts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "monitorKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminMonitorKindResponse"
+            },
+            "nullable": true
+          },
+          "recentRuns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminMonitoringRunResponse"
+            },
+            "nullable": true
+          },
+          "alerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminMonitoringAlertResponse"
+            },
+            "nullable": true
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminMonitoringRunResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "jobType": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitorKind": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "httpStatus": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "parseStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentChanged": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "errorStage": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "durationMilliseconds": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           }
         },

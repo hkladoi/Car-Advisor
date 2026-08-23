@@ -3,6 +3,7 @@
   "profiles": [
     {"domain":"shop.vinfastauto.com","parser_id":"vinfast-html","version":"2.2.0","content_selectors":["main",".product-detail","body"],"title_selectors":["h1","title"]},
     {"domain":"www.toyota.com.vn","parser_id":"toyota-html","version":"2.2.0","content_selectors":["main",".product-detail","article","body"],"title_selectors":["h1","title"]},
+    {"domain":"taf.toyota.com.vn","parser_id":"toyota-dealer-html","version":"2.2.0","content_selectors":["main","article",".entry-content","body"],"title_selectors":["h1","title"]},
     {"domain":"www.thacoauto.vn","parser_id":"thaco-html","version":"2.2.0","content_selectors":["main",".car-detail","article","body"],"title_selectors":["h1","title"]},
     {"domain":"thacoauto.vn","parser_id":"thaco-html","version":"2.2.0","content_selectors":["main",".car-detail","article","body"],"title_selectors":["h1","title"]},
     {"domain":"www.ford.com.vn","parser_id":"ford-html","version":"2.2.0","content_selectors":["main",".vehicle-page","body"],"title_selectors":["h1","title"]},

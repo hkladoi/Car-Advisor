@@ -100,6 +100,47 @@ internal static class OperationalModelConfiguration
             entity.HasIndex(value => new { value.Status, value.PublishedAt });
         });
 
+        modelBuilder.Entity<IngestionJobRun>(entity =>
+        {
+            entity.ToTable("ingestion_job_runs", table =>
+            {
+                table.HasCheckConstraint("ck_ingestion_job_runs_lifecycle",
+                    "(status = 'Running' AND completed_at IS NULL AND duration_milliseconds IS NULL) OR (status <> 'Running' AND completed_at IS NOT NULL AND duration_milliseconds >= 0)");
+                table.HasCheckConstraint("ck_ingestion_job_runs_http_status", "http_status IS NULL OR http_status BETWEEN 0 AND 599");
+            });
+            entity.Property(value => value.JobType).HasMaxLength(80);
+            entity.Property(value => value.MonitorKind).HasMaxLength(100);
+            entity.Property(value => value.SourceKey).HasMaxLength(160);
+            entity.Property(value => value.ParseStatus).HasMaxLength(40);
+            entity.Property(value => value.ErrorStage).HasMaxLength(40);
+            entity.Property(value => value.ErrorCode).HasMaxLength(240);
+            entity.Property(value => value.ErrorMessage).HasMaxLength(4000);
+            entity.HasOne<Source>().WithMany().HasForeignKey(value => value.SourceId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(value => new { value.MonitorKind, value.StartedAt });
+            entity.HasIndex(value => new { value.SourceKey, value.StartedAt });
+            entity.HasIndex(value => new { value.Status, value.StartedAt });
+        });
+
+        modelBuilder.Entity<MonitoringAlert>(entity =>
+        {
+            entity.ToTable("monitoring_alerts", table =>
+            {
+                table.HasCheckConstraint("ck_monitoring_alerts_occurrences", "occurrence_count > 0");
+                table.HasCheckConstraint("ck_monitoring_alerts_lifecycle",
+                    "(status = 'Open' AND acknowledged_at IS NULL AND acknowledged_by IS NULL AND resolved_at IS NULL) OR (status = 'Acknowledged' AND acknowledged_at IS NOT NULL AND NULLIF(BTRIM(acknowledged_by), '') IS NOT NULL AND resolved_at IS NULL) OR (status = 'Resolved' AND resolved_at IS NOT NULL)");
+            });
+            entity.Property(value => value.Fingerprint).HasMaxLength(320);
+            entity.Property(value => value.AlertType).HasMaxLength(100);
+            entity.Property(value => value.SourceKey).HasMaxLength(160);
+            entity.Property(value => value.Message).HasMaxLength(2000);
+            entity.Property(value => value.AcknowledgedBy).HasMaxLength(320);
+            entity.HasOne<Source>().WithMany().HasForeignKey(value => value.SourceId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<IngestionJobRun>().WithMany().HasForeignKey(value => value.JobRunId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(value => value.Fingerprint).IsUnique();
+            entity.HasIndex(value => new { value.Status, value.Severity, value.LastTriggeredAt });
+            entity.HasIndex(value => new { value.SourceKey, value.AlertType });
+        });
+
         modelBuilder.Entity<AuditEvent>(entity =>
         {
             entity.ToTable("audit_events", table => table.HasCheckConstraint(

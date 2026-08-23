@@ -88,6 +88,20 @@ public sealed class DomainSchemaTests
         Assert.Contains(publication.GetForeignKeys(), key => key.Properties.Single().Name == nameof(PublicationVersion.SourceFactId));
     }
 
+    [Fact]
+    public void MonitoringRunAndAlertLifecycleAreGuarded()
+    {
+        using var db = CreateContext();
+        var designModel = db.GetService<IDesignTimeModel>().Model;
+
+        Assert.Contains(designModel.FindEntityType(typeof(IngestionJobRun))!.GetCheckConstraints(),
+            check => check.Name == "ck_ingestion_job_runs_lifecycle");
+        Assert.Contains(designModel.FindEntityType(typeof(MonitoringAlert))!.GetCheckConstraints(),
+            check => check.Name == "ck_monitoring_alerts_lifecycle");
+        Assert.Contains(designModel.FindEntityType(typeof(MonitoringAlert))!.GetIndexes(),
+            index => index.IsUnique && index.Properties.Single().Name == nameof(MonitoringAlert.Fingerprint));
+    }
+
     private static AppDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()

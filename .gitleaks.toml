@@ -6,7 +6,7 @@ useDefault = true
 [[allowlists]]
 description = "Generated dependencies, build outputs and local runtime artifacts are not source inputs."
 paths = [
-  '''(^|/)(node_modules|\.next|bin|obj|\.venv|output|\.tmp|TestResults|\.pytest_cache)(/|$)''',
+  '''(^|/)(node_modules|\.next|bin|obj|\.venv|output|\.tmp|TestResults|\.pytest_cache|__pycache__)(/|$)''',
 ]
 
 [[allowlists]]

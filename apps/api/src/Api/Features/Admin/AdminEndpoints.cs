@@ -395,6 +395,26 @@ public static class AdminEndpoints
             .RequireAdmin(AdministratorRole.Viewer)
             .Produces<AdminQualityResponse>();
 
+        group.MapGet("/monitoring", async (IAdminMonitoringService service, CancellationToken cancellationToken) =>
+                Results.Ok(await service.GetAsync(cancellationToken)))
+            .WithName("GetAdminMonitoring")
+            .RequireAdmin(AdministratorRole.Viewer)
+            .Produces<AdminMonitoringResponse>();
+
+        group.MapPost("/monitoring/alerts/{id:guid}/acknowledge", async (
+                Guid id,
+                AdminReasonRequest request,
+                IAdminMonitoringService service,
+                HttpContext context,
+                CancellationToken cancellationToken) =>
+            {
+                await service.AcknowledgeAsync(id, request.Reason, context.AdminActor(), context, cancellationToken);
+                return Results.NoContent();
+            })
+            .WithName("AcknowledgeAdminMonitoringAlert")
+            .RequireAdmin(AdministratorRole.Reviewer)
+            .Produces(StatusCodes.Status204NoContent);
+
         group.MapGet("/audit", async (int? take, IAdminQualityService service, CancellationToken cancellationToken) =>
                 Results.Ok(await service.GetAuditAsync(take ?? 100, cancellationToken)))
             .WithName("GetAdminAudit")

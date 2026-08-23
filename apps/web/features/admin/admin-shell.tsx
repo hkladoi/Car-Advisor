@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, ClipboardCheck, Database, Gauge, LogOut, ShieldCheck } from "lucide-react";
+import { Activity, BellRing, ClipboardCheck, Database, Gauge, LogOut, ShieldCheck } from "lucide-react";
 
 import type { AdminSession } from "@/lib/admin-api";
 
@@ -10,6 +10,7 @@ const links = [
   { href: "/admin", label: "Tổng quan", icon: Gauge },
   { href: "/admin/coverage", label: "Coverage & QA", icon: Activity },
   { href: "/admin/review", label: "Review queue", icon: ClipboardCheck },
+  { href: "/admin/monitoring", label: "Monitoring", icon: BellRing },
   { href: "/admin/data", label: "Data operations", icon: Database },
 ];
 

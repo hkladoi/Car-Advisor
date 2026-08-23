@@ -19,7 +19,7 @@ Decisions and gate evidence belong in `docs/status/`.
 ## Current state
 
 - V1.0–V1.10 and the V1 FINAL GATE are complete.
-- V2.1–V2.4 are complete; V2.5 automated monitoring is next. See
+- V2.1–V2.5 are complete; V2.6 charging and map enrichment is next. See
   `docs/status/v2-status.md`.
 - V3 must not start until the V2 FINAL GATE passes; see
   `docs/status/v3-status.md`.

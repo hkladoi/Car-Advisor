@@ -8,6 +8,7 @@ import structlog
 
 from ingestion.jobs import IngestionJob
 from ingestion.logging import configure_logging
+from ingestion.monitoring import job_for_schedule, schedule_definitions
 from ingestion.registry import SourceRegistry
 from ingestion.settings import Settings
 
@@ -31,21 +32,28 @@ async def run_scheduler(settings: Settings) -> None:
                 await client.rpush(settings.ingestion_queue, IngestionJob.staleness_check().model_dump_json())
                 enqueued += 1
             for source in registry.sources:
-                if not source.automated_fetch:
+                if not source.automated_fetch and source.category != "brand-registry":
                     continue
-                lease_key = f"ingestion:next-fetch:{source.id}"
-                acquired = await client.set(
-                    lease_key,
-                    "scheduled",
-                    ex=source.refresh_hours * 3600,
-                    nx=True,
-                )
-                if not acquired:
-                    continue
-                job = IngestionJob.known_url(source.id)
-                await client.rpush(settings.ingestion_queue, job.model_dump_json())
-                enqueued += 1
-            logger.info("source_schedule_checked", enqueued=enqueued, queue=settings.ingestion_queue)
+                for schedule in schedule_definitions(source):
+                    lease_key = f"ingestion:next-fetch:{schedule.monitor_kind}:{source.id}"
+                    acquired = await client.set(
+                        lease_key,
+                        "scheduled",
+                        ex=schedule.cadence_hours * 3600,
+                        nx=True,
+                    )
+                    if not acquired:
+                        continue
+                    job = job_for_schedule(source, schedule)
+                    await client.rpush(settings.ingestion_queue, job.model_dump_json())
+                    enqueued += 1
+            queue_depth = await client.llen(settings.ingestion_queue)
+            logger.info(
+                "source_schedule_checked",
+                enqueued=enqueued,
+                queue=settings.ingestion_queue,
+                queue_depth=queue_depth,
+            )
             await asyncio.sleep(settings.ingestion_schedule_seconds)
     finally:
         await client.aclose()

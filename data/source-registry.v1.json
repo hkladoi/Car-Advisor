@@ -528,6 +528,34 @@
       "terms_note": "Publish normalized charge-sustaining and electric consumption only, with market/test-cycle disclosure."
     },
     {
+      "id": "toyota-taf-august-2026-offer",
+      "name": "Toyota An Thanh Fukushima August 2026 new-car offer",
+      "owner": "Toyota An Thanh Fukushima",
+      "category": "dealer-offer",
+      "url": "https://taf.toyota.com.vn/khuyen-mai-toyota-xe-moi-t8-2026/",
+      "allowed_domains": ["taf.toyota.com.vn"],
+      "authority": "DealerOfficial",
+      "content_type": "Html",
+      "refresh_hours": 24,
+      "priority": 1,
+      "robots_note": "Official Toyota dealer promotion page linked from Toyota Motor Vietnam's dealer directory; one daily conditional fetch.",
+      "terms_note": "Publish only dated, normalized offer terms with dealer attribution, eligibility, limits, and direct provenance. Never present an offer as manufacturer-wide."
+    },
+    {
+      "id": "toyota-finance-reference",
+      "name": "Toyota Motor Vietnam installment finance reference",
+      "owner": "Toyota Motor Vietnam",
+      "category": "finance-campaign",
+      "url": "https://www.toyota.com.vn/tin-tuc/thong-tin-bo-tro/mua-xe-tra-gop-vios-43083",
+      "allowed_domains": ["www.toyota.com.vn"],
+      "authority": "BrandOfficial",
+      "content_type": "Html",
+      "refresh_hours": 24,
+      "priority": 1,
+      "robots_note": "Official manufacturer finance-information page; one daily conditional fetch for dated reference terms.",
+      "terms_note": "Reference/as-of information only. Preserve rate period, lender attribution, conditions, and change disclaimer; never imply credit approval or a guaranteed offer."
+    },
+    {
       "id": "brave-discovery",
       "name": "Brave Search discovery only",
       "owner": "Brave Software",

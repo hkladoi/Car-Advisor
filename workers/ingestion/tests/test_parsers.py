@@ -92,6 +92,20 @@ def test_toyota_profile_reads_json_ld_and_profile_content_before_body() -> None:
     assert "Dữ liệu tổng hợp" in parsed.text_blocks[0]
 
 
+def test_official_toyota_dealer_profile_extracts_offer_terms() -> None:
+    sources = SourceRegistry.load(SOURCE_REGISTRY_PATH)
+    source = sources.by_id("toyota-taf-august-2026-offer")
+    content = (FIXTURES / "toyota-taf-offer.html").read_bytes()
+    parsed = parser_registry().resolve(source, source.url).parse(
+        source, snapshot(source.id, source.url, content, "html"), content
+    )
+
+    assert parsed.parser_id == "toyota-dealer-html"
+    assert parsed.title == "Ưu đãi Toyota tháng 8/2026"
+    assert "01/08/2026–31/08/2026" in " ".join(parsed.text_blocks)
+    assert "Nội dung điều hướng" not in " ".join(parsed.text_blocks)
+
+
 def test_coordinator_writes_immutable_artifact_and_skips_same_hash() -> None:
     sources = SourceRegistry.load(SOURCE_REGISTRY_PATH)
     source = sources.by_id("vinfast-vf6")

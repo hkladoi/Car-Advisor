@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import Literal
+import uuid
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -10,7 +11,9 @@ class IngestionJob(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     job_type: Literal["source_staleness_check", "known_url_fetch", "source_discovery"]
+    run_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     requested_at: datetime
+    monitor_kind: str = Field(default="source_refresh", min_length=1, max_length=100)
     source_id: str | None = None
     brand: str | None = None
     data_type: str | None = None
@@ -20,11 +23,20 @@ class IngestionJob(BaseModel):
 
     @classmethod
     def staleness_check(cls) -> "IngestionJob":
-        return cls(job_type="source_staleness_check", requested_at=datetime.now(UTC))
+        return cls(
+            job_type="source_staleness_check",
+            monitor_kind="source_staleness_check",
+            requested_at=datetime.now(UTC),
+        )
 
     @classmethod
-    def known_url(cls, source_id: str) -> "IngestionJob":
-        return cls(job_type="known_url_fetch", source_id=source_id, requested_at=datetime.now(UTC))
+    def known_url(cls, source_id: str, monitor_kind: str = "source_refresh") -> "IngestionJob":
+        return cls(
+            job_type="known_url_fetch",
+            monitor_kind=monitor_kind,
+            source_id=source_id,
+            requested_at=datetime.now(UTC),
+        )
 
     @classmethod
     def discovery(
@@ -34,9 +46,12 @@ class IngestionJob(BaseModel):
         allowed_domains: list[str],
         known_urls: list[str] | None = None,
         force_discovery: bool = False,
+        source_id: str | None = None,
     ) -> "IngestionJob":
         return cls(
             job_type="source_discovery",
+            monitor_kind="new_model_discovery",
+            source_id=source_id,
             brand=brand,
             data_type=data_type,
             allowed_domains=allowed_domains,

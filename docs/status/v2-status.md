@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-23
 
-Overall: **IN PROGRESS — V2.5**
+Overall: **IN PROGRESS — V2.6**
 
 ## Governing decisions
 
@@ -37,7 +37,7 @@ No material conflict between the two source documents has been found so far.
 - [x] V2.2 Domain parsers — PASS 2026-08-23
 - [x] V2.3 Structured extraction — PASS 2026-08-23
 - [x] V2.4 Change detection, review and rollback — PASS 2026-08-23
-- [ ] V2.5 Automated monitoring
+- [x] V2.5 Automated monitoring — PASS 2026-08-23
 - [ ] V2.6 Charging and map enrichment
 - [ ] V2.7 Price and offer history UX
 - [ ] V2.8 Full-market coverage
@@ -200,3 +200,67 @@ Gate commands/evidence:
 - A live HTTP 200 Toyota replay reused the immutable 194,178-byte snapshot and
   extraction artifact, reported one unchanged fact and produced zero duplicate
   changes/publications. API, web, worker and scheduler containers are healthy.
+
+## V2.5 gate — PASS
+
+Implemented evidence:
+
+- The scheduler emits category-specific monitoring jobs: vehicle price and
+  promotion daily, vehicle specs/features/images weekly, official dealer offers
+  daily, finance campaign references daily, fuel/legal/electricity/charging
+  sources daily, and model discovery daily. Each monitor kind has its own Redis
+  lease, so a weekly job cannot suppress a daily job for the same source.
+- Brand registry entries intentionally marked `automated_fetch=false` run a
+  bounded `source_discovery` job instead of crawling/publishing the homepage.
+  Known official URLs return first, preserve source identity and consume zero
+  Brave requests; forced search remains under the V2.1 budget policy.
+- Every run has a UUID and durable lifecycle ledger with requested/start/end
+  timestamps, status, duration, source, monitor kind, HTTP/parser outcome,
+  content-change flag, and a bounded hashed error. The admin metrics aggregate
+  the complete 24-hour window rather than truncating to the recent-run display.
+- Consecutive parser failures open a deduplicated high-severity alert only at the
+  configured threshold. Source staleness opens an authority-aware alert.
+  Acknowledgement requires reviewer RBAC plus a reason and audit event; a
+  successful parser run or recovered freshness resolves the alert.
+- Failure paths retain published data. They record a failed/partial run and keep
+  the immutable snapshot/candidate workflow separate from canonical catalog
+  mutation.
+- The registry now contains a real official Toyota dealer offer source and an
+  official Toyota finance-information source. Finance terms are explicitly
+  reference/as-of only and can never be presented as approval or a guaranteed
+  offer. The dealer domain has its own versioned parser and rights-safe fixture.
+- Admin `/admin/monitoring` displays full-day success metrics, monitor kinds,
+  recent runs, open/resolved alerts and audited acknowledgement. OpenAPI and the
+  generated TypeScript client include both monitoring endpoints.
+
+Official sources checked on 2026-08-23:
+
+- <https://www.toyota.com.vn/lien-he-dai-ly> identifies Toyota An Thanh
+  Fukushima as an official dealer.
+- <https://taf.toyota.com.vn/khuyen-mai-toyota-xe-moi-t8-2026/> is the dated
+  official dealer offer monitored by the gate.
+- <https://www.toyota.com.vn/tin-tuc/thong-tin-bo-tro/mua-xe-tra-gop-vios-43083>
+  is the manufacturer finance-reference page; its changing terms remain
+  provenance-backed reference information only.
+
+Gate commands/evidence:
+
+- Worker suite — 57 passed; API suite — 45 passed with zero build warnings;
+  web lint, 6 tests and production build pass, including `/admin/monitoring`.
+- EF reports no pending model changes. Migration
+  `20260823040639_AddV25AutomatedMonitoring` passed up → down → up against local
+  PostgreSQL and is the latest applied migration.
+- The first live schedule completed all 53 automated fetch jobs successfully.
+  Four brand-registry discovery jobs then completed with
+  `strategy=known_url_first`, one official candidate each and zero charged Brave
+  requests. The gate caught and fixed both the original scheduler exclusion and
+  an invalid discovery data-type slug before this milestone was accepted.
+- `scripts/verify_v2_5_monitoring.py` passes repeatedly: both official dealer
+  and finance URLs return HTTP 200 and parse successfully; three deterministic
+  parser failures open an alert; API acknowledgement adds exactly one audit per
+  run; a recovery resolves parser and stale-source alerts; the canonical
+  price/spec/powertrain/energy digest is unchanged.
+- OpenAPI export and TypeScript generation pass. Gitleaks v8.29.0 reports no
+  leaks. API, web, PostgreSQL, Redis, MinIO, worker and scheduler containers are
+  healthy; deterministic gate failure rows remain as local operational evidence
+  while both alerts finish in `Resolved` state.

@@ -29,6 +29,7 @@ from ingestion.extraction import (
 )
 from ingestion.logging import configure_logging
 from ingestion.metadata import SnapshotMetadataRepository
+from ingestion.monitoring import MonitoringRepository
 from ingestion.parsers import DomainParserRegistry, ParserCoordinator, ParserProfileRegistry
 from ingestion.registry import SourceRegistry
 from ingestion.settings import Settings
@@ -81,6 +82,10 @@ async def run_worker(settings: Settings) -> None:
         engine=StructuredExtractionEngine(llm),
     )
     change_repository = CandidateChangeRepository(settings.postgres_dsn)
+    monitoring_repository = MonitoringRepository(
+        settings.postgres_dsn,
+        settings.parser_failure_alert_threshold,
+    )
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
     for event in (signal.SIGINT, signal.SIGTERM):
@@ -99,18 +104,40 @@ async def run_worker(settings: Settings) -> None:
                 continue
             _, raw_job = item
             job = IngestionJob.model_validate_json(raw_job)
-            logger.info("job_received", job_type=job.job_type, source_id=job.source_id)
+            source = registry.by_id(job.source_id) if job.source_id else None
+            await asyncio.to_thread(monitoring_repository.begin, job, source)
+            logger.info(
+                "job_received",
+                run_id=str(job.run_id),
+                job_type=job.job_type,
+                monitor_kind=job.monitor_kind,
+                source_id=job.source_id,
+            )
             if job.job_type == "source_staleness_check":
-                energy_sources = [source for source in registry.sources if source.category in {
-                    "fuel-price", "electricity-price", "charging-price", "charging-promotion"
-                }]
-                stale = await asyncio.to_thread(metadata_repository.find_stale_sources, energy_sources)
-                logger.info(
-                    "source_staleness_check_complete",
-                    energy_sources=len(energy_sources),
-                    stale_source_ids=stale,
-                    stale_count=len(stale),
-                )
+                monitored_sources = [source for source in registry.sources if source.automated_fetch]
+                try:
+                    stale = await asyncio.to_thread(
+                        metadata_repository.find_stale_sources, monitored_sources
+                    )
+                    await asyncio.to_thread(
+                        monitoring_repository.reconcile_stale_sources,
+                        monitored_sources,
+                        stale,
+                    )
+                    await asyncio.to_thread(monitoring_repository.succeed, job)
+                    logger.info(
+                        "source_staleness_check_complete",
+                        monitored_sources=len(monitored_sources),
+                        stale_source_ids=stale,
+                        stale_count=len(stale),
+                    )
+                except Exception as error:
+                    await asyncio.to_thread(
+                        monitoring_repository.fail, job, "staleness", error
+                    )
+                    logger.exception(
+                        "source_staleness_check_failed", error_type=type(error).__name__
+                    )
                 continue
             if job.job_type == "source_discovery":
                 try:
@@ -137,7 +164,11 @@ async def run_worker(settings: Settings) -> None:
                         cache_hits=batch.cache_hits,
                         charged_requests=batch.charged_requests,
                     )
+                    await asyncio.to_thread(monitoring_repository.succeed, job)
                 except Exception as error:
+                    await asyncio.to_thread(
+                        monitoring_repository.fail, job, "discovery", error
+                    )
                     logger.exception(
                         "source_discovery_failed",
                         brand=job.brand,
@@ -146,7 +177,8 @@ async def run_worker(settings: Settings) -> None:
                     )
                 continue
             try:
-                source = registry.by_id(job.source_id or "")
+                if source is None:
+                    raise KeyError(f"Unknown source for monitoring job: {job.source_id}")
                 snapshot = await fetcher.fetch(source, storage)
                 snapshot_id = await asyncio.to_thread(metadata_repository.record, source, snapshot)
                 try:
@@ -245,14 +277,37 @@ async def run_worker(settings: Settings) -> None:
                                 if extraction_outcome.batch else None
                             ),
                         )
+                        await asyncio.to_thread(
+                            monitoring_repository.succeed,
+                            job,
+                            http_status=snapshot.http_status,
+                            parse_status=parse_outcome.status,
+                            content_changed=parse_outcome.status == "parsed",
+                        )
                     except Exception as error:
+                        await asyncio.to_thread(
+                            monitoring_repository.partial,
+                            job,
+                            "extraction",
+                            error,
+                            http_status=snapshot.http_status,
+                            parse_status=parse_outcome.status,
+                            content_changed=parse_outcome.status == "parsed",
+                        )
                         logger.exception(
                             "source_extraction_failed",
                             source_id=source.id,
                             content_hash=snapshot.content_hash,
                             error_type=type(error).__name__,
-                        )
+                    )
                 except Exception as error:
+                    await asyncio.to_thread(
+                        monitoring_repository.fail,
+                        job,
+                        "parser",
+                        error,
+                        http_status=snapshot.http_status,
+                    )
                     logger.exception(
                         "source_parse_failed",
                         source_id=source.id,
@@ -273,6 +328,9 @@ async def run_worker(settings: Settings) -> None:
                     snapshot_id=str(snapshot_id),
                 )
             except Exception as error:
+                await asyncio.to_thread(
+                    monitoring_repository.fail, job, "fetch", error
+                )
                 logger.exception(
                     "source_fetch_failed",
                     source_id=job.source_id,

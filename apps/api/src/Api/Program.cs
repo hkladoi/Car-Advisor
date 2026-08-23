@@ -58,6 +58,7 @@ builder.Services.AddScoped<IAdminManualImportService, AdminManualImportService>(
 builder.Services.AddScoped<IAdminReviewService, AdminReviewService>();
 builder.Services.AddScoped<IAdminQualityService, AdminQualityService>();
 builder.Services.AddScoped<IAdminDealerService, AdminDealerService>();
+builder.Services.AddScoped<IAdminMonitoringService, AdminMonitoringService>();
 builder.Services.AddRateLimiter(options =>
 {
     options.AddFixedWindowLimiter("admin-login", limiter =>

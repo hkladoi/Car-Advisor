@@ -228,6 +228,58 @@ public sealed record AdminAuditResponse(
     DateTimeOffset OccurredAt,
     string? CorrelationId);
 
+public sealed record AdminMonitoringRunResponse(
+    Guid Id,
+    string JobType,
+    string MonitorKind,
+    string? SourceKey,
+    string Status,
+    DateTimeOffset RequestedAt,
+    DateTimeOffset StartedAt,
+    DateTimeOffset? CompletedAt,
+    int? HttpStatus,
+    string? ParseStatus,
+    bool? ContentChanged,
+    string? ErrorStage,
+    string? ErrorCode,
+    int? DurationMilliseconds);
+
+public sealed record AdminMonitoringAlertResponse(
+    Guid Id,
+    string AlertType,
+    string Severity,
+    string Status,
+    string? SourceKey,
+    Guid? JobRunId,
+    string Message,
+    int OccurrenceCount,
+    DateTimeOffset FirstTriggeredAt,
+    DateTimeOffset LastTriggeredAt,
+    DateTimeOffset? AcknowledgedAt,
+    string? AcknowledgedBy,
+    DateTimeOffset? ResolvedAt);
+
+public sealed record AdminMonitorKindResponse(
+    string MonitorKind,
+    int RunsLast24Hours,
+    int SucceededLast24Hours,
+    decimal SuccessRate,
+    DateTimeOffset? LastStartedAt,
+    DateTimeOffset? LastSucceededAt);
+
+public sealed record AdminMonitoringResponse(
+    int RunsLast24Hours,
+    int SucceededLast24Hours,
+    int FailedLast24Hours,
+    int PartialLast24Hours,
+    int ContentChangesLast24Hours,
+    int OpenAlerts,
+    int HighCriticalAlerts,
+    IReadOnlyList<AdminMonitorKindResponse> MonitorKinds,
+    IReadOnlyList<AdminMonitoringRunResponse> RecentRuns,
+    IReadOnlyList<AdminMonitoringAlertResponse> Alerts,
+    DateTimeOffset GeneratedAt);
+
 public sealed record AdminDealerRequest(
     Guid BrandId,
     string Name,

@@ -42,6 +42,13 @@ export type AdminImport = {
 };
 export type AdminFieldLock = { id: string; entityType: string; entityId: string; fieldPath: string; reason: string; actor: string; expiresAt: string | null; active: boolean };
 export type AdminAudit = { id: string; actor: string; action: string; entityType: string; entityId: string; beforeJson: string | null; afterJson: string | null; reason: string; occurredAt: string; correlationId: string | null };
+export type AdminMonitoring = {
+  runsLast24Hours: number; succeededLast24Hours: number; failedLast24Hours: number; partialLast24Hours: number;
+  contentChangesLast24Hours: number; openAlerts: number; highCriticalAlerts: number; generatedAt: string;
+  monitorKinds: { monitorKind: string; runsLast24Hours: number; succeededLast24Hours: number; successRate: number; lastStartedAt: string | null; lastSucceededAt: string | null }[];
+  recentRuns: { id: string; jobType: string; monitorKind: string; sourceKey: string | null; status: string; requestedAt: string; startedAt: string; completedAt: string | null; httpStatus: number | null; parseStatus: string | null; contentChanged: boolean | null; errorStage: string | null; errorCode: string | null; durationMilliseconds: number | null }[];
+  alerts: { id: string; alertType: string; severity: string; status: string; sourceKey: string | null; jobRunId: string | null; message: string; occurrenceCount: number; firstTriggeredAt: string; lastTriggeredAt: string; acknowledgedAt: string | null; acknowledgedBy: string | null; resolvedAt: string | null }[];
+};
 
 const apiBase = () => process.env.API_INTERNAL_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 

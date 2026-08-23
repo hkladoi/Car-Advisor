@@ -436,6 +436,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/monitoring": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetAdminMonitoring"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/monitoring/alerts/{id}/acknowledge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AcknowledgeAdminMonitoringAlert"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/audit": {
         parameters: {
             query?: never;
@@ -846,6 +878,84 @@ export interface components {
             submittedAt?: string;
             /** Format: date-time */
             stagedAt?: string | null;
+        };
+        AdminMonitorKindResponse: {
+            monitorKind?: string | null;
+            /** Format: int32 */
+            runsLast24Hours?: number;
+            /** Format: int32 */
+            succeededLast24Hours?: number;
+            /** Format: double */
+            successRate?: number;
+            /** Format: date-time */
+            lastStartedAt?: string | null;
+            /** Format: date-time */
+            lastSucceededAt?: string | null;
+        };
+        AdminMonitoringAlertResponse: {
+            /** Format: uuid */
+            id?: string;
+            alertType?: string | null;
+            severity?: string | null;
+            status?: string | null;
+            sourceKey?: string | null;
+            /** Format: uuid */
+            jobRunId?: string | null;
+            message?: string | null;
+            /** Format: int32 */
+            occurrenceCount?: number;
+            /** Format: date-time */
+            firstTriggeredAt?: string;
+            /** Format: date-time */
+            lastTriggeredAt?: string;
+            /** Format: date-time */
+            acknowledgedAt?: string | null;
+            acknowledgedBy?: string | null;
+            /** Format: date-time */
+            resolvedAt?: string | null;
+        };
+        AdminMonitoringResponse: {
+            /** Format: int32 */
+            runsLast24Hours?: number;
+            /** Format: int32 */
+            succeededLast24Hours?: number;
+            /** Format: int32 */
+            failedLast24Hours?: number;
+            /** Format: int32 */
+            partialLast24Hours?: number;
+            /** Format: int32 */
+            contentChangesLast24Hours?: number;
+            /** Format: int32 */
+            openAlerts?: number;
+            /** Format: int32 */
+            highCriticalAlerts?: number;
+            monitorKinds?: components["schemas"]["AdminMonitorKindResponse"][] | null;
+            recentRuns?: components["schemas"]["AdminMonitoringRunResponse"][] | null;
+            alerts?: components["schemas"]["AdminMonitoringAlertResponse"][] | null;
+            /** Format: date-time */
+            generatedAt?: string;
+        };
+        AdminMonitoringRunResponse: {
+            /** Format: uuid */
+            id?: string;
+            jobType?: string | null;
+            monitorKind?: string | null;
+            sourceKey?: string | null;
+            status?: string | null;
+            /** Format: date-time */
+            requestedAt?: string;
+            /** Format: date-time */
+            startedAt?: string;
+            /** Format: date-time */
+            completedAt?: string | null;
+            /** Format: int32 */
+            httpStatus?: number | null;
+            parseStatus?: string | null;
+            contentChanged?: boolean | null;
+            errorStage?: string | null;
+            errorCode?: string | null;
+            /** Format: int32 */
+            durationMilliseconds?: number | null;
         };
         AdminOverrideRequest: {
             entityType?: string | null;
@@ -3366,6 +3476,78 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AdminQualityResponse"];
                 };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetAdminMonitoring: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMonitoringResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AcknowledgeAdminMonitoringAlert: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Unauthorized */
             401: {

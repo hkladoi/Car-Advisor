@@ -40,3 +40,4 @@ class Settings(BaseSettings):
     local_llm_timeout_seconds: float = Field(default=60.0, ge=1.0, le=300.0)
     local_llm_max_input_chars: int = Field(default=40_000, ge=1000, le=200_000)
     extracted_candidate_queue: str = "ingestion:extracted-candidates"
+    parser_failure_alert_threshold: int = Field(default=3, ge=2, le=20)

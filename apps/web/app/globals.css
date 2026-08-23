@@ -786,6 +786,20 @@ h3 { font-size: var(--text-lg); font-weight: 600; }
 .admin-publication-row form { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: end; }
 .admin-publication-row form input { flex: 1 1 15rem; }
 .admin-rollback-note { margin: 0; font-size: var(--text-xs); }
+.admin-monitoring-stack { display: grid; gap: var(--space-xl); }
+.admin-monitoring-alerts { display: grid; gap: var(--space-sm); }
+.admin-monitoring-alerts article { display: grid; gap: var(--space-sm); padding: var(--space-md); border-inline-start: 3px solid var(--color-rule-2); background: var(--color-paper-2); }
+.admin-monitoring-alerts article.severity-high, .admin-monitoring-alerts article.severity-critical { border-color: var(--color-error); }
+.admin-monitoring-alerts article.is-resolved { opacity: .65; }
+.admin-monitoring-alerts article > div { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center; }
+.admin-monitoring-alerts article span, .admin-monitoring-alerts article small { color: var(--color-muted); font-family: var(--font-mono); font-size: var(--text-xs); }
+.admin-monitoring-alerts article p { margin: 0; }
+.admin-monitoring-alerts form { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+.admin-monitoring-alerts form input { flex: 1 1 18rem; }
+.admin-monitoring-runs { min-width: 72rem; }
+.state-succeeded { color: var(--color-success); }
+.state-failed { color: var(--color-error); }
+.state-partial { color: var(--color-accent); }
 
 .admin-ops-stack { display: grid; gap: var(--space-xl); }
 .admin-form-grid { display: grid; gap: var(--space-sm); }
