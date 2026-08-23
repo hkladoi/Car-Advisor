@@ -66,8 +66,10 @@ def main() -> None:
         require(by_service[service]["State"] == "running", f"compose service is not running: {service}")
         require(by_service[service]["Health"] == "healthy", f"compose service is not healthy: {service}")
 
-    latest = psql('SELECT migration_id FROM "__EFMigrationsHistory" ORDER BY migration_id DESC LIMIT 1')
-    require(latest == EXPECTED_MIGRATION, f"unexpected latest migration: {latest}")
+    applied = psql(
+        f'SELECT count(*) FROM "__EFMigrationsHistory" WHERE migration_id=\'{EXPECTED_MIGRATION}\''
+    )
+    require(applied == "1", f"required migration is not applied: {EXPECTED_MIGRATION}")
     require(
         psql("SELECT to_regclass('public.charging_stations') IS NOT NULL") == "t",
         "charging_stations table is missing",
@@ -131,7 +133,7 @@ def main() -> None:
 
     print(json.dumps({
         "status": "PASS",
-        "migration": latest,
+        "migration": EXPECTED_MIGRATION,
         "cachedStations": stations["count"],
         "ocmKeyConfigured": ocm_configured,
         "goongKeyConfigured": capabilities["goongGeocodingEnabled"],

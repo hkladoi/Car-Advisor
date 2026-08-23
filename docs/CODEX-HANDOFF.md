@@ -19,11 +19,11 @@ Decisions and gate evidence belong in `docs/status/`.
 ## Current state
 
 - V1.0–V1.10 and the V1 FINAL GATE are complete.
-- V2.1–V2.8 are complete; the V2 FINAL GATE is next. See
+- V2.1–V2.8 and the V2 FINAL GATE are complete. See
   `docs/status/v2-status.md`. The live reviewed scope is 51 brands (38 included,
   13 excluded), 255 model candidates, 49 explicit trim candidates and 236
   documented trim-inventory gaps; do not replace those gaps with invented data.
-- V3 must not start until the V2 FINAL GATE passes; see
+- V3 is unlocked; V3.1 explainable recommendation is next. See
   `docs/status/v3-status.md`.
 
 ## Architecture
@@ -123,6 +123,7 @@ python -m pytest workers/ingestion/tests
 python scripts/verify_v2_6_charging.py
 python scripts/verify_v2_7_history.py
 python scripts/verify_v2_8_coverage.py
+python scripts/verify_v2_final.py
 docker compose up --build -d --wait
 docker compose ps
 docker compose logs -f api ingestion-worker ingestion-scheduler

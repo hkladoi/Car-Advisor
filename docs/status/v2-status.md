@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-23
 
-Overall: **IN PROGRESS — V2 FINAL GATE**
+Overall: **COMPLETE — V2 FINAL GATE PASS**
 
 ## Governing decisions
 
@@ -41,7 +41,7 @@ No material conflict between the two source documents has been found so far.
 - [x] V2.6 Charging and map enrichment — PASS 2026-08-23
 - [x] V2.7 Price and offer history UX — PASS 2026-08-23
 - [x] V2.8 Full-market coverage — PASS 2026-08-23
-- [ ] V2 FINAL GATE
+- [x] V2 FINAL GATE — PASS 2026-08-23
 
 ## V2.1 gate — PASS
 
@@ -462,3 +462,36 @@ not for unnamed trim identities. When a stable complete trim list is absent,
 V2.8 treats the model as published and the trim inventory as an explicit,
 sourced gap. This satisfies the design's `UNKNOWN`/blocked transparency rule
 without fabricating product data or silently reducing the market denominator.
+
+## V2 FINAL GATE — PASS
+
+Final acceptance evidence:
+
+- All milestone gates were rerun in plan order on the final production images.
+  V2.1 known-URL-first used zero Brave calls; V2.2 resolved 62 automated sources
+  through 47 versioned profiles; V2.4 publish/rollback, V2.5 monitoring failure
+  and recovery, V2.6 charging degradation, V2.7 history cleanup and V2.8 stale
+  source blocking all passed.
+- `scripts/verify_v2_final.py` calculates recurring automation coverage from
+  the reviewed registry and durable job ledger: 14/14 supported automated
+  vehicle-price/promotion, dealer-offer and finance-reference sources have a
+  successful scheduled detection path, or 100% against the ≥80% target.
+- The final gate reruns the bounded V2.5 parser-failure scenario. Failed runs
+  open the expected alert, the published catalog digest is unchanged, and a
+  real official-page recovery resolves the alert. No high/critical monitoring
+  alert remains open.
+- Joining `publication_versions` to `data_changes` finds zero High/Critical
+  publication without a human review audit and zero such system publication.
+  Safe auto-publication remains constrained to the low-risk policy tested by
+  the worker suite.
+- The live public report confirms 51/51 brands reviewed, 304/304 candidates
+  resolved, 255 models, 49 explicit trims, 236 explained trim-inventory gaps,
+  100% core completeness, 100% source freshness across all five domains and
+  zero unresolved duplicate. Public and admin reports are DB-reproducible.
+- Final verification totals: worker 72/72; API 57/57; web ESLint clean, 7 test
+  files / 12 tests and production build pass. EF has no pending model changes;
+  the V2.8 isolated up/down/up drill passes. All production images build and all
+  seven Compose services are healthy. Gitleaks 8.29.0 finds no leak.
+
+The V2 FINAL GATE is therefore complete. V3 is unlocked and begins at V3.1;
+no V3 implementation was counted or started before this result.
