@@ -10,6 +10,7 @@ import redis.asyncio as redis
 import structlog
 
 from ingestion.jobs import IngestionJob
+from ingestion.change_detection import CandidateChangeRepository
 from ingestion.discovery import (
     BraveSearchClient,
     BraveSearchOptions,
@@ -79,6 +80,7 @@ async def run_worker(settings: Settings) -> None:
         fact_repository=CandidateFactRepository(settings.postgres_dsn),
         engine=StructuredExtractionEngine(llm),
     )
+    change_repository = CandidateChangeRepository(settings.postgres_dsn)
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
     for event in (signal.SIGINT, signal.SIGTERM):
@@ -185,8 +187,20 @@ async def run_worker(settings: Settings) -> None:
                             parse_outcome.parsed_object_key,
                             snapshot.content_hash,
                         )
-                        if extraction_outcome.status == "extracted":
-                            batch = extraction_outcome.batch
+                        batch = extraction_outcome.batch
+                        changes = (
+                            await asyncio.to_thread(
+                                change_repository.detect_and_apply, batch
+                            )
+                            if batch else None
+                        )
+                        if changes and changes.auto_published:
+                            from ingestion.cache import invalidate_catalog_cache
+
+                            await asyncio.to_thread(
+                                invalidate_catalog_cache, settings.redis_url
+                            )
+                        if extraction_outcome.status == "extracted" or (changes and changes.detected):
                             await client.rpush(
                                 settings.extracted_candidate_queue,
                                 json.dumps(
@@ -201,11 +215,21 @@ async def run_worker(settings: Settings) -> None:
                                             batch.entity_resolution.model_dump(mode="json")
                                             if batch else None
                                         ),
+                                        "changes": changes.model_dump() if changes else None,
                                     },
                                     ensure_ascii=False,
                                 ),
                             )
                             await client.ltrim(settings.extracted_candidate_queue, -10_000, -1)
+                        if changes:
+                            logger.info(
+                                "candidate_change_detection_complete",
+                                source_id=source.id,
+                                detected=changes.detected,
+                                auto_published=changes.auto_published,
+                                queued_for_review=changes.queued_for_review,
+                                unchanged=changes.unchanged,
+                            )
                         logger.info(
                             "source_extraction_complete",
                             source_id=source.id,

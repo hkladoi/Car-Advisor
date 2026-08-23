@@ -149,8 +149,29 @@ public sealed record AdminReviewItem(
     string RiskLevel,
     string Status,
     DateTimeOffset DetectedAt,
+    string? AnomalyCode,
+    string? DetectionContext,
     object? Source,
     bool FieldLocked);
+
+public sealed record AdminPublicationResponse(
+    Guid Id,
+    Guid DataChangeId,
+    string EntityType,
+    Guid EntityId,
+    string FieldPath,
+    string? BeforeValue,
+    string? AfterValue,
+    Guid? BeforeSourceFactId,
+    Guid? SourceFactId,
+    string Status,
+    DateTimeOffset PublishedAt,
+    string PublishedBy,
+    DateTimeOffset? RolledBackAt,
+    string? RolledBackBy,
+    string? RollbackReason);
+
+public sealed record AdminRollbackRequest(string Reason);
 
 public sealed record AdminCoverageBrand(
     Guid BrandId,

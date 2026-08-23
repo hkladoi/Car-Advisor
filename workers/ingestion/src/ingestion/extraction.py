@@ -481,12 +481,7 @@ class CandidateFactRepository:
         entity_type = entity.entity_type or "UnresolvedVehicle"
         with psycopg.connect(self._dsn) as connection, connection.transaction(), connection.cursor() as cursor:
             for fact in batch.facts:
-                fact_id = uuid.uuid5(
-                    self._NAMESPACE,
-                    "|".join(
-                        [str(batch.snapshot_id), str(entity.entity_id), fact.field_path.value, fact.normalized_value, fact.extraction_method]
-                    ),
-                )
+                fact_id = self.fact_id(batch, fact)
                 context = json.dumps(
                     {
                         "schema_version": batch.schema_version,
@@ -518,6 +513,21 @@ class CandidateFactRepository:
                 )
                 inserted += cursor.rowcount
         return inserted
+
+    @classmethod
+    def fact_id(cls, batch: ExtractionBatch, fact: CandidateFact) -> uuid.UUID:
+        return uuid.uuid5(
+            cls._NAMESPACE,
+            "|".join(
+                [
+                    str(batch.snapshot_id),
+                    str(batch.entity_resolution.entity_id),
+                    fact.field_path.value,
+                    fact.normalized_value,
+                    fact.extraction_method,
+                ]
+            ),
+        )
 
 
 class StructuredExtractionEngine:
@@ -615,7 +625,13 @@ class StructuredExtractionPipeline:
             PurePosixPath("extracted", source.id, "sha256", content_hash, f"{version_key}.json")
         )
         if await asyncio.to_thread(self.storage.exists, artifact_key):
-            return ExtractionOutcome(status="unchanged", artifact_key=artifact_key, inserted_facts=0)
+            artifact = await asyncio.to_thread(self.storage.get_bytes, artifact_key)
+            return ExtractionOutcome(
+                status="unchanged",
+                artifact_key=artifact_key,
+                inserted_facts=0,
+                batch=ExtractionBatch.model_validate_json(artifact),
+            )
         parsed_bytes = await asyncio.to_thread(self.storage.get_bytes, parsed_object_key)
         document = ParsedDocument.model_validate_json(parsed_bytes)
         catalog = await asyncio.to_thread(self.catalog_repository.load)

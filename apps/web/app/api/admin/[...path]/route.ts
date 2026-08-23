@@ -5,7 +5,7 @@ import { ADMIN_COOKIE } from "@/lib/admin-api";
 import { isSameOrigin } from "@/lib/admin-csrf";
 
 const apiBase = () => process.env.API_INTERNAL_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
-const allowed = /^(catalog\/trims(?:\/[0-9a-f-]+)?|sources(?:\/[0-9a-f-]+)?|imports(?:\/validate|\/[0-9a-f-]+\/stage)?|review-queue|changes\/[0-9a-f-]+\/(?:approve|reject|edit-publish)|overrides|field-locks(?:\/[0-9a-f-]+\/unlock)?|dealers(?:\/[0-9a-f-]+)?|dealer-branches(?:\/[0-9a-f-]+)?|dealer-offers(?:\/[0-9a-f-]+)?|coverage|quality|audit)$/i;
+const allowed = /^(catalog\/trims(?:\/[0-9a-f-]+)?|sources(?:\/[0-9a-f-]+)?|imports(?:\/validate|\/[0-9a-f-]+\/stage)?|review-queue|changes\/[0-9a-f-]+\/(?:approve|reject|edit-publish)|publications(?:\/[0-9a-f-]+\/rollback)?|overrides|field-locks(?:\/[0-9a-f-]+\/unlock)?|dealers(?:\/[0-9a-f-]+)?|dealer-branches(?:\/[0-9a-f-]+)?|dealer-offers(?:\/[0-9a-f-]+)?|coverage|quality|audit)$/i;
 
 async function proxy(request: Request, context: { params: Promise<{ path: string[] }> }) {
   const path = (await context.params).path.join("/");

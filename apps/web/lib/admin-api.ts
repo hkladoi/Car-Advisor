@@ -16,7 +16,17 @@ export type AdminQuality = {
 };
 export type AdminReviewItem = {
   id: string; entityType: string; entityId: string; fieldPath: string; oldValue: string | null; newValue: string | null;
-  riskLevel: string; status: string; detectedAt: string; source: { name?: string; url?: string; authority?: string; fetchedAt?: string; contentHash?: string } | null; fieldLocked: boolean;
+  riskLevel: string; status: string; detectedAt: string; anomalyCode: string | null; detectionContext: string | null;
+  source: {
+    sourceFactId?: string; snapshotId?: string; name?: string; url?: string; authority?: string; fetchedAt?: string;
+    contentHash?: string; objectKey?: string; parserVersion?: string; rawValue?: string; normalizedValue?: string;
+    extractionContext?: string; factStatus?: string; confidence?: string;
+  } | null; fieldLocked: boolean;
+};
+export type AdminPublication = {
+  id: string; dataChangeId: string; entityType: string; entityId: string; fieldPath: string;
+  beforeValue: string | null; afterValue: string | null; beforeSourceFactId: string | null; sourceFactId: string | null;
+  status: string; publishedAt: string; publishedBy: string; rolledBackAt: string | null; rolledBackBy: string | null; rollbackReason: string | null;
 };
 export type AdminSource = {
   id: string; name: string; url: string; domain: string; authorityLevel: string; contentType: string; active: boolean; priority: number;

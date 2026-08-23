@@ -180,6 +180,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/publications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetAdminPublications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/publications/{id}/rollback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RollbackAdminPublication"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/changes/{id}/approve": {
         parameters: {
             query?: never;
@@ -826,6 +858,30 @@ export interface components {
             /** Format: date-time */
             lockExpiresAt?: string | null;
         };
+        AdminPublicationResponse: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            dataChangeId?: string;
+            entityType?: string | null;
+            /** Format: uuid */
+            entityId?: string;
+            fieldPath?: string | null;
+            beforeValue?: string | null;
+            afterValue?: string | null;
+            /** Format: uuid */
+            beforeSourceFactId?: string | null;
+            /** Format: uuid */
+            sourceFactId?: string | null;
+            status?: string | null;
+            /** Format: date-time */
+            publishedAt?: string;
+            publishedBy?: string | null;
+            /** Format: date-time */
+            rolledBackAt?: string | null;
+            rolledBackBy?: string | null;
+            rollbackReason?: string | null;
+        };
         AdminQualityIssue: {
             code?: string | null;
             severity?: string | null;
@@ -872,8 +928,13 @@ export interface components {
             status?: string | null;
             /** Format: date-time */
             detectedAt?: string;
+            anomalyCode?: string | null;
+            detectionContext?: string | null;
             source?: unknown;
             fieldLocked?: boolean;
+        };
+        AdminRollbackRequest: {
+            reason?: string | null;
         };
         AdminSessionResponse: {
             /** Format: uuid */
@@ -2495,6 +2556,80 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AdminReviewItem"][];
                 };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetAdminPublications: {
+        parameters: {
+            query?: {
+                take?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminPublicationResponse"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RollbackAdminPublication: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminRollbackRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Unauthorized */
             401: {

@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-23
 
-Overall: **IN PROGRESS — V2.4**
+Overall: **IN PROGRESS — V2.5**
 
 ## Governing decisions
 
@@ -36,7 +36,7 @@ No material conflict between the two source documents has been found so far.
 - [x] V2.1 Brave discovery — PASS 2026-08-23
 - [x] V2.2 Domain parsers — PASS 2026-08-23
 - [x] V2.3 Structured extraction — PASS 2026-08-23
-- [ ] V2.4 Change detection, review and rollback
+- [x] V2.4 Change detection, review and rollback — PASS 2026-08-23
 - [ ] V2.5 Automated monitoring
 - [ ] V2.6 Charging and map enrichment
 - [ ] V2.7 Price and offer history UX
@@ -159,3 +159,44 @@ Credential note: no local LLM endpoint/model is configured, so the optional
 fallback was not called. Its HTTP interaction is exercised only through a strict
 schema/grounding contract test; production remains deterministic-only until an
 operator supplies `LOCAL_LLM_BASE_URL` and `LOCAL_LLM_MODEL`.
+
+## V2.4 gate — PASS
+
+Implemented evidence:
+
+- Every structured candidate is diffed against its typed canonical trim value.
+  Deterministic IDs make replay idempotent; unchanged facts do not create review
+  noise.
+- The anomaly policy routes unresolved entities, conflicts, active field locks,
+  price changes, seat changes, and large technical/dimension deltas to review.
+  Only a `VerifiedOfficial` dimension correction at or below 3%, with no lock or
+  conflict and an existing canonical mapping, may auto-publish.
+- Candidate facts remain separate from published values. Publication is mapped
+  explicitly to `Price`, `TrimSpec`, `PowertrainProfile` or `EnergyProfile`; an
+  unsupported or stale mapping fails closed.
+- Admin review presents published before value, normalized candidate and the
+  immutable source snapshot side by side, including raw extraction evidence,
+  parser version, object key, source authority and confidence.
+- Approve, reject and edit-and-publish record actor/reason/timestamp. Publication
+  versions retain before/after values plus both previous and candidate
+  `SourceFact` lineage. Price mutation archives the prior version in
+  `price_history`.
+- Only the latest published version for an entity field can be rolled back.
+  Rollback restores the exact typed value and previous provenance, refreshes the
+  catalog read model/cache, records an audit event and rejects repeat rollback.
+
+Gate commands/evidence:
+
+- Worker suite — 47 passed, including safe auto-publish, initial/high-delta price anomaly,
+  field-lock, conflict and unresolved-entity policies.
+- API suite — 44 passed; web lint, 6 tests and production build pass.
+- EF reports no pending model changes. Migration
+  `20260823034531_AddV24PublicationRollback` passed up → down → up against local
+  PostgreSQL and leaves `publication_versions` plus anomaly context applied.
+- `scripts/verify_v2_4_change_review.py` passes against Docker: it verifies real
+  V2.3 official snapshot evidence is shown, publishes a reviewed typed value,
+  observes canonical/read lineage, restores exact prior value and SourceFact,
+  verifies audit, and confirms repeat rollback returns conflict.
+- A live HTTP 200 Toyota replay reused the immutable 194,178-byte snapshot and
+  extraction artifact, reported one unchanged fact and produced zero duplicate
+  changes/publications. API, web, worker and scheduler containers are healthy.

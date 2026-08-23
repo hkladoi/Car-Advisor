@@ -5,6 +5,7 @@ using VietnamCarPlatform.Domain.Catalog;
 using VietnamCarPlatform.Domain.Admin;
 using VietnamCarPlatform.Domain.Common;
 using VietnamCarPlatform.Domain.Commerce;
+using VietnamCarPlatform.Domain.Sources;
 using VietnamCarPlatform.Infrastructure.Persistence;
 
 namespace VietnamCarPlatform.Api.UnitTests;
@@ -71,6 +72,20 @@ public sealed class DomainSchemaTests
         Assert.Contains(designModel.FindEntityType(typeof(AdminSession))!.GetCheckConstraints(), check => check.Name == "ck_admin_sessions_expiry");
         Assert.Contains(designModel.FindEntityType(typeof(FieldLock))!.GetCheckConstraints(), check => check.Name == "ck_field_locks_reason");
         Assert.Contains(designModel.FindEntityType(typeof(VietnamCarPlatform.Domain.Sources.AuditEvent))!.GetCheckConstraints(), check => check.Name == "ck_audit_events_reason");
+    }
+
+    [Fact]
+    public void ReviewedPublicationHasRollbackGuardAndOneVersionPerChange()
+    {
+        using var db = CreateContext();
+        var designModel = db.GetService<IDesignTimeModel>().Model;
+        var publication = designModel.FindEntityType(typeof(PublicationVersion))!;
+
+        Assert.Contains(publication.GetCheckConstraints(), check => check.Name == "ck_publication_versions_rollback");
+        Assert.Contains(publication.GetIndexes(), index => index.IsUnique
+            && index.Properties.Select(property => property.Name).SequenceEqual([nameof(PublicationVersion.DataChangeId)]));
+        Assert.Contains(publication.GetForeignKeys(), key => key.Properties.Single().Name == nameof(PublicationVersion.BeforeSourceFactId));
+        Assert.Contains(publication.GetForeignKeys(), key => key.Properties.Single().Name == nameof(PublicationVersion.SourceFactId));
     }
 
     private static AppDbContext CreateContext()

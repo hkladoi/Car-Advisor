@@ -164,6 +164,26 @@ public static class AdminEndpoints
             .RequireAdmin(AdministratorRole.Viewer)
             .Produces<IReadOnlyList<AdminReviewItem>>();
 
+        group.MapGet("/publications", async (int? take, IAdminReviewService service, CancellationToken cancellationToken) =>
+                Results.Ok(await service.GetPublicationsAsync(take ?? 100, cancellationToken)))
+            .WithName("GetAdminPublications")
+            .RequireAdmin(AdministratorRole.Viewer)
+            .Produces<IReadOnlyList<AdminPublicationResponse>>();
+
+        group.MapPost("/publications/{id:guid}/rollback", async (
+                Guid id,
+                AdminRollbackRequest request,
+                IAdminReviewService service,
+                HttpContext context,
+                CancellationToken cancellationToken) =>
+            {
+                await service.RollbackAsync(id, request.Reason, context.AdminActor(), context, cancellationToken);
+                return Results.NoContent();
+            })
+            .WithName("RollbackAdminPublication")
+            .RequireAdmin(AdministratorRole.Reviewer)
+            .Produces(StatusCodes.Status204NoContent);
+
         group.MapPost("/changes/{id:guid}/approve", async (
                 Guid id,
                 AdminReviewDecisionRequest request,

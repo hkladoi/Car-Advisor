@@ -39,6 +39,14 @@ public enum ChangeStatus
     Approved,
     Rejected,
     Superseded,
+    Published,
+    RolledBack,
+}
+
+public enum PublicationStatus
+{
+    Published,
+    RolledBack,
 }
 
 public sealed class Source : Entity
@@ -92,8 +100,28 @@ public sealed class DataChange : Entity
     public ChangeRiskLevel RiskLevel { get; set; }
     public ChangeStatus Status { get; set; } = ChangeStatus.Detected;
     public DateTimeOffset DetectedAt { get; set; }
+    public string? AnomalyCode { get; set; }
+    public string? DetectionContext { get; set; }
     public Guid? SourceFactId { get; set; }
     public Guid? ReviewedAuditEventId { get; set; }
+}
+
+public sealed class PublicationVersion : Entity
+{
+    public Guid DataChangeId { get; set; }
+    public string EntityType { get; set; } = string.Empty;
+    public Guid EntityId { get; set; }
+    public string FieldPath { get; set; } = string.Empty;
+    public string? BeforeValue { get; set; }
+    public string? AfterValue { get; set; }
+    public Guid? BeforeSourceFactId { get; set; }
+    public Guid? SourceFactId { get; set; }
+    public PublicationStatus Status { get; set; } = PublicationStatus.Published;
+    public DateTimeOffset PublishedAt { get; set; }
+    public string PublishedBy { get; set; } = string.Empty;
+    public DateTimeOffset? RolledBackAt { get; set; }
+    public string? RolledBackBy { get; set; }
+    public string? RollbackReason { get; set; }
 }
 
 public sealed class AuditEvent : Entity

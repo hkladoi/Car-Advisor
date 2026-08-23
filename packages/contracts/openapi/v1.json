@@ -533,6 +533,85 @@
         }
       }
     },
+    "/api/v1/admin/publications": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminPublications",
+        "parameters": [
+          {
+            "name": "take",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminPublicationResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/publications/{id}/rollback": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "RollbackAdminPublication",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminRollbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
     "/api/v1/admin/changes/{id}/approve": {
       "post": {
         "tags": [
@@ -2648,6 +2727,75 @@
         },
         "additionalProperties": false
       },
+      "AdminPublicationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dataChangeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityType": {
+            "type": "string",
+            "nullable": true
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fieldPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "beforeValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "afterValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "beforeSourceFactId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceFactId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "publishedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "rolledBackAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "rolledBackBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "rollbackReason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "AdminQualityIssue": {
         "type": "object",
         "properties": {
@@ -2782,11 +2930,29 @@
             "type": "string",
             "format": "date-time"
           },
+          "anomalyCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "detectionContext": {
+            "type": "string",
+            "nullable": true
+          },
           "source": {
             "nullable": true
           },
           "fieldLocked": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminRollbackRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

@@ -53,6 +53,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<SourceSnapshot> SourceSnapshots => Set<SourceSnapshot>();
     public DbSet<SourceFact> SourceFacts => Set<SourceFact>();
     public DbSet<DataChange> DataChanges => Set<DataChange>();
+    public DbSet<PublicationVersion> PublicationVersions => Set<PublicationVersion>();
     public DbSet<AuditEvent> AuditEvents => Set<AuditEvent>();
     public DbSet<CoverageMetric> CoverageMetrics => Set<CoverageMetric>();
     public DbSet<CurrentSearchableTrim> CurrentSearchableTrims => Set<CurrentSearchableTrim>();
@@ -85,6 +86,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         configurationBuilder.Properties<SourceContentType>().HaveConversion<string>().HaveMaxLength(24);
         configurationBuilder.Properties<ChangeRiskLevel>().HaveConversion<string>().HaveMaxLength(16);
         configurationBuilder.Properties<ChangeStatus>().HaveConversion<string>().HaveMaxLength(24);
+        configurationBuilder.Properties<PublicationStatus>().HaveConversion<string>().HaveMaxLength(24);
         configurationBuilder.Properties<AdministratorRole>().HaveConversion<string>().HaveMaxLength(24);
         configurationBuilder.Properties<ManualImportStatus>().HaveConversion<string>().HaveMaxLength(24);
     }

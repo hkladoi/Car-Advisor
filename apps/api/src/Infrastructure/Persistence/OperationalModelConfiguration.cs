@@ -71,10 +71,33 @@ internal static class OperationalModelConfiguration
             entity.Property(value => value.FieldPath).HasMaxLength(500);
             entity.Property(value => value.OldValue).HasColumnType("text");
             entity.Property(value => value.NewValue).HasColumnType("text");
+            entity.Property(value => value.AnomalyCode).HasMaxLength(160);
+            entity.Property(value => value.DetectionContext).HasColumnType("jsonb");
             entity.HasOne<SourceFact>().WithMany().HasForeignKey(value => value.SourceFactId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<AuditEvent>().WithMany().HasForeignKey(value => value.ReviewedAuditEventId).OnDelete(DeleteBehavior.Restrict);
             entity.HasIndex(value => new { value.Status, value.RiskLevel, value.DetectedAt });
+            entity.HasIndex(value => value.AnomalyCode);
             entity.HasIndex(value => new { value.EntityType, value.EntityId, value.FieldPath });
+        });
+
+        modelBuilder.Entity<PublicationVersion>(entity =>
+        {
+            entity.ToTable("publication_versions", table => table.HasCheckConstraint(
+                "ck_publication_versions_rollback",
+                "(status = 'Published' AND rolled_back_at IS NULL AND rolled_back_by IS NULL AND rollback_reason IS NULL) OR (status = 'RolledBack' AND rolled_back_at IS NOT NULL AND NULLIF(BTRIM(rolled_back_by), '') IS NOT NULL AND NULLIF(BTRIM(rollback_reason), '') IS NOT NULL)"));
+            entity.Property(value => value.EntityType).HasMaxLength(160);
+            entity.Property(value => value.FieldPath).HasMaxLength(500);
+            entity.Property(value => value.BeforeValue).HasColumnType("text");
+            entity.Property(value => value.AfterValue).HasColumnType("text");
+            entity.Property(value => value.PublishedBy).HasMaxLength(320);
+            entity.Property(value => value.RolledBackBy).HasMaxLength(320);
+            entity.Property(value => value.RollbackReason).HasMaxLength(2000);
+            entity.HasOne<DataChange>().WithMany().HasForeignKey(value => value.DataChangeId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<SourceFact>().WithMany().HasForeignKey(value => value.BeforeSourceFactId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<SourceFact>().WithMany().HasForeignKey(value => value.SourceFactId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(value => value.DataChangeId).IsUnique();
+            entity.HasIndex(value => new { value.EntityType, value.EntityId, value.FieldPath, value.PublishedAt });
+            entity.HasIndex(value => new { value.Status, value.PublishedAt });
         });
 
         modelBuilder.Entity<AuditEvent>(entity =>
