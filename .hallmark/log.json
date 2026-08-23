@@ -1,6 +1,15 @@
 [
   {
     "date": "2026-08-23",
+    "macrostructure": "Account Ledger",
+    "theme": "Cobalt",
+    "enrichment": "privacy controls",
+    "nav": "N13-shared",
+    "footer": "Ft5",
+    "brief": "V3.2 opt-in accounts, saved decisions, watch signals and privacy lifecycle"
+  },
+  {
+    "date": "2026-08-23",
     "macrostructure": "Split Studio",
     "theme": "Cobalt",
     "enrichment": "none",

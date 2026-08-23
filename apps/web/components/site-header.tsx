@@ -21,6 +21,7 @@ export function SiteHeader() {
           <Link href="/financing">Mua/vay</Link>
           <Link href="/compare">So sánh</Link>
           <Link href="/recommend">Gợi ý</Link>
+          <Link href="/account">Tài khoản</Link>
           <Link href="/coverage">Phạm vi dữ liệu</Link>
         </nav>
       </div>

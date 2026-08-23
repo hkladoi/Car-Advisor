@@ -8,6 +8,7 @@ import { RegionSelector } from "@/components/region-selector";
 import { PriceHistoryChart } from "@/components/history-charts";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { SourceDetails } from "@/components/source-details";
+import { WatchlistButton } from "@/features/account/watchlist-button";
 import { formatDate, formatMoney, formatNumber, getCar, type CarDetailResponse } from "@/lib/catalog-api";
 import { getDealerOfferHistory, getVehiclePriceHistory, type DealerOfferHistoryItem } from "@/lib/history-api";
 
@@ -135,7 +136,7 @@ export default async function CarDetailPage({ params }: { params: Promise<{ trim
             <p className="machine-label">{car.brandName.toUpperCase()} · MY{car.modelYear} · {powertrainLabels[car.powertrainType.toUpperCase()] ?? car.powertrainType}</p>
             <h1>{car.modelName} <span>{car.trimName}</span></h1>
             <p>{car.bodyType} · phân khúc {car.segment === "Unknown" ? "chưa rõ" : car.segment} · {marketStatusLabels[car.marketStatus] ?? car.marketStatus}</p>
-            <div className="detail-controls"><RegionSelector /><SourceDetails source={detail.primarySource} /><Link className="detail-compare-link" href={`/compare?trims=${car.trimId}`}><GitCompareArrows aria-hidden="true" size={15} /> So sánh trim</Link></div>
+            <div className="detail-controls"><RegionSelector /><SourceDetails source={detail.primarySource} /><Link className="detail-compare-link" href={`/compare?trims=${car.trimId}`}><GitCompareArrows aria-hidden="true" size={15} /> So sánh trim</Link><WatchlistButton trimId={car.trimId} /></div>
             <dl className="detail-price-summary">
               <div><dt>Giá hiện hành</dt><dd>{formatMoney(car.currentPrice)}</dd></div>
               <div><dt>MSRP</dt><dd>{formatMoney(car.msrp)}</dd></div>

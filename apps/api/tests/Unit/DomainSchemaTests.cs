@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using VietnamCarPlatform.Domain.Catalog;
+using VietnamCarPlatform.Domain.Accounts;
 using VietnamCarPlatform.Domain.Admin;
 using VietnamCarPlatform.Domain.Common;
 using VietnamCarPlatform.Domain.Commerce;
@@ -73,6 +74,25 @@ public sealed class DomainSchemaTests
         Assert.Contains(designModel.FindEntityType(typeof(AdminSession))!.GetCheckConstraints(), check => check.Name == "ck_admin_sessions_expiry");
         Assert.Contains(designModel.FindEntityType(typeof(FieldLock))!.GetCheckConstraints(), check => check.Name == "ck_field_locks_reason");
         Assert.Contains(designModel.FindEntityType(typeof(VietnamCarPlatform.Domain.Sources.AuditEvent))!.GetCheckConstraints(), check => check.Name == "ck_audit_events_reason");
+    }
+
+    [Fact]
+    public void OptInAccountsOwnSessionsComparisonsAndWatchlistWithPrivacyGuards()
+    {
+        using var db = CreateContext();
+        var designModel = db.GetService<IDesignTimeModel>().Model;
+
+        Assert.Contains(designModel.FindEntityType(typeof(UserAccount))!.GetCheckConstraints(),
+            check => check.Name == "ck_user_accounts_consent");
+        Assert.Contains(designModel.FindEntityType(typeof(UserSession))!.GetCheckConstraints(),
+            check => check.Name == "ck_user_sessions_expiry");
+        Assert.Contains(designModel.FindEntityType(typeof(SavedComparison))!.GetCheckConstraints(),
+            check => check.Name == "ck_saved_comparisons_trim_ids");
+        Assert.Contains(designModel.FindEntityType(typeof(WatchlistEntry))!.GetIndexes(),
+            index => index.IsUnique && index.Properties.Select(property => property.Name)
+                .SequenceEqual([nameof(WatchlistEntry.UserAccountId), nameof(WatchlistEntry.TrimId)]));
+        Assert.All(designModel.FindEntityType(typeof(UserSession))!.GetForeignKeys(),
+            key => Assert.Equal(DeleteBehavior.Cascade, key.DeleteBehavior));
     }
 
     [Fact]

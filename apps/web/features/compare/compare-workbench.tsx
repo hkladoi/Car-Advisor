@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type CSSProperties, type FormEvent } from "react";
-import { AlertTriangle, ArrowRight, Check, Copy, ExternalLink, GitCompareArrows, SlidersHorizontal } from "lucide-react";
+import { AlertTriangle, ArrowRight, BookmarkPlus, Check, Copy, ExternalLink, GitCompareArrows, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -66,6 +66,7 @@ export function CompareWorkbench({ cars, regions, selectedTrimIds, profile, fina
   const [differencesOnly, setDifferencesOnly] = useState(initialDifferencesOnly);
   const [selectionError, setSelectionError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [saveState, setSaveState] = useState<"idle" | "pending" | "saved" | "auth" | "error">("idle");
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -108,6 +109,24 @@ export function CompareWorkbench({ cars, regions, selectedTrimIds, profile, fina
     window.setTimeout(() => setCopied(false), 1800);
   }
 
+  async function saveComparison() {
+    setSaveState("pending");
+    const response = await fetch("/api/account/comparisons", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: `So sánh ${result?.vehicles.map(vehicle => vehicle.modelName).join(" · ") ?? calculationDate}`,
+        trimIds: selectedTrimIds,
+        regionCode: provinceCode,
+        profilePreset: profile,
+        financingPreset: financing,
+      }),
+    });
+    if (response.ok) setSaveState("saved");
+    else if (response.status === 401) setSaveState("auth");
+    else setSaveState("error");
+  }
+
   const visibleRows = result?.rows.filter((row) => !differencesOnly || row.different) ?? [];
   const sections = [...new Set(visibleRows.map((row) => row.section))];
 
@@ -128,7 +147,10 @@ export function CompareWorkbench({ cars, regions, selectedTrimIds, profile, fina
           <button className="button-control button-primary" type="submit">Tính lại tất cả xe <ArrowRight aria-hidden="true" size={17} /></button>
           {result && <label className="compare-difference-toggle"><input type="checkbox" checked={differencesOnly} onChange={(event) => toggleDifferences(event.target.checked)} /><span>Chỉ hiện khác biệt</span></label>}
           {result && <button className="button-control button-outline" type="button" onClick={share}>{copied ? <Check aria-hidden="true" size={16} /> : <Copy aria-hidden="true" size={16} />}{copied ? "Đã sao chép" : "Chia sẻ URL"}</button>}
+          {result && <button className="button-control button-outline" type="button" onClick={saveComparison} disabled={saveState === "pending" || saveState === "saved"}>{saveState === "saved" ? <Check aria-hidden="true" size={16} /> : <BookmarkPlus aria-hidden="true" size={16} />}{saveState === "pending" ? "Đang lưu…" : saveState === "saved" ? "Đã lưu" : "Lưu vào tài khoản"}</button>}
         </div>
+        {saveState === "auth" && <p className="compare-selection-error">Đăng nhập tại <Link href="/account">Tài khoản</Link> để lưu bộ so sánh.</p>}
+        {saveState === "error" && <p className="compare-selection-error">Chưa thể lưu bộ so sánh.</p>}
         {selectionError && <p className="compare-selection-error">{selectionError}</p>}
         <p className="compare-preset-note">Preset là giả định công khai, không phải hồ sơ tài chính thật. Thay preset hoặc khu vực sẽ gọi lại toàn bộ engine cho mọi trim.</p>
       </form>

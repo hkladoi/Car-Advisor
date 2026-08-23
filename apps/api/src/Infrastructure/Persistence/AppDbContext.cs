@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using VietnamCarPlatform.Domain.Accounts;
 using VietnamCarPlatform.Domain.Admin;
 using VietnamCarPlatform.Domain.Affordability;
 using VietnamCarPlatform.Domain.Catalog;
@@ -12,6 +13,10 @@ namespace VietnamCarPlatform.Infrastructure.Persistence;
 
 public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    public DbSet<UserAccount> UserAccounts => Set<UserAccount>();
+    public DbSet<UserSession> UserSessions => Set<UserSession>();
+    public DbSet<SavedComparison> SavedComparisons => Set<SavedComparison>();
+    public DbSet<WatchlistEntry> WatchlistEntries => Set<WatchlistEntry>();
     public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
     public DbSet<AdminSession> AdminSessions => Set<AdminSession>();
     public DbSet<FieldLock> FieldLocks => Set<FieldLock>();
@@ -115,6 +120,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         CommerceModelConfiguration.Configure(modelBuilder);
         OperationalModelConfiguration.Configure(modelBuilder);
         AdminModelConfiguration.Configure(modelBuilder);
+        AccountModelConfiguration.Configure(modelBuilder);
 
         modelBuilder.Entity<CurrentSearchableTrim>(entity =>
         {

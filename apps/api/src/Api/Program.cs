@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using VietnamCarPlatform.Api.Features.Accounts;
 using VietnamCarPlatform.Api.Features.Affordability;
 using VietnamCarPlatform.Api.Features.Admin;
 using VietnamCarPlatform.Api.Features.Catalog;
@@ -60,6 +61,8 @@ builder.Services.AddScoped<ICompareService, CompareService>();
 builder.Services.AddScoped<IChargingService, ChargingService>();
 builder.Services.AddScoped<IHistoryService, HistoryService>();
 builder.Services.AddScoped<IRecommendationService, RecommendationService>();
+builder.Services.AddScoped<IAccountAuthService, AccountAuthService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 var goongOptions = new GoongOptions
 {
     ApiKey = builder.Configuration["GOONG_API_KEY"] ?? string.Empty,
@@ -86,6 +89,13 @@ builder.Services.AddRateLimiter(options =>
     options.AddFixedWindowLimiter("admin-login", limiter =>
     {
         limiter.PermitLimit = 5;
+        limiter.Window = TimeSpan.FromMinutes(1);
+        limiter.QueueLimit = 0;
+        limiter.AutoReplenishment = true;
+    });
+    options.AddFixedWindowLimiter("account-auth", limiter =>
+    {
+        limiter.PermitLimit = 10;
         limiter.Window = TimeSpan.FromMinutes(1);
         limiter.QueueLimit = 0;
         limiter.AutoReplenishment = true;
@@ -168,14 +178,15 @@ app.UseExceptionHandler(exceptionApp =>
         var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
         var traceId = context.TraceIdentifier;
         var adminError = exception as AdminOperationException;
-        context.Response.StatusCode = adminError?.StatusCode ?? StatusCodes.Status500InternalServerError;
+        var accountError = exception as AccountOperationException;
+        context.Response.StatusCode = adminError?.StatusCode ?? accountError?.StatusCode ?? StatusCodes.Status500InternalServerError;
         context.Response.ContentType = "application/json";
         await context.Response.WriteAsJsonAsync(new ApiError(
-            adminError?.Code ?? "UNEXPECTED_ERROR",
-            adminError?.Message ?? "The API could not complete the request.",
+            adminError?.Code ?? accountError?.Code ?? "UNEXPECTED_ERROR",
+            adminError?.Message ?? accountError?.Message ?? "The API could not complete the request.",
             [],
             traceId));
-        if (adminError is null)
+        if (adminError is null && accountError is null)
         {
             ApiLog.UnhandledRequestFailure(app.Logger, traceId, exception);
         }
@@ -207,6 +218,7 @@ app.MapChargingEndpoints();
 app.MapHistoryEndpoints();
 app.MapCoverageEndpoints();
 app.MapRecommendationEndpoints();
+app.MapAccountEndpoints();
 app.MapAdminEndpoints();
 
 app.MapHealthChecks("/health/live", new HealthCheckOptions

@@ -5,6 +5,433 @@
     "version": "v1"
   },
   "paths": {
+    "/api/v1/accounts/register": {
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "RegisterAccount",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountRegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountAuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/login": {
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "LoginAccount",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountAuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/me": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "GetAccountSession",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "DeleteAccount",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountDeleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/logout": {
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "LogoutAccount",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/profile": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "GetAccountProfile",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountProfileResponse"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "SaveAccountProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/comparisons": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "GetSavedComparisons",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SavedComparisonResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "SaveComparison",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavedComparisonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedComparisonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/comparisons/{id}": {
+      "delete": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "DeleteSavedComparison",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/watchlist": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "GetWatchlist",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WatchlistResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "SaveWatchlist",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchlistRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchlistResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/watchlist/{trimId}": {
+      "delete": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "DeleteWatchlist",
+        "parameters": [
+          {
+            "name": "trimId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/alerts": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "GetAccountAlerts",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccountAlertResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/export": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "ExportAccountData",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountDataExportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/auth/login": {
       "post": {
         "tags": [
@@ -2556,6 +2983,335 @@
   },
   "components": {
     "schemas": {
+      "AccountAlertResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "kind": {
+            "type": "string",
+            "nullable": true
+          },
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vehicle": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/AccountAlertSource"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AccountAlertSource": {
+        "type": "object",
+        "properties": {
+          "sourceFactId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "authority": {
+            "type": "string",
+            "nullable": true
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AccountAuthResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AccountDataExportResponse": {
+        "type": "object",
+        "properties": {
+          "exportedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "account": {
+            "$ref": "#/components/schemas/AccountSessionResponse"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/AccountProfileResponse"
+          },
+          "savedComparisons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SavedComparisonResponse"
+            },
+            "nullable": true
+          },
+          "watchlist": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WatchlistResponse"
+            },
+            "nullable": true
+          },
+          "currentAlerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountAlertResponse"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AccountDeleteRequest": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "nullable": true
+          },
+          "confirmation": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AccountLoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AccountProfileRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "regionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "netMonthlyIncome": {
+            "type": "number",
+            "format": "double"
+          },
+          "rentHousing": {
+            "type": "number",
+            "format": "double"
+          },
+          "essentialExpenses": {
+            "type": "number",
+            "format": "double"
+          },
+          "otherFixedDebt": {
+            "type": "number",
+            "format": "double"
+          },
+          "savingsTarget": {
+            "type": "number",
+            "format": "double"
+          },
+          "monthlyKilometres": {
+            "type": "number",
+            "format": "double"
+          },
+          "parkingMonthly": {
+            "type": "number",
+            "format": "double"
+          },
+          "householdBaseKwh": {
+            "type": "number",
+            "format": "double"
+          },
+          "policy": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AccountProfileResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "regionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "netMonthlyIncome": {
+            "type": "number",
+            "format": "double"
+          },
+          "rentHousing": {
+            "type": "number",
+            "format": "double"
+          },
+          "essentialExpenses": {
+            "type": "number",
+            "format": "double"
+          },
+          "otherFixedDebt": {
+            "type": "number",
+            "format": "double"
+          },
+          "savingsTarget": {
+            "type": "number",
+            "format": "double"
+          },
+          "monthlyKilometres": {
+            "type": "number",
+            "format": "double"
+          },
+          "parkingMonthly": {
+            "type": "number",
+            "format": "double"
+          },
+          "householdBaseKwh": {
+            "type": "number",
+            "format": "double"
+          },
+          "policy": {
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AccountRegisterRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "privacyConsent": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AccountSessionResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "consentedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "privacyPolicyVersion": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "AdminAuditResponse": {
         "type": "object",
         "properties": {
@@ -8058,6 +8814,78 @@
         },
         "additionalProperties": false
       },
+      "SavedComparisonRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "trimIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "regionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "profilePreset": {
+            "type": "string",
+            "nullable": true
+          },
+          "financingPreset": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SavedComparisonResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "trimIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "regionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "profilePreset": {
+            "type": "string",
+            "nullable": true
+          },
+          "financingPreset": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
       "SourceBadge": {
         "type": "object",
         "properties": {
@@ -8286,6 +9114,87 @@
           },
           "source": {
             "$ref": "#/components/schemas/SourceBadge"
+          }
+        },
+        "additionalProperties": false
+      },
+      "WatchlistRequest": {
+        "type": "object",
+        "properties": {
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "regionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "priceAlerts": {
+            "type": "boolean"
+          },
+          "promotionAlerts": {
+            "type": "boolean"
+          },
+          "dealerOfferAlerts": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "WatchlistResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brandName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "trimName": {
+            "type": "string",
+            "nullable": true
+          },
+          "regionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "targetPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "priceAlerts": {
+            "type": "boolean"
+          },
+          "promotionAlerts": {
+            "type": "boolean"
+          },
+          "dealerOfferAlerts": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false

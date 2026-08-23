@@ -4,6 +4,182 @@
  */
 
 export interface paths {
+    "/api/v1/accounts/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RegisterAccount"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/accounts/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["LoginAccount"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/accounts/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetAccountSession"];
+        put?: never;
+        post?: never;
+        delete: operations["DeleteAccount"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/accounts/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["LogoutAccount"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/accounts/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetAccountProfile"];
+        put: operations["SaveAccountProfile"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/accounts/comparisons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetSavedComparisons"];
+        put?: never;
+        post: operations["SaveComparison"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/accounts/comparisons/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["DeleteSavedComparison"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/accounts/watchlist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetWatchlist"];
+        put: operations["SaveWatchlist"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/accounts/watchlist/{trimId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["DeleteWatchlist"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/accounts/alerts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetAccountAlerts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/accounts/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ExportAccountData"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/auth/login": {
         parameters: {
             query?: never;
@@ -792,6 +968,121 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AccountAlertResponse: {
+            id?: string | null;
+            kind?: string | null;
+            /** Format: uuid */
+            trimId?: string;
+            vehicle?: string | null;
+            title?: string | null;
+            message?: string | null;
+            /** Format: double */
+            amount?: number | null;
+            currency?: string | null;
+            /** Format: date-time */
+            effectiveFrom?: string;
+            /** Format: date-time */
+            effectiveTo?: string | null;
+            source?: components["schemas"]["AccountAlertSource"];
+        };
+        AccountAlertSource: {
+            /** Format: uuid */
+            sourceFactId?: string | null;
+            name?: string | null;
+            url?: string | null;
+            authority?: string | null;
+            /** Format: date-time */
+            verifiedAt?: string | null;
+        };
+        AccountAuthResponse: {
+            token?: string | null;
+            /** Format: date-time */
+            expiresAt?: string;
+            /** Format: uuid */
+            userId?: string;
+            email?: string | null;
+            displayName?: string | null;
+        };
+        AccountDataExportResponse: {
+            /** Format: date-time */
+            exportedAt?: string;
+            account?: components["schemas"]["AccountSessionResponse"];
+            profile?: components["schemas"]["AccountProfileResponse"];
+            savedComparisons?: components["schemas"]["SavedComparisonResponse"][] | null;
+            watchlist?: components["schemas"]["WatchlistResponse"][] | null;
+            currentAlerts?: components["schemas"]["AccountAlertResponse"][] | null;
+        };
+        AccountDeleteRequest: {
+            password?: string | null;
+            confirmation?: string | null;
+        };
+        AccountLoginRequest: {
+            email?: string | null;
+            password?: string | null;
+        };
+        AccountProfileRequest: {
+            name?: string | null;
+            regionCode?: string | null;
+            /** Format: double */
+            netMonthlyIncome?: number;
+            /** Format: double */
+            rentHousing?: number;
+            /** Format: double */
+            essentialExpenses?: number;
+            /** Format: double */
+            otherFixedDebt?: number;
+            /** Format: double */
+            savingsTarget?: number;
+            /** Format: double */
+            monthlyKilometres?: number;
+            /** Format: double */
+            parkingMonthly?: number;
+            /** Format: double */
+            householdBaseKwh?: number;
+            policy?: string | null;
+        };
+        AccountProfileResponse: {
+            /** Format: uuid */
+            id?: string;
+            name?: string | null;
+            regionCode?: string | null;
+            /** Format: double */
+            netMonthlyIncome?: number;
+            /** Format: double */
+            rentHousing?: number;
+            /** Format: double */
+            essentialExpenses?: number;
+            /** Format: double */
+            otherFixedDebt?: number;
+            /** Format: double */
+            savingsTarget?: number;
+            /** Format: double */
+            monthlyKilometres?: number;
+            /** Format: double */
+            parkingMonthly?: number;
+            /** Format: double */
+            householdBaseKwh?: number;
+            policy?: string | null;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        AccountRegisterRequest: {
+            email?: string | null;
+            password?: string | null;
+            displayName?: string | null;
+            privacyConsent?: boolean;
+        };
+        AccountSessionResponse: {
+            /** Format: uuid */
+            userId?: string;
+            email?: string | null;
+            displayName?: string | null;
+            /** Format: date-time */
+            expiresAt?: string;
+            /** Format: date-time */
+            consentedAt?: string;
+            privacyPolicyVersion?: string | null;
+        };
         AdminAuditResponse: {
             /** Format: uuid */
             id?: string;
@@ -2626,6 +2917,26 @@ export interface components {
             factStatus?: string | null;
             confidence?: string | null;
         };
+        SavedComparisonRequest: {
+            name?: string | null;
+            trimIds?: string[] | null;
+            regionCode?: string | null;
+            profilePreset?: string | null;
+            financingPreset?: string | null;
+        };
+        SavedComparisonResponse: {
+            /** Format: uuid */
+            id?: string;
+            name?: string | null;
+            trimIds?: string[] | null;
+            regionCode?: string | null;
+            profilePreset?: string | null;
+            financingPreset?: string | null;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
         SourceBadge: {
             /** Format: uuid */
             sourceId?: string;
@@ -2702,6 +3013,35 @@ export interface components {
             conditions?: string | null;
             source?: components["schemas"]["SourceBadge"];
         };
+        WatchlistRequest: {
+            /** Format: uuid */
+            trimId?: string;
+            regionCode?: string | null;
+            /** Format: double */
+            targetPrice?: number | null;
+            priceAlerts?: boolean;
+            promotionAlerts?: boolean;
+            dealerOfferAlerts?: boolean;
+        };
+        WatchlistResponse: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            trimId?: string;
+            brandName?: string | null;
+            modelName?: string | null;
+            trimName?: string | null;
+            regionCode?: string | null;
+            /** Format: double */
+            currentPrice?: number | null;
+            /** Format: double */
+            targetPrice?: number | null;
+            priceAlerts?: boolean;
+            promotionAlerts?: boolean;
+            dealerOfferAlerts?: boolean;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -2711,6 +3051,451 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    RegisterAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AccountRegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountAuthResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    LoginAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AccountLoginRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountAuthResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    GetAccountSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountSessionResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AccountDeleteRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LogoutAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetAccountProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountProfileResponse"];
+                };
+            };
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SaveAccountProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AccountProfileRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountProfileResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetSavedComparisons: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedComparisonResponse"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SaveComparison: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SavedComparisonRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedComparisonResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteSavedComparison: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetWatchlist: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WatchlistResponse"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SaveWatchlist: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WatchlistRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WatchlistResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteWatchlist: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                trimId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetAccountAlerts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountAlertResponse"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ExportAccountData: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountDataExportResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     AdminLogin: {
         parameters: {
             query?: never;

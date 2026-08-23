@@ -217,6 +217,10 @@ h3 { font-size: var(--text-lg); font-weight: 600; }
 .text-link:active,
 .site-nav__links a:active { color: var(--color-accent-hover); }
 
+.watchlist-action { display: inline-flex; align-items: center; gap: .5rem; }
+.watchlist-action button { cursor: pointer; }
+.watchlist-action a, .watchlist-action span { color: var(--color-muted); font-size: var(--text-xs); font-weight: 600; }
+
 .workbench {
   align-self: center;
   min-width: 0;
@@ -427,6 +431,13 @@ h3 { font-size: var(--text-lg); font-weight: 600; }
   .calculation-band { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); align-items: start; }
   .calculation-band__copy { position: sticky; inset-block-start: 7rem; }
   .next-step { grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr) auto; align-items: end; }
+}
+
+@media (min-width: 60rem) and (max-width: 83.99rem) {
+  .site-nav__inner { grid-template-columns: auto auto minmax(0, 1fr); }
+  .wordmark > strong, .search-pill__label, .search-pill__keys { display: none; }
+  .search-pill { justify-content: center; width: 2.75rem; padding-inline: 0; }
+  .site-nav__links { gap: clamp(.45rem, 1vw, .8rem); font-size: .78rem; }
 }
 
 @media (pointer: coarse) {

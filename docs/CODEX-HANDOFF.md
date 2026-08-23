@@ -26,7 +26,10 @@ Decisions and gate evidence belong in `docs/status/`.
 - V3.1 explainable recommendation is complete and its gate passed. The current
   reviewed catalog is intentionally too sparse to publish a ranked result, so
   `/recommend` exposes a data-withheld ledger instead of fabricated scores.
-  V3.2 accounts/privacy is next. See `docs/status/v3-status.md`.
+- V3.2 opt-in accounts/privacy is complete. Anonymous behavior remains the
+  default; account owners can save profile/comparisons/watchlist, inspect
+  current alert signals, export all private data and permanently delete it.
+  V3.3 trusted real-world data is next. See `docs/status/v3-status.md`.
 
 ## Architecture
 
