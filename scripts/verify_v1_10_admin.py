@@ -165,6 +165,47 @@ def main() -> None:
     require(status, 409, stage_error)
     assert isinstance(stage_error, dict) and stage_error["code"] == "ADMIN_IMPORT_NOT_VALIDATED"
 
+    # Stage one valid, review-only candidate so this gate does not depend on a live
+    # source changing while CI happens to be running. The candidate is rejected
+    # below and therefore never reaches the public catalog.
+    review_slug = f"v110-review-{uuid.uuid4().hex[:10]}"
+    review_record = {
+        "brand_name": "V1.10 review gate",
+        "brand_slug": "v110-review-gate",
+        "model_name": "Review candidate",
+        "model_slug": "review-candidate",
+        "generation_code": "gate-1",
+        "model_year": 2026,
+        "trim_name": "V1.10 review-only candidate",
+        "trim_slug": review_slug,
+        "source_url": source["url"],
+        "body_type": "Suv",
+        "segment": "B",
+        "market_status": "Upcoming",
+        "powertrain": "Bev",
+        "price_type": "Unannounced",
+    }
+    status, review_import, _ = call(
+        "/api/v1/admin/imports/validate",
+        method="POST",
+        body={
+            "fileName": "v1.10-review-only-gate.json",
+            "content": json.dumps([review_record], ensure_ascii=False),
+            "reason": "V1.10 gate creates one valid review-only candidate to exercise the queue deterministically.",
+        },
+        token=token,
+    )
+    require(status, 200, review_import)
+    assert isinstance(review_import, dict) and review_import["status"] == "Validated"
+    status, staged_import, _ = call(
+        f"/api/v1/admin/imports/{review_import['id']}/stage",
+        method="POST",
+        body={"reason": "V1.10 gate stages the isolated candidate for an explicit reviewer decision."},
+        token=token,
+    )
+    require(status, 200, staged_import)
+    assert isinstance(staged_import, dict) and staged_import["status"] == "StagedForReview"
+
     # Positive CRUD is confined to an unsourced draft under an existing hierarchy and removed in finally.
     draft_id: str | None = None
     draft_slug = f"v110-gate-{uuid.uuid4().hex[:10]}"
@@ -258,9 +299,28 @@ def main() -> None:
     status, queue, _ = call("/api/v1/admin/review-queue", token=token)
     require(status, 200, queue)
     assert isinstance(queue, list) and queue
+    staged_change = next(
+        item for item in queue
+        if item["fieldPath"] == f"manual-import:{review_import['id']}"
+    )
+    assert staged_change["entityType"] == "ManualVehicleImport"
     source_changes = [item for item in queue if item["entityType"].lower() == "source"]
-    assert source_changes and all(item["source"] and item["source"]["url"].startswith("https://") for item in source_changes)
-    assert any(item["source"].get("contentHash") and item["source"].get("parserVersion") for item in source_changes)
+    assert all(item["source"] and item["source"]["url"].startswith("https://") for item in source_changes)
+    assert all(item["source"].get("contentHash") and item["source"].get("parserVersion") for item in source_changes)
+    status, rejected, _ = call(
+        f"/api/v1/admin/changes/{staged_change['id']}/reject",
+        method="POST",
+        body={
+            "reason": "V1.10 gate rejects its isolated candidate so no test record can be published.",
+            "editedValue": None,
+        },
+        token=token,
+    )
+    require(status, 204, rejected)
+    status, queue_after_rejection, _ = call("/api/v1/admin/review-queue", token=token)
+    require(status, 200, queue_after_rejection)
+    assert isinstance(queue_after_rejection, list)
+    assert all(item["id"] != staged_change["id"] for item in queue_after_rejection)
 
     # Dealer/branch/offer CRUD stays in Draft/PendingReview and is removed; no test offer reaches public data.
     dealer_id: str | None = None
@@ -339,7 +399,8 @@ def main() -> None:
     assert isinstance(audit, list)
     actions = {event["action"] for event in audit}
     assert {
-        "SourceUpdated", "ManualImportValidated", "CatalogTrimCreated", "CatalogTrimUpdated",
+        "SourceUpdated", "ManualImportValidated", "ManualImportStaged", "DataChangeRejected",
+        "CatalogTrimCreated", "CatalogTrimUpdated",
         "CatalogTrimDeleted", "ManualOverrideWithFieldLock", "ManualOverride", "FieldUnlocked",
         "DealerCreated", "DealerDeleted", "DealerBranchCreated", "DealerBranchDeleted",
         "DealerOfferCreated", "DealerOfferUpdated", "DealerOfferDeleted",
