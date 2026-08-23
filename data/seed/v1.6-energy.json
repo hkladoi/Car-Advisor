@@ -1,0 +1,239 @@
+{
+  "schema_version": "v1.6",
+  "observed_at": "2026-08-22T12:00:00+07:00",
+  "reviewed_by": "v1.6-energy-review@vietnam-car-platform.local",
+  "review_reason": "Reviewed V1.6 energy prices, household tiers, public charging tariff, promotion eligibility, and official vehicle consumption disclosures against the design and implementation plan.",
+  "energy_prices": [
+    {
+      "key": "fuel-e5ron92-2026-08-20",
+      "energy_type": "Ron92E5",
+      "provider": "Bộ Công Thương",
+      "region_code": "VN",
+      "amount": 21833,
+      "unit": "VND/litre",
+      "tax_rate": 0,
+      "tax_included": true,
+      "effective_from": "2026-08-20T15:00:00+07:00",
+      "source_id": "moit-fuel-2026-08-20",
+      "citation": "Giá điều hành E5RON92-II hiệu lực từ 15:00 ngày 20/08/2026: 21.833 đồng/lít."
+    },
+    {
+      "key": "fuel-e10ron95iii-2026-08-20",
+      "energy_type": "E10Ron95III",
+      "provider": "Bộ Công Thương",
+      "region_code": "VN",
+      "amount": 22668,
+      "unit": "VND/litre",
+      "tax_rate": 0,
+      "tax_included": true,
+      "effective_from": "2026-08-20T15:00:00+07:00",
+      "source_id": "moit-fuel-2026-08-20",
+      "citation": "Giá điều hành E10RON95-III hiệu lực từ 15:00 ngày 20/08/2026: 22.668 đồng/lít."
+    },
+    {
+      "key": "fuel-diesel-2026-08-20",
+      "energy_type": "Diesel",
+      "provider": "Bộ Công Thương",
+      "region_code": "VN",
+      "amount": 28543,
+      "unit": "VND/litre",
+      "tax_rate": 0,
+      "tax_included": true,
+      "effective_from": "2026-08-20T15:00:00+07:00",
+      "source_id": "moit-fuel-2026-08-20",
+      "citation": "Giá điều hành dầu diesel 0,05S hiệu lực từ 15:00 ngày 20/08/2026: 28.543 đồng/lít."
+    },
+    {
+      "key": "evn-household-tier-1-2025-05-10",
+      "energy_type": "Electricity",
+      "provider": "EVN household retail",
+      "amount": 1984,
+      "unit": "VND/kWh",
+      "tier_from_inclusive": 0,
+      "tier_to_inclusive": 50,
+      "tax_rate": 0.10,
+      "tax_included": false,
+      "effective_from": "2025-05-10T00:00:00+07:00",
+      "source_id": "evn-household-tariff-2025",
+      "citation": "Giá bán lẻ điện sinh hoạt bậc 1 từ 0 đến 50 kWh là 1.984 đồng/kWh, chưa VAT."
+    },
+    {
+      "key": "evn-household-tier-2-2025-05-10",
+      "energy_type": "Electricity",
+      "provider": "EVN household retail",
+      "amount": 2050,
+      "unit": "VND/kWh",
+      "tier_from_inclusive": 50,
+      "tier_to_inclusive": 100,
+      "tax_rate": 0.10,
+      "tax_included": false,
+      "effective_from": "2025-05-10T00:00:00+07:00",
+      "source_id": "evn-household-tariff-2025",
+      "citation": "Giá bán lẻ điện sinh hoạt bậc 2 từ 51 đến 100 kWh là 2.050 đồng/kWh, chưa VAT."
+    },
+    {
+      "key": "evn-household-tier-3-2025-05-10",
+      "energy_type": "Electricity",
+      "provider": "EVN household retail",
+      "amount": 2380,
+      "unit": "VND/kWh",
+      "tier_from_inclusive": 100,
+      "tier_to_inclusive": 200,
+      "tax_rate": 0.10,
+      "tax_included": false,
+      "effective_from": "2025-05-10T00:00:00+07:00",
+      "source_id": "evn-household-tariff-2025",
+      "citation": "Giá bán lẻ điện sinh hoạt bậc 3 từ 101 đến 200 kWh là 2.380 đồng/kWh, chưa VAT."
+    },
+    {
+      "key": "evn-household-tier-4-2025-05-10",
+      "energy_type": "Electricity",
+      "provider": "EVN household retail",
+      "amount": 2998,
+      "unit": "VND/kWh",
+      "tier_from_inclusive": 200,
+      "tier_to_inclusive": 300,
+      "tax_rate": 0.10,
+      "tax_included": false,
+      "effective_from": "2025-05-10T00:00:00+07:00",
+      "source_id": "evn-household-tariff-2025",
+      "citation": "Giá bán lẻ điện sinh hoạt bậc 4 từ 201 đến 300 kWh là 2.998 đồng/kWh, chưa VAT."
+    },
+    {
+      "key": "evn-household-tier-5-2025-05-10",
+      "energy_type": "Electricity",
+      "provider": "EVN household retail",
+      "amount": 3350,
+      "unit": "VND/kWh",
+      "tier_from_inclusive": 300,
+      "tier_to_inclusive": 400,
+      "tax_rate": 0.10,
+      "tax_included": false,
+      "effective_from": "2025-05-10T00:00:00+07:00",
+      "source_id": "evn-household-tariff-2025",
+      "citation": "Giá bán lẻ điện sinh hoạt bậc 5 từ 301 đến 400 kWh là 3.350 đồng/kWh, chưa VAT."
+    },
+    {
+      "key": "evn-household-tier-6-2025-05-10",
+      "energy_type": "Electricity",
+      "provider": "EVN household retail",
+      "amount": 3460,
+      "unit": "VND/kWh",
+      "tier_from_inclusive": 400,
+      "tier_to_inclusive": null,
+      "tax_rate": 0.10,
+      "tax_included": false,
+      "effective_from": "2025-05-10T00:00:00+07:00",
+      "source_id": "evn-household-tariff-2025",
+      "citation": "Giá bán lẻ điện sinh hoạt bậc 6 từ 401 kWh trở lên là 3.460 đồng/kWh, chưa VAT."
+    }
+  ],
+  "charging_providers": [
+    {
+      "key": "vgreen-public",
+      "name": "V-Green",
+      "slug": "v-green",
+      "network_type": "BrandOwned",
+      "official_url": "https://vgreen.net/",
+      "source_id": "vgreen-car-charging-policy",
+      "citation": "V-Green công bố chính sách giá sạc ô tô điện tại hệ thống trạm sạc công cộng."
+    }
+  ],
+  "charging_tariffs": [
+    {
+      "key": "vgreen-public-car-2024-03-19",
+      "provider_key": "vgreen-public",
+      "amount_per_kwh": 3858,
+      "amount_per_session": 0,
+      "overstay_rules": {
+        "graceMinutes": 10,
+        "tiers": [
+          {"fromMinute": 11, "toMinute": 60, "amountPerMinute": 1000},
+          {"fromMinute": 61, "toMinute": 120, "amountPerMinute": 2000},
+          {"fromMinute": 121, "toMinute": null, "amountPerMinute": 4000}
+        ],
+        "excludedConnectorTypes": ["AC11"]
+      },
+      "overstay_cap_per_session": 1000000,
+      "tax_included": true,
+      "currency": "VND",
+      "region_scope": "VN",
+      "effective_from": "2024-03-19T00:00:00+07:00",
+      "source_id": "vgreen-car-charging-policy",
+      "citation": "Đơn giá sạc 3.858 đồng/kWh đã gồm VAT; phí sau sạc bậc 1.000/2.000/4.000 đồng mỗi phút, tối đa 1.000.000 đồng/lần."
+    }
+  ],
+  "charging_promotions": [
+    {
+      "key": "vinfast-personal-free-vgreen-2026-2029",
+      "provider_key": "vgreen-public",
+      "brand_slug": "vinfast",
+      "benefit": "Free",
+      "eligibility": {
+        "customerTypes": ["Personal"],
+        "purchaseDateRequired": true,
+        "purchasedOnOrAfter": "2026-02-10",
+        "vehicleScope": "VinFast personal passenger cars",
+        "conditionsApply": true,
+        "requiresEligibilityConfirmation": true
+      },
+      "caps": {
+        "maxSessionsPerCarPerMonth": 10,
+        "period": "calendar-month"
+      },
+      "effective_from": "2026-02-10T00:00:00+07:00",
+      "effective_to": "2029-02-11T00:00:00+07:00",
+      "source_id": "vinfast-free-charging-2026",
+      "citation": "Khách hàng cá nhân mua xe từ 10/02/2026 được miễn phí tối đa 10 phiên sạc/xe/tháng đến hết ngày 10/02/2029, theo điều kiện chương trình."
+    }
+  ],
+  "vehicle_profiles": [
+    {
+      "key": "toyota-yaris-cross-2026-yaris-cross-energy",
+      "brand_slug": "toyota",
+      "model_slug": "yaris-cross",
+      "model_year": 2026,
+      "trim_slug": "yaris-cross",
+      "official_fuel_litres_per_100_km": 5.95,
+      "fuel_consumption_condition": "Combined manufacturer disclosure",
+      "test_cycle": "Manufacturer disclosure",
+      "consumption_notes": "Official combined figure for the petrol version; urban 7.41 and extra-urban 5.10 L/100km are retained in the source snapshot but not substituted for combined use.",
+      "source_id": "toyota-yaris-cross-energy",
+      "citation": "Toyota Việt Nam công bố Yaris Cross bản xăng tiêu thụ kết hợp 5,95 lít/100 km."
+    },
+    {
+      "key": "vinfast-vf6-2026-eco-energy",
+      "brand_slug": "vinfast",
+      "model_slug": "vf-6",
+      "model_year": 2026,
+      "trim_slug": "eco",
+      "official_electric_kwh_per_100_km": 13.012,
+      "electric_consumption_condition": "Pure electric; Vietnam type N5DG03",
+      "test_cycle": "Vietnam energy label",
+      "consumption_notes": "Vietnam Register discloses 130.12 Wh/km for the VF 6S type N5DG03; the V1.6 mapping to the current catalog VF 6 Eco naming is explicit and reviewable.",
+      "source_id": "vr-vf6-energy-label",
+      "citation": "Cục Đăng kiểm Việt Nam công bố VINFAST VF 6S mã N5DG03 tiêu thụ điện năng 130,12 Wh/km."
+    },
+    {
+      "key": "byd-sealion6-2025-dynamic-energy",
+      "brand_slug": "byd",
+      "model_slug": "sealion-6",
+      "model_year": 2025,
+      "trim_slug": "dynamic",
+      "recommended_fuel": "E10Ron95III",
+      "official_fuel_litres_per_100_km": 4.72,
+      "official_electric_kwh_per_100_km": 16.9,
+      "fuel_consumption_condition": "Charge-sustaining SOC below 25%",
+      "electric_consumption_condition": "Charge-depleting electric energy ADR 81/02",
+      "usable_battery_kwh": 18.3,
+      "official_range_km": 92,
+      "test_cycle": "ADR 81/02",
+      "ac_max_kw": 6.6,
+      "dc_max_kw": 18,
+      "port_type": "Type 2 / CCS2",
+      "consumption_notes": "PHEV split calculation uses 4.72 L/100km only for fuel-mode distance and 16.9 kWh/100km only for EV distance. The 1.1 L/100km full-battery weighted figure is intentionally not used or mixed with charge-sustaining fuel consumption.",
+      "source_id": "byd-sealion6-charge-sustaining",
+      "citation": "BYD manufacturer specification discloses 4,72 L/100km at SOC below 25%, 169 Wh/km, 18,3 kWh battery and 92 km electric range for the standard-range FWD version."
+    }
+  ]
+}

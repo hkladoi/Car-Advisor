@@ -1,0 +1,216 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Scan repository for secrets
+        run: >-
+          docker run --rm --volume "$PWD:/repo:ro"
+          ghcr.io/gitleaks/gitleaks:v8.29.0
+          dir /repo --config /repo/.gitleaks.toml --max-target-megabytes 10 --no-banner --redact
+      - name: Scan dependency and filesystem vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: 1
+
+  container-security:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: api
+            dockerfile: apps/api/src/Api/Dockerfile
+          - name: web
+            dockerfile: apps/web/Dockerfile
+          - name: ingestion
+            dockerfile: workers/ingestion/Dockerfile
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build ${{ matrix.name }} image for scanning
+        run: docker build --tag vcp-${{ matrix.name }}:ci --file ${{ matrix.dockerfile }} .
+      - name: Scan ${{ matrix.name }} container vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: vcp-${{ matrix.name }}:ci
+          scanners: vuln,misconfig
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: 1
+
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.422
+      - run: dotnet restore VietnamCarPlatform.sln
+      - run: dotnet build VietnamCarPlatform.sln --configuration Release --no-restore
+      - run: dotnet test VietnamCarPlatform.sln --configuration Release --no-build --logger trx
+      - run: dotnet tool restore
+      - run: >-
+          dotnet ef migrations has-pending-model-changes
+          --project apps/api/src/Infrastructure/VietnamCarPlatform.Infrastructure.csproj
+          --startup-project apps/api/src/Api/VietnamCarPlatform.Api.csproj
+          --configuration Release
+          --no-build
+      - run: sh ./scripts/export-openapi.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openapi
+          path: packages/contracts/openapi/v1.json
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint:web
+      - run: npm run test:web
+      - run: npm run build:web
+
+  worker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: workers/ingestion/requirements.txt
+      - run: pip install -r workers/ingestion/requirements.txt
+      - run: pytest workers/ingestion/tests
+
+  integration:
+    needs: [security, container-security, api, web, worker]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.422
+      - run: docker compose config --quiet
+      - run: docker compose up --build --detach --wait
+      - run: dotnet tool restore
+      - run: dotnet restore VietnamCarPlatform.sln
+      - run: dotnet build VietnamCarPlatform.sln --configuration Release --no-restore
+      - name: Apply database migrations
+        env:
+          DATABASE_URL: Host=localhost;Port=5432;Database=vietnam_car_platform;Username=vcp;Password=vcp-local-dev
+        run: >-
+          dotnet ef database update
+          --project apps/api/src/Infrastructure/VietnamCarPlatform.Infrastructure.csproj
+          --startup-project apps/api/src/Api/VietnamCarPlatform.Api.csproj
+          --configuration Release
+          --no-build
+      - name: Verify schema constraints
+        run: docker compose exec -T postgres psql -U vcp -d vietnam_car_platform < scripts/verify-v1.1-schema.sql
+      - name: Validate V1.2 official seed contract
+        run: >-
+          docker compose run --rm --no-deps ingestion-worker
+          python -m ingestion.cli validate-seed
+          --registry /app/data/source-registry.v1.json
+          --seed /app/data/seed/v1.2-initial-vehicles.json
+      - name: Fetch immutable official source snapshots
+        run: |
+          mkdir -p .tmp
+          docker compose run --rm --no-deps --volume "$PWD/.tmp:/app/.tmp" ingestion-worker \
+            python -m ingestion.cli fetch-seed \
+            --registry /app/data/source-registry.v1.json \
+            --seed /app/data/seed/v1.2-initial-vehicles.json \
+            --manifest /app/.tmp/v1.2-snapshots.json
+      - name: Publish and verify V1.2 seed
+        run: |
+          docker compose run --rm --no-deps --volume "$PWD/.tmp:/app/.tmp:ro" ingestion-worker \
+            python -m ingestion.cli publish-seed \
+            --registry /app/data/source-registry.v1.json \
+            --seed /app/data/seed/v1.2-initial-vehicles.json \
+            --manifest /app/.tmp/v1.2-snapshots.json \
+            --dsn "host=/var/run/postgresql dbname=vietnam_car_platform user=vcp"
+          docker compose exec -T postgres psql -U vcp -d vietnam_car_platform < scripts/verify-v1.2-seed.sql
+      - name: Verify V1.3 catalog/search/filter gate
+        run: python scripts/verify_v1_3_catalog.py
+      - name: Verify V1.4 web catalog/detail gate
+        run: python scripts/verify_v1_4_web.py
+      - name: Validate V1.5 registration seed
+        run: >-
+          docker compose run --rm --no-deps ingestion-worker
+          python -m ingestion.cli validate-registration-seed
+          --registry /app/data/source-registry.v1.json
+          --seed /app/data/seed/v1.5-registration-rules.json
+      - name: Fetch and publish V1.5 legal/region snapshots
+        run: |
+          docker compose run --rm --no-deps --volume "$PWD/.tmp:/app/.tmp" ingestion-worker \
+            python -m ingestion.cli fetch-registration-seed \
+            --registry /app/data/source-registry.v1.json \
+            --seed /app/data/seed/v1.5-registration-rules.json \
+            --manifest /app/.tmp/v1.5-registration.json
+          docker compose run --rm --no-deps --volume "$PWD/.tmp:/app/.tmp:ro" ingestion-worker \
+            python -m ingestion.cli publish-registration-seed \
+            --registry /app/data/source-registry.v1.json \
+            --seed /app/data/seed/v1.5-registration-rules.json \
+            --manifest /app/.tmp/v1.5-registration.json \
+            --dsn "host=/var/run/postgresql dbname=vietnam_car_platform user=vcp"
+      - name: Verify V1.5 on-road golden gate
+        run: python scripts/verify_v1_5_onroad.py
+      - name: Validate V1.6 energy seed
+        run: >-
+          docker compose run --rm --no-deps ingestion-worker
+          python -m ingestion.cli validate-energy-seed
+          --registry /app/data/source-registry.v1.json
+          --seed /app/data/seed/v1.6-energy.json
+      - name: Fetch and publish V1.6 energy snapshots
+        run: |
+          docker compose run --rm --no-deps --volume "$PWD/.tmp:/app/.tmp" ingestion-worker \
+            python -m ingestion.cli fetch-energy-seed \
+            --registry /app/data/source-registry.v1.json \
+            --seed /app/data/seed/v1.6-energy.json \
+            --manifest /app/.tmp/v1.6-energy.json
+          docker compose run --rm --no-deps --volume "$PWD/.tmp:/app/.tmp:ro" ingestion-worker \
+            python -m ingestion.cli publish-energy-seed \
+            --registry /app/data/source-registry.v1.json \
+            --seed /app/data/seed/v1.6-energy.json \
+            --manifest /app/.tmp/v1.6-energy.json \
+            --dsn "host=/var/run/postgresql dbname=vietnam_car_platform user=vcp"
+      - name: Verify V1.6 energy golden gate
+        run: python scripts/verify_v1_6_energy.py
+      - name: Verify V1.7 ownership and salary affordability gate
+        run: python scripts/verify_v1_7_affordability.py
+      - name: Verify V1.8 financing and purchase cash-flow gate
+        run: python scripts/verify_v1_8_financing.py
+      - name: Verify V1.9 trim comparison gate
+        run: python scripts/verify_v1_9_compare.py
+      - name: Verify V1.10 admin, data quality and audit gate
+        run: python scripts/verify_v1_10_admin.py
+      - name: Verify backup and isolated DB/object restore drill
+        run: python scripts/backup_restore_test.py
+      - name: Verify complete V1 release gate
+        run: python scripts/verify_v1_final.py
+      - run: curl --fail http://localhost:8080/health/live
+      - run: curl --fail http://localhost:8080/health/ready
+      - run: curl --fail http://localhost:3000
+      - if: always()
+        run: docker compose logs --no-color
+      - if: always()
+        run: docker compose down --volumes

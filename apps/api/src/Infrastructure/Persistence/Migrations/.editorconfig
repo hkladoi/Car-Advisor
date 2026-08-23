@@ -1,0 +1,3 @@
+[*.cs]
+# EF generates one column-name array per index; lifting these into fields makes migrations non-regenerable.
+dotnet_diagnostic.CA1861.severity = none

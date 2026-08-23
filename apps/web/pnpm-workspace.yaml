@@ -1,0 +1,4 @@
+allowBuilds:
+  unrs-resolver: set this to true or false
+minimumReleaseAgeExclude:
+  - react-hook-form@7.86.0

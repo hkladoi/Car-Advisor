@@ -1,0 +1,107 @@
+{
+  "schema_version": "v1.5",
+  "observed_at": "2026-08-22T00:00:00+07:00",
+  "reviewed_by": "reviewed-seed@vietnam-car-platform.local",
+  "review_reason": "V1.5 reviewed legal rules and Province Open API v2 administrative snapshot required by the implementation plan.",
+  "province_source_id": "province-open-api-v2",
+  "rules": [
+    {
+      "key": "plate-area-i-passenger-up-to-9-2026",
+      "component": "PlateAndRegistrationFee",
+      "scope": {"all": [{"field": "areaClass", "operator": "equals", "value": "I"}, {"field": "vehicleType", "operator": "equals", "value": "PassengerCar"}, {"field": "seats", "operator": "lte", "value": 9}]},
+      "calculation_type": "Fixed",
+      "parameters": {"amount": 14000000},
+      "priority": 1,
+      "version": 1,
+      "effective_from": "2026-01-01T00:00:00+07:00",
+      "source_id": "mof-plate-fee-2026",
+      "citation": "Circular 155/2025/TT-BTC: Area I, passenger cars with up to 9 seats, VND 14,000,000."
+    },
+    {
+      "key": "plate-area-ii-passenger-up-to-9-2026",
+      "component": "PlateAndRegistrationFee",
+      "scope": {"all": [{"field": "areaClass", "operator": "equals", "value": "II"}, {"field": "vehicleType", "operator": "equals", "value": "PassengerCar"}, {"field": "seats", "operator": "lte", "value": 9}]},
+      "calculation_type": "Fixed",
+      "parameters": {"amount": 140000},
+      "priority": 1,
+      "version": 1,
+      "effective_from": "2026-01-01T00:00:00+07:00",
+      "source_id": "mof-plate-fee-2026",
+      "citation": "Circular 155/2025/TT-BTC: Area II, passenger cars with up to 9 seats, VND 140,000."
+    },
+    {
+      "key": "bev-first-registration-tax-2025-2027",
+      "component": "FirstRegistrationTax",
+      "scope": {"powertrain": ["Bev"]},
+      "calculation_type": "Percentage",
+      "parameters": {"rate": 0, "basis": "effectiveCashPurchasePrice"},
+      "priority": 1,
+      "version": 1,
+      "effective_from": "2025-03-01T00:00:00+07:00",
+      "effective_to": "2027-03-01T00:00:00+07:00",
+      "source_id": "gov-bev-tax-current",
+      "citation": "Decree 51/2025/ND-CP: 0% first-time registration fee for battery electric cars through 28 February 2027."
+    },
+    {
+      "key": "bev-first-registration-tax-2027-2030",
+      "component": "FirstRegistrationTax",
+      "scope": {"powertrain": ["Bev"]},
+      "calculation_type": "Percentage",
+      "parameters": {"rate": 0, "basis": "effectiveCashPurchasePrice"},
+      "priority": 1,
+      "version": 2,
+      "effective_from": "2027-03-01T00:00:00+07:00",
+      "effective_to": "2031-01-01T00:00:00+07:00",
+      "source_id": "gov-bev-tax-2027",
+      "citation": "Decree 202/2026/ND-CP: 0% first-time registration fee for battery electric cars from 1 March 2027 through 31 December 2030."
+    },
+    {
+      "key": "compulsory-insurance-under-6-seats-2023",
+      "component": "CompulsoryInsurance",
+      "scope": {"all": [{"field": "vehicleType", "operator": "equals", "value": "PassengerCar"}, {"field": "seats", "operator": "lt", "value": 6}]},
+      "calculation_type": "Formula",
+      "parameters": {"name": "addVat", "baseAmount": 437000, "vatRate": 0.1},
+      "priority": 1,
+      "version": 1,
+      "effective_from": "2023-09-06T00:00:00+07:00",
+      "source_id": "gov-compulsory-insurance-2023",
+      "citation": "Decree 67/2023/ND-CP: VND 437,000 before VAT for non-commercial cars with fewer than 6 seats."
+    },
+    {
+      "key": "compulsory-insurance-6-to-11-seats-2023",
+      "component": "CompulsoryInsurance",
+      "scope": {"all": [{"field": "vehicleType", "operator": "equals", "value": "PassengerCar"}, {"field": "seats", "operator": "gte", "value": 6}, {"field": "seats", "operator": "lte", "value": 11}]},
+      "calculation_type": "Formula",
+      "parameters": {"name": "addVat", "baseAmount": 794000, "vatRate": 0.1},
+      "priority": 1,
+      "version": 1,
+      "effective_from": "2023-09-06T00:00:00+07:00",
+      "source_id": "gov-compulsory-insurance-2023",
+      "citation": "Decree 67/2023/ND-CP: VND 794,000 before VAT for non-commercial cars with 6 to 11 seats."
+    },
+    {
+      "key": "road-usage-private-up-to-9-seats-2024",
+      "component": "RoadUsageFee",
+      "scope": {"all": [{"field": "vehicleType", "operator": "equals", "value": "PassengerCar"}, {"field": "seats", "operator": "lte", "value": 9}, {"field": "buyerType", "operator": "in", "values": ["Individual", "Household"]}, {"field": "roadUsageMonths", "operator": "equals", "value": 12}]},
+      "calculation_type": "Fixed",
+      "parameters": {"amount": 1560000},
+      "priority": 1,
+      "version": 1,
+      "effective_from": "2024-02-01T00:00:00+07:00",
+      "source_id": "gov-road-usage-fee-2024",
+      "citation": "Decree 90/2023/ND-CP: VND 1,560,000 per 12 months for privately registered passenger vehicles with fewer than 10 seats."
+    },
+    {
+      "key": "new-car-initial-inspection-exemption-2023",
+      "component": "InspectionFee",
+      "scope": {"firstInspectionExempt": [true]},
+      "calculation_type": "Fixed",
+      "parameters": {"amount": 0},
+      "priority": 1,
+      "version": 1,
+      "effective_from": "2023-03-22T00:00:00+07:00",
+      "source_id": "gov-inspection-exemption-2023",
+      "citation": "Circular 02/2023/TT-BGTVT: eligible new, unused vehicles are exempt from first inspection."
+    }
+  ]
+}

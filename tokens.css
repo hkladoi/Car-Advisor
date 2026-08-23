@@ -1,0 +1,71 @@
+/* Hallmark · genre: modern-minimal · macrostructure: Workbench · theme: Cobalt · enrichment: product UI · nav: N13 · footer: Ft2 */
+:root {
+  --color-paper: oklch(98.5% 0.004 250);
+  --color-paper-2: oklch(96% 0.007 250);
+  --color-paper-3: oklch(92.5% 0.009 252);
+  --color-rule: oklch(86% 0.012 252);
+  --color-rule-2: oklch(72% 0.018 254);
+  --color-neutral: oklch(51% 0.019 256);
+  --color-muted: oklch(42% 0.019 257);
+  --color-ink-2: oklch(34% 0.018 257);
+  --color-ink: oklch(24% 0.02 258);
+  --color-graphite: oklch(20% 0.016 260);
+  --color-graphite-2: oklch(25% 0.019 258);
+  --color-graphite-rule: oklch(38% 0.022 256);
+  --color-on-graphite: oklch(94% 0.008 252);
+  --color-on-graphite-muted: oklch(76% 0.014 254);
+  --color-accent: oklch(55% 0.205 256);
+  --color-accent-hover: oklch(49% 0.205 256);
+  --color-accent-ink: oklch(98.5% 0.004 250);
+  --color-focus: oklch(48% 0.205 256);
+  --color-error: oklch(54% 0.19 25);
+  --color-success: oklch(48% 0.13 150);
+
+  --font-display: "Space Grotesk Variable", "Space Grotesk", ui-sans-serif, sans-serif;
+  --font-body: "Inter Variable", "Inter", ui-sans-serif, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace;
+  --font-wordmark: var(--font-display);
+
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --space-4xl: 9rem;
+
+  --text-xs: 0.72rem;
+  --text-sm: 0.82rem;
+  --text-base: 1rem;
+  --text-md: 1.2rem;
+  --text-lg: 1.5rem;
+  --text-xl: 1.9rem;
+  --text-2xl: 2.4rem;
+  --text-3xl: 3rem;
+  --text-4xl: 3.75rem;
+  --text-display-s: clamp(2.35rem, 5vw, 4rem);
+  --text-display: clamp(2.75rem, 5vw + 1rem, 5.25rem);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+
+  --rule-thin: 1px;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+
+  --z-base: 1;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+}

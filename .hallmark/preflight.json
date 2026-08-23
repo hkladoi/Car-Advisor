@@ -1,0 +1,10 @@
+{
+  "scannedAt": "2026-08-22",
+  "framework": "Next.js App Router",
+  "fontStack": ["Space Grotesk Variable", "Inter Variable", "JetBrains Mono Variable"],
+  "palette": "Cobalt OKLCH tokens",
+  "motion": "motion-cut with functional command palette and button feedback",
+  "spacing": "4pt semantic scale",
+  "preserve": ["tokens.css", "Cobalt palette", "font pairing", "responsive floor"]
+}
+

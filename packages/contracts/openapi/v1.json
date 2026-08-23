@@ -1,0 +1,6047 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vietnam Car Platform API",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/v1/admin/auth/login": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "AdminLogin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminLoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/auth/session": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminSession",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/auth/logout": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "AdminLogout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/trims": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminTrims",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminTrimRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "CreateAdminTrim",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminTrimDraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTrimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/trims/{id}": {
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "UpdateAdminTrim",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminTrimUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTrimRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "DeleteAdminTrim",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sources": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminSources",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminSourceResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "CreateAdminSource",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSourceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSourceResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sources/{id}": {
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "UpdateAdminSource",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSourceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSourceResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "DeactivateAdminSource",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/imports": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminImports",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminManualImportResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/imports/validate": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "ValidateAdminImport",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminManualImportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminManualImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/imports/{id}/stage": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "StageAdminImport",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminManualImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/review-queue": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminReviewQueue",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminReviewItem"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/changes/{id}/approve": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "ApproveAdminChange",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminReviewDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/changes/{id}/reject": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "RejectAdminChange",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminReviewDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/changes/{id}/edit-publish": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "EditAndPublishAdminChange",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminReviewDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/overrides": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "CreateAdminOverride",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminOverrideRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminFieldLockResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/field-locks": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminFieldLocks",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminFieldLockResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/field-locks/{id}/unlock": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "UnlockAdminField",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/dealers": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminDealers",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminDealerResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "CreateAdminDealer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminDealerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDealerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/dealers/{id}": {
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "UpdateAdminDealer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminDealerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDealerResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "DeleteAdminDealer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/dealer-branches": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminDealerBranches",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminDealerBranchResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "CreateAdminDealerBranch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminDealerBranchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDealerBranchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/dealer-branches/{id}": {
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "UpdateAdminDealerBranch",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminDealerBranchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDealerBranchResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "DeleteAdminDealerBranch",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/dealer-offers": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminDealerOffers",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminDealerOfferResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "CreateAdminDealerOffer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminDealerOfferRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDealerOfferResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/dealer-offers/{id}": {
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "UpdateAdminDealerOffer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminDealerOfferRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDealerOfferResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "DeleteAdminDealerOffer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/coverage": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminCoverage",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCoverageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/quality": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminQuality",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminQualityResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/audit": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminAudit",
+        "parameters": [
+          {
+            "name": "take",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminAuditResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/affordability/evaluate": {
+      "post": {
+        "tags": [
+          "Affordability"
+        ],
+        "operationId": "EvaluateOwnershipAffordability",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AffordabilityEvaluationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffordabilityEvaluationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/brands": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "GetBrands",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cars": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "GetCars",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Sort",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Brand",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Model",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Body",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Segment",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Powertrain",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Seats",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "MsrpMin",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "MsrpMax",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "CurrentPriceMin",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "CurrentPriceMax",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "OnRoadMin",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "OnRoadMax",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "LengthMin",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "LengthMax",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "WidthMin",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "WidthMax",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "HeightMin",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "HeightMax",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "RangeMin",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "RangeMax",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "BatteryMin",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "BatteryMax",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "ConsumptionMin",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "ConsumptionMax",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "Features",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FeatureMode",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Colors",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CarsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cars/{trimId}": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "GetCarByTrimId",
+        "parameters": [
+          {
+            "name": "trimId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CarDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/compare/calculate": {
+      "post": {
+        "tags": [
+          "Compare"
+        ],
+        "operationId": "CompareTrims",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompareCalculationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareCalculationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/calculators/energy": {
+      "post": {
+        "tags": [
+          "Energy"
+        ],
+        "operationId": "CalculateMonthlyEnergyCost",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnergyCalculationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCalculationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/financing/calculate": {
+      "post": {
+        "tags": [
+          "Financing"
+        ],
+        "operationId": "CalculatePurchaseFinancing",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancingCalculationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancingCalculationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ownership/calculate": {
+      "post": {
+        "tags": [
+          "Ownership"
+        ],
+        "operationId": "CalculateOperatingOwnershipCost",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OwnershipCalculationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnershipCalculationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/regions": {
+      "get": {
+        "tags": [
+          "Registration"
+        ],
+        "operationId": "GetRegions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/calculators/on-road": {
+      "post": {
+        "tags": [
+          "Registration"
+        ],
+        "operationId": "CalculateOnRoadPrice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnRoadCalculationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnRoadCalculationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/system/info": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "operationId": "GetSystemInfo",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AdminAuditResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actor": {
+            "type": "string",
+            "nullable": true
+          },
+          "action": {
+            "type": "string",
+            "nullable": true
+          },
+          "entityType": {
+            "type": "string",
+            "nullable": true
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "beforeJson": {
+            "type": "string",
+            "nullable": true
+          },
+          "afterJson": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminCoverageBrand": {
+        "type": "object",
+        "properties": {
+          "brandId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brandName": {
+            "type": "string",
+            "nullable": true
+          },
+          "included": {
+            "type": "boolean"
+          },
+          "discovered": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mapped": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "published": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blocked": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "stale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "completeness": {
+            "type": "number",
+            "format": "double"
+          },
+          "freshness": {
+            "type": "number",
+            "format": "double"
+          },
+          "missingCoreCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminCoverageResponse": {
+        "type": "object",
+        "properties": {
+          "brands": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminCoverageBrand"
+            },
+            "nullable": true
+          },
+          "brandScopeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "activeModelCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "activeTrimCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "coreCompleteness": {
+            "type": "number",
+            "format": "double"
+          },
+          "freshness": {
+            "type": "number",
+            "format": "double"
+          },
+          "unresolvedDuplicates": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fullMarketGatePassed": {
+            "type": "boolean"
+          },
+          "gateFailures": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "calculatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminDealerBranchRequest": {
+        "type": "object",
+        "properties": {
+          "dealerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "provinceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminDealerBranchResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dealerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dealerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "provinceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "offerCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminDealerOfferBenefitRequest": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "statedValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "isCashEquivalent": {
+            "type": "boolean"
+          },
+          "exclusivityGroup": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminDealerOfferRequest": {
+        "type": "object",
+        "properties": {
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "headline": {
+            "type": "string",
+            "nullable": true
+          },
+          "combinabilityGroup": {
+            "type": "string",
+            "nullable": true
+          },
+          "conditionsJson": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "sourceFactId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "benefits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminDealerOfferBenefitRequest"
+            },
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminDealerOfferResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dealerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "branchName": {
+            "type": "string",
+            "nullable": true
+          },
+          "provinceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trimName": {
+            "type": "string",
+            "nullable": true
+          },
+          "headline": {
+            "type": "string",
+            "nullable": true
+          },
+          "combinabilityGroup": {
+            "type": "string",
+            "nullable": true
+          },
+          "conditionsJson": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "sourceFactId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "benefits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminDealerOfferBenefitRequest"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminDealerRequest": {
+        "type": "object",
+        "properties": {
+          "brandId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "officialStatus": {
+            "type": "boolean"
+          },
+          "officialUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminDealerResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brandId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brandName": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "officialStatus": {
+            "type": "boolean"
+          },
+          "officialUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "branchCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offerCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminFieldLockResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityType": {
+            "type": "string",
+            "nullable": true
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fieldPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "actor": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminImportValidationIssue": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "field": {
+            "type": "string",
+            "nullable": true
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "severity": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminLoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminLoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminManualImportRequest": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "content": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminManualImportResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "format": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "recordCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminImportValidationIssue"
+            },
+            "nullable": true
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stagedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminOverrideRequest": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string",
+            "nullable": true
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fieldPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "newValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "lockField": {
+            "type": "boolean"
+          },
+          "lockExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminQualityIssue": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "severity": {
+            "type": "string",
+            "nullable": true
+          },
+          "entityType": {
+            "type": "string",
+            "nullable": true
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fieldPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminQualityResponse": {
+        "type": "object",
+        "properties": {
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminQualityIssue"
+            },
+            "nullable": true
+          },
+          "impossibleValues": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "duplicates": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "staleSources": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingCoreFields": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sourceConflicts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dealerOfferIssues": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminReasonRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminReviewDecisionRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "editedValue": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminReviewItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityType": {
+            "type": "string",
+            "nullable": true
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fieldPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "oldValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "newValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "riskLevel": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "detectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "nullable": true
+          },
+          "fieldLocked": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminSessionResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminSourceRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "authorityLevel": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "robotsNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "termsNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "refreshIntervalHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminSourceResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "domain": {
+            "type": "string",
+            "nullable": true
+          },
+          "authorityLevel": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "refreshIntervalHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastFetchedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "stale": {
+            "type": "boolean"
+          },
+          "snapshotCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "robotsNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "termsNote": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminTrimDraftRequest": {
+        "type": "object",
+        "properties": {
+          "brandName": {
+            "type": "string",
+            "nullable": true
+          },
+          "brandSlug": {
+            "type": "string",
+            "nullable": true
+          },
+          "brandCountryCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "brandOfficialUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelSlug": {
+            "type": "string",
+            "nullable": true
+          },
+          "bodyType": {
+            "type": "string",
+            "nullable": true
+          },
+          "segment": {
+            "type": "string",
+            "nullable": true
+          },
+          "generationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "generationStartYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "modelYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trimName": {
+            "type": "string",
+            "nullable": true
+          },
+          "trimSlug": {
+            "type": "string",
+            "nullable": true
+          },
+          "marketStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminTrimRow": {
+        "type": "object",
+        "properties": {
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brandName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "generationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trimName": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "marketStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "bodyType": {
+            "type": "string",
+            "nullable": true
+          },
+          "segment": {
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminTrimUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "marketStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "launchedAt": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "discontinuedAt": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AffordabilityCandidate": {
+        "type": "object",
+        "properties": {
+          "vehicle": {
+            "$ref": "#/components/schemas/AffordabilityVehicleIdentity"
+          },
+          "evaluation": {
+            "$ref": "#/components/schemas/AffordabilityEvaluationResult"
+          },
+          "ownership": {
+            "$ref": "#/components/schemas/OwnershipCalculationResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AffordabilityCostBand": {
+        "type": "object",
+        "properties": {
+          "band": {
+            "type": "string",
+            "nullable": true
+          },
+          "monthlyVehicleCashflow": {
+            "type": "number",
+            "format": "double"
+          },
+          "incomeRatio": {
+            "type": "number",
+            "format": "double"
+          },
+          "disposableRatio": {
+            "type": "number",
+            "format": "double"
+          },
+          "eligible": {
+            "type": "boolean"
+          },
+          "rating": {
+            "type": "string",
+            "nullable": true
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AffordabilityEvaluationRequest": {
+        "type": "object",
+        "properties": {
+          "trimIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "provinceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "calculationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "policy": {
+            "type": "string",
+            "nullable": true
+          },
+          "netMonthlyIncome": {
+            "type": "number",
+            "format": "double"
+          },
+          "rentHousing": {
+            "type": "number",
+            "format": "double"
+          },
+          "essentialExpenses": {
+            "type": "number",
+            "format": "double"
+          },
+          "otherFixedDebt": {
+            "type": "number",
+            "format": "double"
+          },
+          "savingsTarget": {
+            "type": "number",
+            "format": "double"
+          },
+          "maximumMonthlyVehicleSpend": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "expenses": {
+            "$ref": "#/components/schemas/OwnershipExpenseAssumptionsRequest"
+          },
+          "energy": {
+            "$ref": "#/components/schemas/OwnershipEnergyScenarioRequest"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AffordabilityEvaluationResponse": {
+        "type": "object",
+        "properties": {
+          "policy": {
+            "type": "string",
+            "nullable": true
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/AffordabilityPolicyThresholds"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/AffordabilityProfileSummary"
+          },
+          "eligibleCars": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AffordabilityCandidate"
+            },
+            "nullable": true
+          },
+          "overBudgetCars": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AffordabilityCandidate"
+            },
+            "nullable": true
+          },
+          "dataExcludedCars": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExcludedAffordabilityCandidate"
+            },
+            "nullable": true
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AffordabilityEvaluationResult": {
+        "type": "object",
+        "properties": {
+          "eligible": {
+            "type": "boolean"
+          },
+          "rating": {
+            "type": "string",
+            "nullable": true
+          },
+          "disposableIncome": {
+            "type": "number",
+            "format": "double"
+          },
+          "current": {
+            "$ref": "#/components/schemas/AffordabilityCostBand"
+          },
+          "normalized": {
+            "$ref": "#/components/schemas/AffordabilityCostBand"
+          },
+          "worstReasonable": {
+            "$ref": "#/components/schemas/AffordabilityCostBand"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AffordabilityPolicyThresholds": {
+        "type": "object",
+        "properties": {
+          "maximumIncomeRatio": {
+            "type": "number",
+            "format": "double"
+          },
+          "maximumDisposableRatio": {
+            "type": "number",
+            "format": "double"
+          },
+          "warningUtilization": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AffordabilityProfileSummary": {
+        "type": "object",
+        "properties": {
+          "netMonthlyIncome": {
+            "type": "number",
+            "format": "double"
+          },
+          "rentHousing": {
+            "type": "number",
+            "format": "double"
+          },
+          "essentialExpenses": {
+            "type": "number",
+            "format": "double"
+          },
+          "otherFixedDebt": {
+            "type": "number",
+            "format": "double"
+          },
+          "savingsTarget": {
+            "type": "number",
+            "format": "double"
+          },
+          "maximumMonthlyVehicleSpend": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "disposableIncomeBeforeVehicle": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AffordabilityVehicleIdentity": {
+        "type": "object",
+        "properties": {
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brandName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "trimName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "powertrain": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "fieldErrors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldError"
+            },
+            "nullable": true
+          },
+          "traceId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AppliedBenefit": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "statedValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "isCashEquivalent": {
+            "type": "boolean"
+          },
+          "origin": {
+            "type": "string",
+            "nullable": true
+          },
+          "originId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AppliedChargingPromotion": {
+        "type": "object",
+        "properties": {
+          "promotionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "benefit": {
+            "type": "string",
+            "nullable": true
+          },
+          "benefitValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/EnergySourceReference"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AppliedDealerFinancingCreditResponse": {
+        "type": "object",
+        "properties": {
+          "offerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "benefitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "offerHeadline": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/RuleSourceReference"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AppliedEnergyRate": {
+        "type": "object",
+        "properties": {
+          "rateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "nullable": true
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "taxRate": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "taxIncluded": {
+            "type": "boolean"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/EnergySourceReference"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AppliedRuleReference": {
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "component": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/RuleSourceReference"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BrandItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentTrimCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BrandsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandItem"
+            },
+            "nullable": true
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CarDetailResponse": {
+        "type": "object",
+        "properties": {
+          "car": {
+            "$ref": "#/components/schemas/CatalogCar"
+          },
+          "trims": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrimSwitchItem"
+            },
+            "nullable": true
+          },
+          "prices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceDetail"
+            },
+            "nullable": true
+          },
+          "gallery": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GalleryImage"
+            },
+            "nullable": true
+          },
+          "specifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpecificationDetail"
+            },
+            "nullable": true
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeatureDetail"
+            },
+            "nullable": true
+          },
+          "colors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ColorDetail"
+            },
+            "nullable": true
+          },
+          "warranty": {
+            "$ref": "#/components/schemas/WarrantyDetail"
+          },
+          "dealerOffers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DealerOfferDetail"
+            },
+            "nullable": true
+          },
+          "primarySource": {
+            "$ref": "#/components/schemas/SourceBadge"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CarsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogCar"
+            },
+            "nullable": true
+          },
+          "facets": {
+            "$ref": "#/components/schemas/CatalogFacets"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "featureFilterSemantics": {
+            "type": "string",
+            "nullable": true
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CatalogCar": {
+        "type": "object",
+        "properties": {
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brandName": {
+            "type": "string",
+            "nullable": true
+          },
+          "brandSlug": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelSlug": {
+            "type": "string",
+            "nullable": true
+          },
+          "generationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trimName": {
+            "type": "string",
+            "nullable": true
+          },
+          "trimSlug": {
+            "type": "string",
+            "nullable": true
+          },
+          "marketStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "bodyType": {
+            "type": "string",
+            "nullable": true
+          },
+          "segment": {
+            "type": "string",
+            "nullable": true
+          },
+          "powertrainType": {
+            "type": "string",
+            "nullable": true
+          },
+          "msrp": {
+            "$ref": "#/components/schemas/MoneyValue"
+          },
+          "currentPrice": {
+            "$ref": "#/components/schemas/MoneyValue"
+          },
+          "onRoadRange": {
+            "$ref": "#/components/schemas/MoneyRange"
+          },
+          "specifications": {
+            "$ref": "#/components/schemas/CatalogSpecifications"
+          },
+          "featureCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "colorCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "primaryImageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataUpdatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CatalogFacets": {
+        "type": "object",
+        "properties": {
+          "brands": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacetValue"
+            },
+            "nullable": true
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacetValue"
+            },
+            "nullable": true
+          },
+          "bodyTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacetValue"
+            },
+            "nullable": true
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacetValue"
+            },
+            "nullable": true
+          },
+          "powertrains": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacetValue"
+            },
+            "nullable": true
+          },
+          "seats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacetValue"
+            },
+            "nullable": true
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacetValue"
+            },
+            "nullable": true
+          },
+          "colors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacetValue"
+            },
+            "nullable": true
+          },
+          "msrp": {
+            "$ref": "#/components/schemas/NumericRange"
+          },
+          "currentPrice": {
+            "$ref": "#/components/schemas/NumericRange"
+          },
+          "onRoad": {
+            "$ref": "#/components/schemas/NumericRange"
+          },
+          "rangeKm": {
+            "$ref": "#/components/schemas/NumericRange"
+          },
+          "batteryKwh": {
+            "$ref": "#/components/schemas/NumericRange"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CatalogSpecifications": {
+        "type": "object",
+        "properties": {
+          "seats": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "lengthMm": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "widthMm": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "heightMm": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "wheelbaseMm": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "officialRangeKm": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "usableBatteryKwh": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "fuelLitresPer100Km": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "electricKwhPer100Km": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ColorDetail": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "hexHint": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "availability": {
+            "type": "string",
+            "nullable": true
+          },
+          "extraPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceBadge"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CompareCalculationRequest": {
+        "type": "object",
+        "properties": {
+          "trimIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "provinceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "calculationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "profilePreset": {
+            "type": "string",
+            "nullable": true
+          },
+          "financingPreset": {
+            "type": "string",
+            "nullable": true
+          },
+          "policy": {
+            "type": "string",
+            "nullable": true
+          },
+          "netMonthlyIncome": {
+            "type": "number",
+            "format": "double"
+          },
+          "rentHousing": {
+            "type": "number",
+            "format": "double"
+          },
+          "essentialExpenses": {
+            "type": "number",
+            "format": "double"
+          },
+          "otherFixedDebt": {
+            "type": "number",
+            "format": "double"
+          },
+          "savingsTarget": {
+            "type": "number",
+            "format": "double"
+          },
+          "maximumMonthlyVehicleSpend": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "expenses": {
+            "$ref": "#/components/schemas/OwnershipExpenseAssumptionsRequest"
+          },
+          "energy": {
+            "$ref": "#/components/schemas/OwnershipEnergyScenarioRequest"
+          },
+          "purchase": {
+            "$ref": "#/components/schemas/PurchaseFundingRequest"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CompareCalculationResponse": {
+        "type": "object",
+        "properties": {
+          "vehicles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompareVehicleHeader"
+            },
+            "nullable": true
+          },
+          "scenario": {
+            "$ref": "#/components/schemas/CompareScenarioSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompareRow"
+            },
+            "nullable": true
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "calculatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CompareCell": {
+        "type": "object",
+        "properties": {
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
+          },
+          "numericValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "textValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "booleanValue": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompareSourceReference"
+            },
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CompareRow": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "section": {
+            "type": "string",
+            "nullable": true
+          },
+          "canonicalUnit": {
+            "type": "string",
+            "nullable": true
+          },
+          "format": {
+            "type": "string",
+            "nullable": true
+          },
+          "different": {
+            "type": "boolean"
+          },
+          "cells": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompareCell"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CompareScenarioSummary": {
+        "type": "object",
+        "properties": {
+          "provinceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "calculationDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "profilePreset": {
+            "type": "string",
+            "nullable": true
+          },
+          "financingPreset": {
+            "type": "string",
+            "nullable": true
+          },
+          "policy": {
+            "type": "string",
+            "nullable": true
+          },
+          "monthlyKilometres": {
+            "type": "number",
+            "format": "double"
+          },
+          "parkingMonthly": {
+            "type": "number",
+            "format": "double"
+          },
+          "fundingSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "purchaseMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "repaymentMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "annualInterestRate": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "termMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "downPaymentPercent": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CompareSourceReference": {
+        "type": "object",
+        "properties": {
+          "sourceFactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "authority": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "fetchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contentHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "factStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "confidence": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CompareVehicleHeader": {
+        "type": "object",
+        "properties": {
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brandName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "trimName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bodyType": {
+            "type": "string",
+            "nullable": true
+          },
+          "segment": {
+            "type": "string",
+            "nullable": true
+          },
+          "powertrain": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataUpdatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DealerOfferBenefitDetail": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "statedValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "isCashEquivalent": {
+            "type": "boolean"
+          },
+          "exclusivityGroup": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DealerOfferDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dealerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "branchName": {
+            "type": "string",
+            "nullable": true
+          },
+          "provinceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "headline": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "conditionsJson": {
+            "type": "string",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "benefits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DealerOfferBenefitDetail"
+            },
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceBadge"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EnergyBreakdownItem": {
+        "type": "object",
+        "properties": {
+          "component": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number",
+            "format": "double"
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true
+          },
+          "normalizedAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "currentAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "appliedRate": {
+            "$ref": "#/components/schemas/AppliedEnergyRate"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EnergyCalculationRequest": {
+        "type": "object",
+        "properties": {
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "calculationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "monthlyKilometres": {
+            "type": "number",
+            "format": "double"
+          },
+          "fuelType": {
+            "type": "string",
+            "nullable": true
+          },
+          "evShare": {
+            "type": "number",
+            "format": "double"
+          },
+          "homeChargingShare": {
+            "type": "number",
+            "format": "double"
+          },
+          "chargingEfficiency": {
+            "type": "number",
+            "format": "double"
+          },
+          "homeMode": {
+            "type": "string",
+            "nullable": true
+          },
+          "householdBaseKwh": {
+            "type": "number",
+            "format": "double"
+          },
+          "customHomeAmountPerKwh": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "chargingProviderSlug": {
+            "type": "string",
+            "nullable": true
+          },
+          "connectorType": {
+            "type": "string",
+            "nullable": true
+          },
+          "chargingPowerKw": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "publicSessions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sessionsUsedThisMonth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "postChargeMinutesPerSession": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "customerType": {
+            "type": "string",
+            "nullable": true
+          },
+          "purchaseDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "promotionEligibilityConfirmed": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EnergyCalculationResponse": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "$ref": "#/components/schemas/EnergyCalculationResult"
+          },
+          "vehicle": {
+            "$ref": "#/components/schemas/EnergyVehicleIdentity"
+          },
+          "energyProfile": {
+            "$ref": "#/components/schemas/EnergyProfileReference"
+          },
+          "calculationDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "breakdown": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnergyBreakdownItem"
+            },
+            "nullable": true
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "appliedRates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppliedEnergyRate"
+            },
+            "nullable": true
+          },
+          "appliedPromotions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppliedChargingPromotion"
+            },
+            "nullable": true
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "calculatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EnergyCalculationResult": {
+        "type": "object",
+        "properties": {
+          "currentCost": {
+            "type": "number",
+            "format": "double"
+          },
+          "normalizedCost": {
+            "type": "number",
+            "format": "double"
+          },
+          "promotionSavings": {
+            "type": "number",
+            "format": "double"
+          },
+          "fuelLitres": {
+            "type": "number",
+            "format": "double"
+          },
+          "batteryEnergyKwh": {
+            "type": "number",
+            "format": "double"
+          },
+          "gridEnergyKwh": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EnergyProfileReference": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "officialFuelLitresPer100Km": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "officialElectricKwhPer100Km": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "fuelConsumptionCondition": {
+            "type": "string",
+            "nullable": true
+          },
+          "electricConsumptionCondition": {
+            "type": "string",
+            "nullable": true
+          },
+          "testCycle": {
+            "type": "string",
+            "nullable": true
+          },
+          "consumptionNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/EnergySourceReference"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EnergySourceReference": {
+        "type": "object",
+        "properties": {
+          "sourceFactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "authority": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "fetchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contentHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "factStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "confidence": {
+            "type": "string",
+            "nullable": true
+          },
+          "freshUntil": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isStale": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EnergyVehicleIdentity": {
+        "type": "object",
+        "properties": {
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brandId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "modelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brandName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "trimName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "powertrain": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ExcludedAffordabilityCandidate": {
+        "type": "object",
+        "properties": {
+          "vehicle": {
+            "$ref": "#/components/schemas/AffordabilityVehicleIdentity"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "explanation": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FacetValue": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FeatureDetail": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "group": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "booleanValue": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "numericValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "textValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "enumValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceBadge"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FieldError": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "nullable": true
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FinancingCalculationRequest": {
+        "type": "object",
+        "properties": {
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "provinceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "calculationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "policy": {
+            "type": "string",
+            "nullable": true
+          },
+          "netMonthlyIncome": {
+            "type": "number",
+            "format": "double"
+          },
+          "rentHousing": {
+            "type": "number",
+            "format": "double"
+          },
+          "essentialExpenses": {
+            "type": "number",
+            "format": "double"
+          },
+          "otherFixedDebt": {
+            "type": "number",
+            "format": "double"
+          },
+          "savingsTarget": {
+            "type": "number",
+            "format": "double"
+          },
+          "maximumMonthlyVehicleSpend": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "expenses": {
+            "$ref": "#/components/schemas/OwnershipExpenseAssumptionsRequest"
+          },
+          "energy": {
+            "$ref": "#/components/schemas/OwnershipEnergyScenarioRequest"
+          },
+          "purchase": {
+            "$ref": "#/components/schemas/PurchaseFundingRequest"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FinancingCalculationResponse": {
+        "type": "object",
+        "properties": {
+          "policy": {
+            "type": "string",
+            "nullable": true
+          },
+          "purchaseRating": {
+            "type": "string",
+            "nullable": true
+          },
+          "profile": {
+            "$ref": "#/components/schemas/FinancingProfileSummary"
+          },
+          "ownership": {
+            "$ref": "#/components/schemas/OwnershipCalculationResponse"
+          },
+          "ownershipAffordability": {
+            "$ref": "#/components/schemas/AffordabilityEvaluationResult"
+          },
+          "onRoad": {
+            "$ref": "#/components/schemas/OnRoadCalculationResponse"
+          },
+          "financing": {
+            "$ref": "#/components/schemas/FinancingCalculationResult"
+          },
+          "purchaseThresholds": {
+            "$ref": "#/components/schemas/PurchaseCashflowThresholds"
+          },
+          "purchaseCashflow": {
+            "$ref": "#/components/schemas/PurchaseCashflowResult"
+          },
+          "interestRate": {
+            "$ref": "#/components/schemas/InterestRateReference"
+          },
+          "appliedDealerCredits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppliedDealerFinancingCreditResponse"
+            },
+            "nullable": true
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "calculatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FinancingCalculationResult": {
+        "type": "object",
+        "properties": {
+          "purchaseStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "financingStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "acquisitionCost": {
+            "type": "number",
+            "format": "double"
+          },
+          "externalContribution": {
+            "type": "number",
+            "format": "double"
+          },
+          "tradeInNetValue": {
+            "type": "number",
+            "format": "double"
+          },
+          "otherUpfrontCredits": {
+            "type": "number",
+            "format": "double"
+          },
+          "financedBasis": {
+            "type": "number",
+            "format": "double"
+          },
+          "downPayment": {
+            "type": "number",
+            "format": "double"
+          },
+          "upfrontCashRequired": {
+            "type": "number",
+            "format": "double"
+          },
+          "availableCash": {
+            "type": "number",
+            "format": "double"
+          },
+          "cashShortfall": {
+            "type": "number",
+            "format": "double"
+          },
+          "loanPrincipal": {
+            "type": "number",
+            "format": "double"
+          },
+          "firstPayment": {
+            "type": "number",
+            "format": "double"
+          },
+          "averagePayment": {
+            "type": "number",
+            "format": "double"
+          },
+          "lastPayment": {
+            "type": "number",
+            "format": "double"
+          },
+          "monthlyPaymentForCommitment": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalInterest": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalLoanRepayment": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FinancingProfileSummary": {
+        "type": "object",
+        "properties": {
+          "netMonthlyIncome": {
+            "type": "number",
+            "format": "double"
+          },
+          "rentHousing": {
+            "type": "number",
+            "format": "double"
+          },
+          "essentialExpenses": {
+            "type": "number",
+            "format": "double"
+          },
+          "otherFixedDebt": {
+            "type": "number",
+            "format": "double"
+          },
+          "savingsTarget": {
+            "type": "number",
+            "format": "double"
+          },
+          "disposableIncomeBeforeVehicle": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GalleryImage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "rightsStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "rightsNote": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "InputPriceReference": {
+        "type": "object",
+        "properties": {
+          "priceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "priceType": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "regionScope": {
+            "type": "string",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/RuleSourceReference"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InterestRateReference": {
+        "type": "object",
+        "properties": {
+          "annualInterestRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "origin": {
+            "type": "string",
+            "nullable": true
+          },
+          "fieldPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "rawValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/RuleSourceReference"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MoneyRange": {
+        "type": "object",
+        "properties": {
+          "minimum": {
+            "type": "number",
+            "format": "double"
+          },
+          "maximum": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MoneyValue": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NumericRange": {
+        "type": "object",
+        "properties": {
+          "minimum": {
+            "type": "number",
+            "format": "double"
+          },
+          "maximum": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OnRoadBreakdownItem": {
+        "type": "object",
+        "properties": {
+          "component": {
+            "type": "string",
+            "nullable": true
+          },
+          "beforeSupport": {
+            "type": "number",
+            "format": "double"
+          },
+          "eligibleSupport": {
+            "type": "number",
+            "format": "double"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "appliedRule": {
+            "$ref": "#/components/schemas/AppliedRuleReference"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OnRoadCalculationRequest": {
+        "type": "object",
+        "properties": {
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "provinceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "calculationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "buyerType": {
+            "type": "string",
+            "nullable": true
+          },
+          "vehicleType": {
+            "type": "string",
+            "nullable": true
+          },
+          "firstInspectionExempt": {
+            "type": "boolean"
+          },
+          "roadUsageMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "selectedOfferIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OnRoadCalculationResponse": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "$ref": "#/components/schemas/OnRoadResult"
+          },
+          "vehicle": {
+            "$ref": "#/components/schemas/VehicleCalculationIdentity"
+          },
+          "region": {
+            "$ref": "#/components/schemas/RegionItem"
+          },
+          "calculationDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "inputPrice": {
+            "$ref": "#/components/schemas/InputPriceReference"
+          },
+          "breakdown": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OnRoadBreakdownItem"
+            },
+            "nullable": true
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "appliedRules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppliedRuleReference"
+            },
+            "nullable": true
+          },
+          "appliedBenefits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppliedBenefit"
+            },
+            "nullable": true
+          },
+          "nonCashBenefits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppliedBenefit"
+            },
+            "nullable": true
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "calculatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OnRoadResult": {
+        "type": "object",
+        "properties": {
+          "onRoadPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "effectiveCashPurchasePrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "inputPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "cashPurchaseReduction": {
+            "type": "number",
+            "format": "double"
+          },
+          "eligibleFeeSupportBenefits": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OperatingOwnershipCostResult": {
+        "type": "object",
+        "properties": {
+          "currentMonthlyCost": {
+            "type": "number",
+            "format": "double"
+          },
+          "normalizedMonthlyCost": {
+            "type": "number",
+            "format": "double"
+          },
+          "worstReasonableMonthlyCost": {
+            "type": "number",
+            "format": "double"
+          },
+          "breakdown": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OwnershipCostComponent"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OwnershipCalculationRequest": {
+        "type": "object",
+        "properties": {
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "provinceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "calculationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expenses": {
+            "$ref": "#/components/schemas/OwnershipExpenseAssumptionsRequest"
+          },
+          "energy": {
+            "$ref": "#/components/schemas/OwnershipEnergyScenarioRequest"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OwnershipCalculationResponse": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "$ref": "#/components/schemas/OperatingOwnershipCostResult"
+          },
+          "vehicle": {
+            "$ref": "#/components/schemas/AffordabilityVehicleIdentity"
+          },
+          "energy": {
+            "$ref": "#/components/schemas/EnergyCalculationResponse"
+          },
+          "appliedRecurringRules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppliedRuleReference"
+            },
+            "nullable": true
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "calculatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OwnershipCostComponent": {
+        "type": "object",
+        "properties": {
+          "component": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "normalizedAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "worstReasonableAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "origin": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OwnershipEnergyScenarioRequest": {
+        "type": "object",
+        "properties": {
+          "fuelType": {
+            "type": "string",
+            "nullable": true
+          },
+          "evShare": {
+            "type": "number",
+            "format": "double"
+          },
+          "homeChargingShare": {
+            "type": "number",
+            "format": "double"
+          },
+          "chargingEfficiency": {
+            "type": "number",
+            "format": "double"
+          },
+          "homeMode": {
+            "type": "string",
+            "nullable": true
+          },
+          "householdBaseKwh": {
+            "type": "number",
+            "format": "double"
+          },
+          "customHomeAmountPerKwh": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "chargingProviderSlug": {
+            "type": "string",
+            "nullable": true
+          },
+          "connectorType": {
+            "type": "string",
+            "nullable": true
+          },
+          "chargingPowerKw": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "publicSessions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sessionsUsedThisMonth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "postChargeMinutesPerSession": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "customerType": {
+            "type": "string",
+            "nullable": true
+          },
+          "purchaseDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "promotionEligibilityConfirmed": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OwnershipExpenseAssumptionsRequest": {
+        "type": "object",
+        "properties": {
+          "monthlyKilometres": {
+            "type": "number",
+            "format": "double"
+          },
+          "parkingMonthly": {
+            "type": "number",
+            "format": "double"
+          },
+          "maintenanceReserveMonthly": {
+            "type": "number",
+            "format": "double"
+          },
+          "bodyInsuranceAnnual": {
+            "type": "number",
+            "format": "double"
+          },
+          "tyreReserveMonthly": {
+            "type": "number",
+            "format": "double"
+          },
+          "batteryRentalMonthly": {
+            "type": "number",
+            "format": "double"
+          },
+          "compulsoryInsuranceMonthlyOverride": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "roadUsageMonthlyOverride": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "inspectionMonthlyOverride": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "firstInspectionExempt": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PriceDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "regionScope": {
+            "type": "string",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceBadge"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PurchaseCashflowResult": {
+        "type": "object",
+        "properties": {
+          "vehicleDebtRatio": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalDebtRatio": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalMonthlyVehicleCommitment": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalCommitmentRatio": {
+            "type": "number",
+            "format": "double"
+          },
+          "postPaymentDisposable": {
+            "type": "number",
+            "format": "double"
+          },
+          "rating": {
+            "type": "string",
+            "nullable": true
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PurchaseCashflowThresholds": {
+        "type": "object",
+        "properties": {
+          "maximumVehicleDebtRatio": {
+            "type": "number",
+            "format": "double"
+          },
+          "maximumTotalCommitmentRatio": {
+            "type": "number",
+            "format": "double"
+          },
+          "warningUtilization": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PurchaseFundingRequest": {
+        "type": "object",
+        "properties": {
+          "fundingSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "purchaseMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "availableCash": {
+            "type": "number",
+            "format": "double"
+          },
+          "familyContribution": {
+            "type": "number",
+            "format": "double"
+          },
+          "tradeInNetValue": {
+            "type": "number",
+            "format": "double"
+          },
+          "downPaymentAmount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "downPaymentPercent": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "annualInterestRate": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "interestRateSourceFactId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "termMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "repaymentMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "bankFees": {
+            "type": "number",
+            "format": "double"
+          },
+          "loanInsuranceUpfront": {
+            "type": "number",
+            "format": "double"
+          },
+          "selectedDealerOfferIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegionItem": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "areaClass": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/RuleSourceReference"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegionsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegionItem"
+            },
+            "nullable": true
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RuleSourceReference": {
+        "type": "object",
+        "properties": {
+          "sourceFactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "authority": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "fetchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contentHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "factStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "confidence": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SourceBadge": {
+        "type": "object",
+        "properties": {
+          "sourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "authority": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "fetchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contentHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "factStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "confidence": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SpecificationDetail": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "group": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "numericValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "textValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "enumValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceBadge"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TrimSwitchItem": {
+        "type": "object",
+        "properties": {
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentPrice": {
+            "$ref": "#/components/schemas/MoneyValue"
+          },
+          "selected": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "VehicleCalculationIdentity": {
+        "type": "object",
+        "properties": {
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brandName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "trimName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "powertrain": {
+            "type": "string",
+            "nullable": true
+          },
+          "seats": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "WarrantyDetail": {
+        "type": "object",
+        "properties": {
+          "vehicleMonths": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "vehicleKilometres": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "batteryMonths": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "batteryKilometres": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "conditions": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceBadge"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

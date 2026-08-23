@@ -1,0 +1,39 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# JavaScript
+node_modules/
+.next/
+out/
+coverage/
+
+# .NET
+**/bin/
+**/obj/
+TestResults/
+
+# Python
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.venv/
+*.py[cod]
+
+# Local runtime data
+.data/
+.minio/
+.tmp/
+output/
+*.log
+
+# Local agent and browser artifacts
+.codex-tools/
+.playwright-cli/
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
