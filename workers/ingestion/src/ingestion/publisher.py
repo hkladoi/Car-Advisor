@@ -94,13 +94,14 @@ class PostgresPublisher:
                 cursor.execute(
                     """
                     INSERT INTO sources
-                        (id, name, url, domain, authority_level, content_type, robots_note,
+                        (id, name, url, domain, category, authority_level, content_type, robots_note,
                          terms_note, active, priority, refresh_interval, last_fetched_at,
                          created_at, updated_at)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, TRUE, %s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, TRUE, %s, %s, %s, %s, %s)
                     ON CONFLICT (url) DO UPDATE SET
                         name = EXCLUDED.name,
                         domain = EXCLUDED.domain,
+                        category = EXCLUDED.category,
                         authority_level = EXCLUDED.authority_level,
                         content_type = EXCLUDED.content_type,
                         robots_note = EXCLUDED.robots_note,
@@ -116,6 +117,7 @@ class PostgresPublisher:
                         source.name,
                         source.url,
                         source.allowed_domains[0],
+                        source.category,
                         source.authority.value,
                         source.content_type.value,
                         source.robots_note,

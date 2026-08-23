@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-23
 
-Overall: **IN PROGRESS — V2.8**
+Overall: **IN PROGRESS — V2 FINAL GATE**
 
 ## Governing decisions
 
@@ -40,7 +40,7 @@ No material conflict between the two source documents has been found so far.
 - [x] V2.5 Automated monitoring — PASS 2026-08-23
 - [x] V2.6 Charging and map enrichment — PASS 2026-08-23
 - [x] V2.7 Price and offer history UX — PASS 2026-08-23
-- [ ] V2.8 Full-market coverage
+- [x] V2.8 Full-market coverage — PASS 2026-08-23
 - [ ] V2 FINAL GATE
 
 ## V2.1 gate — PASS
@@ -391,3 +391,74 @@ because the plan explicitly marks it optional, while all three mandatory V2.7
 history items are complete. This does not remove the reproducibility inputs
 already returned by current calculators and can be added later without changing
 the effective-dated history contracts.
+
+## V2.8 gate — PASS
+
+Implemented evidence:
+
+- A reviewed, closed `v2.8` Vietnam market manifest covers 51 brand decisions:
+  38 included and 13 explicitly excluded. Porsche is included; Ferrari,
+  Lamborghini and Lotus are excluded by the configured scope policy. Every
+  decision has an official/trusted source, immutable HTTP snapshot, reviewer,
+  timestamp and reason.
+- All 43 source URLs required by the manifest were fetched from their real
+  official pages and persisted to MinIO before publication. HTTP-first remains
+  primary; the bounded Playwright fallback handles difficult HTML/XML pages,
+  preserves the final response body/content type, uses a native browser user
+  agent where required and closes the browser on a bounded timeout.
+- The closed inventory contains 255 active/upcoming/announced model candidates
+  and 49 explicitly published trim candidates. All 304 candidates resolve to a
+  catalog identity or an explicit blocked reason; there are no silent drops and
+  no duplicate candidate keys.
+- For 236 models whose reviewed official listing does not expose a stable,
+  complete trim inventory, the system records a sourced
+  `TRIM_INVENTORY_BLOCKED_WITH_REASON` gap. It does not invent trim names. Every
+  current active catalog trim is mapped back to a published market candidate.
+- Migration `20260823062601_AddV28MarketCoverage` adds source categories,
+  source/snapshot-backed brand reviews, the closed `market_candidates` ledger
+  and versioned `market_scope_reviews`. Publication is transactional and
+  rebuilds the current manifest inventory so renamed keys cannot survive as
+  stale candidates.
+- `GET /api/v1/coverage` and authenticated admin coverage calculate the same
+  live gate from catalog rows, source snapshots and review state. The gate
+  requires 100% brand review, Porsche/supercar policy, candidate resolution,
+  official provenance, active-trim mapping, valid price states, at least 95%
+  core completeness, fresh price/promotion/dealer/energy/legal domains and zero
+  unresolved high-confidence duplicates.
+- Public `/coverage` exposes the scope version/hash, PASS/BLOCKED state,
+  51/51 review, 304/304 resolution, model/trim totals, freshness domains,
+  per-brand matrix, documented gaps and exclusions. Admin coverage adds the
+  operational candidate/gap ledger. The navigation now links the public report.
+
+Gate commands/evidence:
+
+- Worker suite — 72 passed, including manifest closure, official authority,
+  mandatory exclusions, explicit inventory gaps and versioned parser routing.
+- API Release suite — 57 passed with zero failures. Web lint passes; 7 Vitest
+  files / 12 tests pass without unhandled errors; production build includes
+  `/coverage` and `/admin/coverage`.
+- All API/web/worker/scheduler production images rebuild successfully and all
+  seven Compose services are healthy. OpenAPI export and generated TypeScript
+  client include the public coverage contract.
+- `scripts/verify_v2_8_coverage.py` passes against the running production
+  images: migration/schema constraints, 51/38/13 scope, 255+49 candidate
+  inventory, 304/304 resolution, 236 explained gaps, 100% core completeness,
+  100% freshness across five required domains and zero duplicates.
+- EF reports no pending model changes. EF-generated SQL passed a separate
+  PostgreSQL migration drill on an isolated temporary database: all migrations
+  up, V2.8 down to `20260823050109_AddV26ChargingMapData`, then V2.8 up again;
+  the temporary database was dropped afterward.
+- The same repeatable gate temporarily ages one real official Porsche source,
+  confirms the public badge becomes BLOCKED with
+  `MARKET_CANDIDATE_SOURCE_FRESHNESS_SLA_FAILED`, restores the exact previous
+  timestamp in `finally`, and confirms PASS again.
+- Real Chromium QA on 1440×1000 and 390×844 confirms the public gate, mobile
+  table containment and expandable 236-gap ledger. Network requests are 200,
+  the console has zero errors/warnings and the mobile document has no horizontal
+  overflow.
+
+Recorded decision: a brand model page is authoritative for model presence but
+not for unnamed trim identities. When a stable complete trim list is absent,
+V2.8 treats the model as published and the trim inventory as an explicit,
+sourced gap. This satisfies the design's `UNKNOWN`/blocked transparency rule
+without fabricating product data or silently reducing the market denominator.

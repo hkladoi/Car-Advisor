@@ -11,6 +11,7 @@ using VietnamCarPlatform.Api.Features.Admin;
 using VietnamCarPlatform.Api.Features.Catalog;
 using VietnamCarPlatform.Api.Features.Charging;
 using VietnamCarPlatform.Api.Features.Compare;
+using VietnamCarPlatform.Api.Features.Coverage;
 using VietnamCarPlatform.Api.Features.Energy;
 using VietnamCarPlatform.Api.Features.Financing;
 using VietnamCarPlatform.Api.Features.Pricing;
@@ -202,6 +203,7 @@ app.MapFinancingEndpoints();
 app.MapCompareEndpoints();
 app.MapChargingEndpoints();
 app.MapHistoryEndpoints();
+app.MapCoverageEndpoints();
 app.MapAdminEndpoints();
 
 app.MapHealthChecks("/health/live", new HealthCheckOptions

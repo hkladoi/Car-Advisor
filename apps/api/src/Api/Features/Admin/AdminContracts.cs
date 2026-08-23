@@ -184,7 +184,28 @@ public sealed record AdminCoverageBrand(
     int Stale,
     decimal Completeness,
     decimal Freshness,
-    int MissingCoreCount);
+    int MissingCoreCount,
+    int ModelCandidates,
+    int TrimCandidates,
+    int TrimInventoryGaps,
+    bool Reviewed,
+    DateTimeOffset? ReviewedAt);
+
+public sealed record AdminCoverageGap(
+    Guid CandidateId,
+    string BrandName,
+    string CandidateKind,
+    string CandidateName,
+    string Code,
+    string Reason,
+    DateTimeOffset LastSeenAt);
+
+public sealed record AdminFreshnessDomain(
+    string Domain,
+    int SourceCount,
+    int StaleCount,
+    decimal Freshness,
+    bool Passed);
 
 public sealed record AdminCoverageResponse(
     IReadOnlyList<AdminCoverageBrand> Brands,
@@ -196,6 +217,16 @@ public sealed record AdminCoverageResponse(
     int UnresolvedDuplicates,
     bool FullMarketGatePassed,
     IReadOnlyList<string> GateFailures,
+    string? ScopeVersion,
+    string? ManifestHash,
+    int ReviewedBrandCount,
+    int ExcludedBrandCount,
+    int DiscoveredCandidateCount,
+    int ResolvedCandidateCount,
+    int DocumentedBlockedCount,
+    int TrimInventoryGapCount,
+    IReadOnlyList<AdminCoverageGap> CandidateGaps,
+    IReadOnlyList<AdminFreshnessDomain> FreshnessDomains,
     DateTimeOffset CalculatedAt);
 
 public sealed record AdminQualityIssue(

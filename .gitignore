@@ -8,7 +8,7 @@ docs/CODEX-SECRETS.local.md
 node_modules/
 .next/
 out/
-coverage/
+/coverage/
 
 # .NET
 **/bin/

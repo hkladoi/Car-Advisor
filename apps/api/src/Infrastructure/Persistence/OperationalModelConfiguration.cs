@@ -25,6 +25,7 @@ internal static class OperationalModelConfiguration
             entity.Property(value => value.Name).HasMaxLength(240);
             entity.Property(value => value.Url).HasMaxLength(2048);
             entity.Property(value => value.Domain).HasMaxLength(253);
+            entity.Property(value => value.Category).HasMaxLength(80);
             entity.Property(value => value.RobotsNote).HasMaxLength(2000);
             entity.Property(value => value.TermsNote).HasMaxLength(2000);
             entity.HasIndex(value => value.Url).IsUnique();
@@ -171,6 +172,58 @@ internal static class OperationalModelConfiguration
             entity.HasOne<VehicleModel>().WithMany().HasForeignKey(value => value.ModelId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne<Trim>().WithMany().HasForeignKey(value => value.TrimId).OnDelete(DeleteBehavior.Cascade);
             entity.HasIndex(value => new { value.BrandId, value.ModelId, value.TrimId, value.CalculatedAt });
+        });
+
+        modelBuilder.Entity<MarketCandidate>(entity =>
+        {
+            entity.ToTable("market_candidates", table =>
+            {
+                table.HasCheckConstraint(
+                    "ck_market_candidates_resolution",
+                    "(resolution = 'Published' AND blocked_reason IS NULL AND model_id IS NOT NULL AND (kind = 'Model' OR trim_id IS NOT NULL)) OR (resolution = 'BlockedWithReason' AND blocked_reason IS NOT NULL AND length(trim(blocked_reason)) > 0)");
+                table.HasCheckConstraint(
+                    "ck_market_candidates_parent",
+                    "(kind = 'Model' AND parent_external_key IS NULL AND trim_id IS NULL AND trim_inventory_status <> 'NotApplicable') OR (kind = 'Trim' AND parent_external_key IS NOT NULL AND trim_inventory_status = 'NotApplicable')");
+                table.HasCheckConstraint(
+                    "ck_market_candidates_trim_inventory",
+                    "trim_inventory_status <> 'BlockedWithReason' OR (trim_inventory_reason IS NOT NULL AND length(trim(trim_inventory_reason)) > 0)");
+                table.HasCheckConstraint(
+                    "ck_market_candidates_review_times",
+                    "discovered_at <= last_seen_at AND discovered_at <= reviewed_at");
+            });
+            entity.Property(value => value.Market).HasMaxLength(8);
+            entity.Property(value => value.ExternalKey).HasMaxLength(300);
+            entity.Property(value => value.Name).HasMaxLength(240);
+            entity.Property(value => value.ParentExternalKey).HasMaxLength(300);
+            entity.Property(value => value.BlockedReason).HasMaxLength(2000);
+            entity.Property(value => value.TrimInventoryReason).HasMaxLength(2000);
+            entity.Property(value => value.ReviewedBy).HasMaxLength(320);
+            entity.HasOne<Brand>().WithMany().HasForeignKey(value => value.BrandId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<Source>().WithMany().HasForeignKey(value => value.SourceId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<SourceSnapshot>().WithMany().HasForeignKey(value => value.EvidenceSnapshotId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<VehicleModel>().WithMany().HasForeignKey(value => value.ModelId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<Trim>().WithMany().HasForeignKey(value => value.TrimId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(value => new { value.Market, value.BrandId, value.Kind, value.ExternalKey }).IsUnique();
+            entity.HasIndex(value => new { value.Market, value.MarketStatus, value.Resolution });
+            entity.HasIndex(value => value.LastSeenAt);
+        });
+
+        modelBuilder.Entity<MarketScopeReview>(entity =>
+        {
+            entity.ToTable("market_scope_reviews", table =>
+            {
+                table.HasCheckConstraint("ck_market_scope_reviews_counts", "reviewed_brand_count > 0 AND included_brand_count > 0 AND excluded_brand_count >= 0 AND reviewed_brand_count = included_brand_count + excluded_brand_count AND model_candidate_count > 0 AND trim_candidate_count >= 0");
+                table.HasCheckConstraint("ck_market_scope_reviews_times", "observed_at <= reviewed_at");
+            });
+            entity.Property(value => value.Market).HasMaxLength(8);
+            entity.Property(value => value.SchemaVersion).HasMaxLength(32);
+            entity.Property(value => value.ManifestHash).HasMaxLength(128);
+            entity.Property(value => value.ReviewedBy).HasMaxLength(320);
+            entity.Property(value => value.ReviewReason).HasMaxLength(2000);
+            entity.HasOne<Source>().WithMany().HasForeignKey(value => value.PolicySourceId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<SourceSnapshot>().WithMany().HasForeignKey(value => value.PolicySnapshotId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(value => new { value.Market, value.SchemaVersion }).IsUnique();
+            entity.HasIndex(value => new { value.Market, value.ReviewedAt });
         });
     }
 

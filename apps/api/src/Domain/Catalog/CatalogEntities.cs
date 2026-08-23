@@ -14,8 +14,13 @@ public sealed class Brand : Entity
 public sealed class BrandScope : EffectiveDatedEntity
 {
     public Guid BrandId { get; set; }
+    public string Market { get; set; } = "VN";
     public bool Included { get; set; }
     public string Reason { get; set; } = string.Empty;
+    public Guid? SourceId { get; set; }
+    public Guid? EvidenceSnapshotId { get; set; }
+    public DateTimeOffset? ReviewedAt { get; set; }
+    public string? ReviewedBy { get; set; }
 }
 
 public sealed class VehicleModel : Entity

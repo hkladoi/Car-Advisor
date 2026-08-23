@@ -19,8 +19,10 @@ Decisions and gate evidence belong in `docs/status/`.
 ## Current state
 
 - V1.0–V1.10 and the V1 FINAL GATE are complete.
-- V2.1–V2.7 are complete; V2.8 full-market coverage completion is next. See
-  `docs/status/v2-status.md`.
+- V2.1–V2.8 are complete; the V2 FINAL GATE is next. See
+  `docs/status/v2-status.md`. The live reviewed scope is 51 brands (38 included,
+  13 excluded), 255 model candidates, 49 explicit trim candidates and 236
+  documented trim-inventory gaps; do not replace those gaps with invented data.
 - V3 must not start until the V2 FINAL GATE passes; see
   `docs/status/v3-status.md`.
 
@@ -120,6 +122,7 @@ python -m pip install -r workers/ingestion/requirements.txt
 python -m pytest workers/ingestion/tests
 python scripts/verify_v2_6_charging.py
 python scripts/verify_v2_7_history.py
+python scripts/verify_v2_8_coverage.py
 docker compose up --build -d --wait
 docker compose ps
 docker compose logs -f api ingestion-worker ingestion-scheduler
@@ -141,6 +144,7 @@ dotnet ef migrations has-pending-model-changes --project apps/api/src/Infrastruc
   <http://localhost:8080/health/ready>
 - MinIO console: <http://localhost:9001>
 - Energy price history: <http://localhost:3000/energy/history>
+- Public full-market coverage: <http://localhost:3000/coverage>
 - PostgreSQL: `localhost:5432`; Redis: `localhost:6379`
 
 ## Debugging and recovery

@@ -6,9 +6,18 @@ export const ADMIN_COOKIE = "vcp_admin_session";
 
 export type AdminSession = { userId: string; email: string; displayName: string; role: string; expiresAt: string };
 export type AdminCoverage = {
-  brands: { brandId: string; brandName: string; included: boolean; discovered: number; mapped: number; published: number; blocked: number; stale: number; completeness: number; freshness: number; missingCoreCount: number }[];
+  brands: {
+    brandId: string; brandName: string; included: boolean; discovered: number; mapped: number; published: number; blocked: number;
+    stale: number; completeness: number; freshness: number; missingCoreCount: number; modelCandidates: number; trimCandidates: number;
+    trimInventoryGaps: number; reviewed: boolean; reviewedAt: string | null;
+  }[];
   brandScopeCount: number; activeModelCount: number; activeTrimCount: number; coreCompleteness: number; freshness: number;
-  unresolvedDuplicates: number; fullMarketGatePassed: boolean; gateFailures: string[]; calculatedAt: string;
+  unresolvedDuplicates: number; fullMarketGatePassed: boolean; gateFailures: string[]; scopeVersion: string | null; manifestHash: string | null;
+  reviewedBrandCount: number; excludedBrandCount: number; discoveredCandidateCount: number; resolvedCandidateCount: number;
+  documentedBlockedCount: number; trimInventoryGapCount: number;
+  candidateGaps: { candidateId: string; brandName: string; candidateKind: string; candidateName: string; code: string; reason: string; lastSeenAt: string }[];
+  freshnessDomains: { domain: string; sourceCount: number; staleCount: number; freshness: number; passed: boolean }[];
+  calculatedAt: string;
 };
 export type AdminQuality = {
   issues: { code: string; severity: string; entityType: string; entityId: string; fieldPath: string; message: string }[];

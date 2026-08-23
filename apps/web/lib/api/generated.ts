@@ -580,6 +580,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/coverage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetPublicCoverage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/calculators/energy": {
         parameters: {
             query?: never;
@@ -796,6 +812,26 @@ export interface components {
             freshness?: number;
             /** Format: int32 */
             missingCoreCount?: number;
+            /** Format: int32 */
+            modelCandidates?: number;
+            /** Format: int32 */
+            trimCandidates?: number;
+            /** Format: int32 */
+            trimInventoryGaps?: number;
+            reviewed?: boolean;
+            /** Format: date-time */
+            reviewedAt?: string | null;
+        };
+        AdminCoverageGap: {
+            /** Format: uuid */
+            candidateId?: string;
+            brandName?: string | null;
+            candidateKind?: string | null;
+            candidateName?: string | null;
+            code?: string | null;
+            reason?: string | null;
+            /** Format: date-time */
+            lastSeenAt?: string;
         };
         AdminCoverageResponse: {
             brands?: components["schemas"]["AdminCoverageBrand"][] | null;
@@ -813,6 +849,22 @@ export interface components {
             unresolvedDuplicates?: number;
             fullMarketGatePassed?: boolean;
             gateFailures?: string[] | null;
+            scopeVersion?: string | null;
+            manifestHash?: string | null;
+            /** Format: int32 */
+            reviewedBrandCount?: number;
+            /** Format: int32 */
+            excludedBrandCount?: number;
+            /** Format: int32 */
+            discoveredCandidateCount?: number;
+            /** Format: int32 */
+            resolvedCandidateCount?: number;
+            /** Format: int32 */
+            documentedBlockedCount?: number;
+            /** Format: int32 */
+            trimInventoryGapCount?: number;
+            candidateGaps?: components["schemas"]["AdminCoverageGap"][] | null;
+            freshnessDomains?: components["schemas"]["AdminFreshnessDomain"][] | null;
             /** Format: date-time */
             calculatedAt?: string;
         };
@@ -932,6 +984,16 @@ export interface components {
             /** Format: date-time */
             expiresAt?: string | null;
             active?: boolean;
+        };
+        AdminFreshnessDomain: {
+            domain?: string | null;
+            /** Format: int32 */
+            sourceCount?: number;
+            /** Format: int32 */
+            staleCount?: number;
+            /** Format: double */
+            freshness?: number;
+            passed?: boolean;
         };
         AdminImportValidationIssue: {
             /** Format: int32 */
@@ -4191,6 +4253,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    GetPublicCoverage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminCoverageResponse"];
                 };
             };
         };

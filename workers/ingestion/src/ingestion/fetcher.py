@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import hashlib
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -46,16 +47,18 @@ class KnownUrlFetcher:
             raise ValueError(f"Source URL is outside the allowlist: {source.url}")
 
         try:
-            response = await self._fetch_http(source.url)
+            response = await self._fetch_http(source.url, source.http_user_agent)
             final_url = str(response.url)
             content = response.content
             status = response.status_code
             headers = response.headers
             fetch_method = "http"
         except (httpx.TransportError, httpx.HTTPStatusError):
-            if source.content_type is not ContentType.HTML or self._transport is not None:
+            if source.content_type not in {ContentType.HTML, ContentType.XML} or self._transport is not None:
                 raise
-            final_url, content, status, headers = await self._fetch_browser(source.url)
+            final_url, content, status, headers = await self._fetch_browser(
+                source.url, source.content_type
+            )
             fetch_method = "playwright"
         if not source.allows_url(final_url):
             raise ValueError(f"Redirect escaped source allowlist: {final_url}")
@@ -88,7 +91,7 @@ class KnownUrlFetcher:
             fetch_method=fetch_method,
         )
 
-    async def _fetch_http(self, url: str) -> httpx.Response:
+    async def _fetch_http(self, url: str, user_agent: str | None = None) -> httpx.Response:
         response: httpx.Response | None = None
         async for attempt in AsyncRetrying(
             stop=stop_after_attempt(3),
@@ -98,7 +101,7 @@ class KnownUrlFetcher:
         ):
             with attempt:
                 async with httpx.AsyncClient(
-                    headers={"User-Agent": self._user_agent, "Accept": "text/html,application/pdf,application/json,application/xml;q=0.9,*/*;q=0.8"},
+                    headers={"User-Agent": user_agent or self._user_agent, "Accept": "text/html,application/pdf,application/json,application/xml;q=0.9,*/*;q=0.8"},
                     follow_redirects=True,
                     timeout=self._timeout,
                     transport=self._transport,
@@ -109,13 +112,20 @@ class KnownUrlFetcher:
             raise RuntimeError("Fetcher completed without a response")
         return response
 
-    async def _fetch_browser(self, url: str) -> tuple[str, bytes, int, dict[str, str]]:
+    async def _fetch_browser(
+        self, url: str, content_type: ContentType
+    ) -> tuple[str, bytes, int, dict[str, str]]:
         from playwright.async_api import async_playwright
 
         async with async_playwright() as playwright:
             browser = await playwright.chromium.launch(headless=True)
             try:
-                context = await browser.new_context(user_agent=self._user_agent)
+                # Keep the transparent crawler UA for the HTTP path, but use
+                # Chromium's native UA for the browser fallback. Several
+                # manufacturer CDNs reject non-browser UAs before rendering
+                # their JavaScript application even when automated access is
+                # permitted by the reviewed registry policy.
+                context = await browser.new_context(ignore_https_errors=True)
                 page = await context.new_page()
                 response = await page.goto(
                     url,
@@ -130,12 +140,21 @@ class KnownUrlFetcher:
                         request=httpx.Request("GET", page.url),
                         response=httpx.Response(response.status),
                     )
-                content = (await page.content()).encode("utf-8")
                 headers = await response.all_headers()
-                headers["content-type"] = "text/html; charset=utf-8"
+                if content_type is ContentType.HTML:
+                    content = (await page.content()).encode("utf-8")
+                    headers["content-type"] = "text/html; charset=utf-8"
+                else:
+                    content = await response.body()
                 return page.url, content, response.status, headers
             finally:
-                await browser.close()
+                # A browser process can become unresponsive while Chromium is
+                # shutting down. Never let one cleanup stall the whole source
+                # batch indefinitely.
+                try:
+                    await asyncio.wait_for(browser.close(), timeout=5)
+                except TimeoutError:
+                    pass
 
 
 def _extension(content_type: ContentType) -> str:

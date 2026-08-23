@@ -60,6 +60,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<MonitoringAlert> MonitoringAlerts => Set<MonitoringAlert>();
     public DbSet<AuditEvent> AuditEvents => Set<AuditEvent>();
     public DbSet<CoverageMetric> CoverageMetrics => Set<CoverageMetric>();
+    public DbSet<MarketCandidate> MarketCandidates => Set<MarketCandidate>();
+    public DbSet<MarketScopeReview> MarketScopeReviews => Set<MarketScopeReview>();
     public DbSet<CurrentSearchableTrim> CurrentSearchableTrims => Set<CurrentSearchableTrim>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -93,6 +95,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         configurationBuilder.Properties<ChangeRiskLevel>().HaveConversion<string>().HaveMaxLength(16);
         configurationBuilder.Properties<ChangeStatus>().HaveConversion<string>().HaveMaxLength(24);
         configurationBuilder.Properties<PublicationStatus>().HaveConversion<string>().HaveMaxLength(24);
+        configurationBuilder.Properties<MarketCandidateKind>().HaveConversion<string>().HaveMaxLength(16);
+        configurationBuilder.Properties<MarketCandidateResolution>().HaveConversion<string>().HaveMaxLength(32);
+        configurationBuilder.Properties<TrimInventoryStatus>().HaveConversion<string>().HaveMaxLength(32);
         configurationBuilder.Properties<IngestionRunStatus>().HaveConversion<string>().HaveMaxLength(24);
         configurationBuilder.Properties<MonitoringAlertStatus>().HaveConversion<string>().HaveMaxLength(24);
         configurationBuilder.Properties<MonitoringAlertSeverity>().HaveConversion<string>().HaveMaxLength(16);

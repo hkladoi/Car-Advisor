@@ -34,6 +34,11 @@ from ingestion.energy_seed import (
     load_energy_seed,
     validate_energy_seed,
 )
+from ingestion.market_scope import (
+    MarketScopePublisher,
+    load_market_scope,
+    validate_market_scope,
+)
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -106,6 +111,18 @@ def _parser() -> argparse.ArgumentParser:
             energy.add_argument("--manifest", type=Path, required=True)
         if command == "publish-energy-seed":
             energy.add_argument("--dsn", required=True)
+    for command, help_text in (
+        ("validate-market-scope", "Validate the reviewed V2.8 Vietnam BrandScope and candidate inventory"),
+        ("fetch-market-scope", "Fetch every official V2.8 BrandScope source to immutable storage"),
+        ("publish-market-scope", "Publish V2.8 BrandScope and resolved candidates transactionally"),
+    ):
+        market = subparsers.add_parser(command, help=help_text)
+        market.add_argument("--registry", type=Path, required=True)
+        market.add_argument("--scope", type=Path, required=True)
+        if command != "validate-market-scope":
+            market.add_argument("--manifest", type=Path, required=True)
+        if command == "publish-market-scope":
+            market.add_argument("--dsn", required=True)
     return parser
 
 
@@ -124,6 +141,46 @@ async def _fetch_seed(registry: SourceRegistry, source_ids: set[str], settings: 
             return await fetcher.fetch(registry.by_id(source_id), storage)
 
     return await asyncio.gather(*(fetch_one(source_id) for source_id in sorted(source_ids)))
+
+
+async def _fetch_market_scope_sources(
+    registry: SourceRegistry, source_ids: set[str], settings: Settings
+) -> list[Snapshot]:
+    storage = S3CompatibleObjectStorage(settings)
+    fetcher = KnownUrlFetcher(settings.ingestion_user_agent)
+    semaphore = asyncio.Semaphore(settings.ingestion_max_concurrency)
+
+    async def fetch_one(source_id: str) -> Snapshot:
+        source = registry.by_id(source_id)
+        if not source.automated_fetch:
+            if source.category != "market-scope-policy":
+                raise ValueError(f"Market source {source_id} is not approved for a reviewed fetch")
+            source = source.model_copy(update={"automated_fetch": True})
+        async with semaphore:
+            print(f"market-scope fetch started: {source_id}", flush=True)
+            try:
+                snapshot = await asyncio.wait_for(fetcher.fetch(source, storage), timeout=150)
+            except TimeoutError as error:
+                raise TimeoutError(f"Market source fetch timed out: {source_id}") from error
+            except Exception as error:
+                raise RuntimeError(
+                    f"Market source fetch failed: {source_id}: {type(error).__name__}: {error}"
+                ) from error
+            print(
+                f"market-scope fetch completed: {source_id} "
+                f"({snapshot.fetch_method}, HTTP {snapshot.http_status})",
+                flush=True,
+            )
+            return snapshot
+
+    outcomes = await asyncio.gather(
+        *(fetch_one(source_id) for source_id in sorted(source_ids)),
+        return_exceptions=True,
+    )
+    failures = [str(outcome) for outcome in outcomes if isinstance(outcome, BaseException)]
+    if failures:
+        raise RuntimeError("Market scope fetch failures:\n" + "\n".join(failures))
+    return [outcome for outcome in outcomes if isinstance(outcome, Snapshot)]
 
 
 async def _discover_source(args: argparse.Namespace, registry: SourceRegistry, settings: Settings) -> dict:
@@ -224,6 +281,29 @@ def main() -> None:
         return
     if args.command == "discover-source":
         result = asyncio.run(_discover_source(args, registry, Settings()))
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command.endswith("market-scope"):
+        scope = load_market_scope(args.scope)
+        report = validate_market_scope(scope, registry)
+        if args.command == "validate-market-scope":
+            print(json.dumps(report, ensure_ascii=False, indent=2))
+            return
+        if args.command == "fetch-market-scope":
+            snapshots = asyncio.run(_fetch_market_scope_sources(registry, scope.source_ids, Settings()))
+            write_snapshot_manifest(args.manifest, snapshots)
+            print(json.dumps({"snapshots": len(snapshots), "manifest": str(args.manifest)}, indent=2))
+            return
+        result = MarketScopePublisher(args.dsn).publish(
+            scope, registry, read_snapshot_manifest(args.manifest)
+        )
+        settings = Settings()
+        try:
+            from ingestion.cache import invalidate_catalog_cache
+
+            result["catalog_cache_keys_invalidated"] = invalidate_catalog_cache(settings.redis_url)
+        except Exception as error:
+            result["catalog_cache_invalidation_warning"] = type(error).__name__
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
     if args.command.endswith("energy-seed"):

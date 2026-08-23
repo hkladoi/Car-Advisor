@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from datetime import UTC, datetime
 from io import BytesIO
 from pathlib import Path
@@ -73,7 +74,10 @@ def test_every_automated_source_resolves_to_a_versioned_parser() -> None:
     for source in sources.sources:
         if source.automated_fetch and source.category != "discovery":
             parser = parsers.resolve(source, source.url)
-            assert parser.parser_version.endswith("/2.2.0")
+            assert re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*/\d+\.\d+\.\d+", parser.parser_version)
+
+    market_parser = parsers.resolve(sources.by_id("isuzu-vietnam-market"), sources.by_id("isuzu-vietnam-market").url)
+    assert market_parser.parser_version == "isuzu-market-html/2.8.0"
 
 
 def test_toyota_profile_reads_json_ld_and_profile_content_before_body() -> None:

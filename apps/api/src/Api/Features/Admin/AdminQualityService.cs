@@ -22,10 +22,19 @@ public sealed class AdminQualityService(AppDbContext database, TimeProvider time
     public async Task<AdminCoverageResponse> GetCoverageAsync(CancellationToken cancellationToken)
     {
         var now = timeProvider.GetUtcNow();
+        const string market = "VN";
         var brands = await database.Brands.AsNoTracking().OrderBy(value => value.Name).ToArrayAsync(cancellationToken);
-        var scopes = await database.BrandScopes.AsNoTracking()
-            .Where(value => value.EffectiveFrom <= now && (value.EffectiveTo == null || value.EffectiveTo > now))
+        var currentScopeRows = await database.BrandScopes.AsNoTracking()
+            .Where(value => value.Market == market && value.EffectiveFrom <= now && (value.EffectiveTo == null || value.EffectiveTo > now))
             .OrderByDescending(value => value.EffectiveFrom)
+            .ToArrayAsync(cancellationToken);
+        var scopes = currentScopeRows.GroupBy(value => value.BrandId).Select(group => group.First()).ToArray();
+        var latestReview = await database.MarketScopeReviews.AsNoTracking()
+            .Where(value => value.Market == market)
+            .OrderByDescending(value => value.ReviewedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+        var candidates = await database.MarketCandidates.AsNoTracking()
+            .Where(value => value.Market == market && (value.MarketStatus == MarketStatus.Active || value.MarketStatus == MarketStatus.Upcoming || value.MarketStatus == MarketStatus.Announced))
             .ToArrayAsync(cancellationToken);
         var trimRows = await (
                 from trim in database.Trims.AsNoTracking()
@@ -34,8 +43,12 @@ public sealed class AdminQualityService(AppDbContext database, TimeProvider time
                 join model in database.Models.AsNoTracking() on generation.ModelId equals model.Id
                 select new QualityTrimRow(trim, model.Id, model.BrandId, generation.Code, modelYear.Year))
             .ToArrayAsync(cancellationToken);
-        var activeRows = trimRows.Where(value => value.Trim.MarketStatus is MarketStatus.Active or MarketStatus.Upcoming or MarketStatus.Announced).ToArray();
-        var activeIds = activeRows.Select(value => value.Trim.Id).ToArray();
+        var includedBrandIds = scopes.Where(value => value.Included).Select(value => value.BrandId).ToHashSet();
+        var activeRows = trimRows.Where(value => includedBrandIds.Contains(value.BrandId) && value.Trim.MarketStatus is MarketStatus.Active or MarketStatus.Upcoming or MarketStatus.Announced).ToArray();
+        var publishedTrimCandidates = candidates
+            .Where(value => value.Kind == MarketCandidateKind.Trim && value.Resolution == MarketCandidateResolution.Published && value.TrimId is not null)
+            .ToArray();
+        var activeIds = publishedTrimCandidates.Select(value => value.TrimId!.Value).Distinct().ToArray();
         var currentPrices = await database.Prices.AsNoTracking()
             .Where(value => activeIds.Contains(value.TrimId)
                 && value.EffectiveFrom <= now
@@ -50,103 +63,189 @@ public sealed class AdminQualityService(AppDbContext database, TimeProvider time
                 where activeIds.Contains(spec.TrimId) && CoreSpecCodes.Contains(definition.Code)
                 select new { spec.TrimId, definition.Code, spec.SourceFactId })
             .ToArrayAsync(cancellationToken);
-        var profileTrimIds = await database.PowertrainProfiles.AsNoTracking()
+        var profiles = await database.PowertrainProfiles.AsNoTracking()
             .Where(value => activeIds.Contains(value.TrimId))
-            .Select(value => value.TrimId)
-            .Distinct()
             .ToArrayAsync(cancellationToken);
         var sourceRows = await database.Sources.AsNoTracking().Where(value => value.Active).ToArrayAsync(cancellationToken);
         var latestSnapshots = await database.SourceSnapshots.AsNoTracking().GroupBy(value => value.SourceId)
             .Select(group => new { SourceId = group.Key, LastFetchedAt = group.Max(value => value.FetchedAt) })
             .ToArrayAsync(cancellationToken);
+        var evidenceSnapshotIds = candidates.Select(value => value.EvidenceSnapshotId)
+            .Concat(scopes.Where(value => value.EvidenceSnapshotId is not null).Select(value => value.EvidenceSnapshotId!.Value))
+            .Distinct()
+            .ToArray();
+        var evidenceSnapshots = await database.SourceSnapshots.AsNoTracking()
+            .Where(value => evidenceSnapshotIds.Contains(value.Id))
+            .ToArrayAsync(cancellationToken);
         var staleSourceIds = sourceRows.Where(value =>
         {
             var last = value.LastFetchedAt ?? latestSnapshots.FirstOrDefault(snapshot => snapshot.SourceId == value.Id)?.LastFetchedAt;
             return last is null || last + value.RefreshInterval < now;
-        }).Select(value => value.Id).ToArray();
-        var staleTrimIds = await (
+        }).Select(value => value.Id).ToHashSet();
+        var staleCandidateIds = candidates.Where(candidate =>
+        {
+            var source = sourceRows.FirstOrDefault(value => value.Id == candidate.SourceId);
+            var snapshot = evidenceSnapshots.FirstOrDefault(value => value.Id == candidate.EvidenceSnapshotId);
+            return source is null || snapshot is null || snapshot.SourceId != candidate.SourceId || snapshot.HttpStatus is < 200 or >= 300
+                || staleSourceIds.Contains(candidate.SourceId) || candidate.LastSeenAt + source.RefreshInterval < now;
+        }).Select(value => value.Id).ToHashSet();
+
+        var priceSourceIds = await (
                 from price in database.Prices.AsNoTracking()
                 join fact in database.SourceFacts.AsNoTracking() on price.SourceFactId equals fact.Id
                 join snapshot in database.SourceSnapshots.AsNoTracking() on fact.SnapshotId equals snapshot.Id
-                where activeIds.Contains(price.TrimId) && staleSourceIds.Contains(snapshot.SourceId)
-                select price.TrimId)
-            .Distinct()
-            .ToArrayAsync(cancellationToken);
-        var blockedTrimIds = await database.DataChanges.AsNoTracking()
-            .Where(value => value.EntityType == "Trim"
-                && activeIds.Contains(value.EntityId)
-                && value.Status == ChangeStatus.PendingReview
-                && (value.RiskLevel == ChangeRiskLevel.High || value.RiskLevel == ChangeRiskLevel.Critical))
-            .Select(value => value.EntityId)
-            .Distinct()
-            .ToArrayAsync(cancellationToken);
+                where activeIds.Contains(price.TrimId) && price.EffectiveFrom <= now && (price.EffectiveTo == null || price.EffectiveTo > now)
+                select snapshot.SourceId)
+            .Distinct().ToArrayAsync(cancellationToken);
+        var energySourceIds = await (
+                from price in database.EnergyPrices.AsNoTracking()
+                join fact in database.SourceFacts.AsNoTracking() on price.SourceFactId equals fact.Id
+                join snapshot in database.SourceSnapshots.AsNoTracking() on fact.SnapshotId equals snapshot.Id
+                where price.EffectiveFrom <= now && (price.EffectiveTo == null || price.EffectiveTo > now)
+                select snapshot.SourceId)
+            .Distinct().ToArrayAsync(cancellationToken);
+        var legalSourceIds = await (
+                from rule in database.RegistrationRules.AsNoTracking()
+                join fact in database.SourceFacts.AsNoTracking() on rule.SourceFactId equals fact.Id
+                join snapshot in database.SourceSnapshots.AsNoTracking() on fact.SnapshotId equals snapshot.Id
+                where rule.EffectiveFrom <= now && (rule.EffectiveTo == null || rule.EffectiveTo > now)
+                select snapshot.SourceId)
+            .Distinct().ToArrayAsync(cancellationToken);
+        var promotionSourceIds = sourceRows.Where(value => value.Category is "dealer-offer" or "finance-campaign").Select(value => value.Id).ToArray();
+        var dealerOfferSourceIds = sourceRows.Where(value => value.Category == "dealer-offer").Select(value => value.Id).ToArray();
+
+        AdminFreshnessDomain DomainFreshness(string name, IReadOnlyCollection<Guid> sourceIds)
+        {
+            var distinct = sourceIds.Distinct().ToArray();
+            var stale = distinct.Count(id => staleSourceIds.Contains(id));
+            var freshness = distinct.Length == 0 ? 0m : decimal.Round((decimal)(distinct.Length - stale) / distinct.Length, 6);
+            return new AdminFreshnessDomain(name, distinct.Length, stale, freshness, distinct.Length > 0 && stale == 0);
+        }
+
+        var freshnessDomains = new[]
+        {
+            DomainFreshness("price", priceSourceIds),
+            DomainFreshness("promotion", promotionSourceIds),
+            DomainFreshness("dealer-offer", dealerOfferSourceIds),
+            DomainFreshness("energy", energySourceIds),
+            DomainFreshness("legal", legalSourceIds),
+        };
 
         const int requiredPerTrim = 9; // market status + price/provenance + powertrain + five canonical specs
         var coverageBrands = new List<AdminCoverageBrand>();
-        foreach (var brand in brands)
+        foreach (var scope in scopes.OrderBy(value => brands.FirstOrDefault(brand => brand.Id == value.BrandId)?.Name))
         {
-            var latestScope = scopes.FirstOrDefault(value => value.BrandId == brand.Id);
-            var included = latestScope?.Included == true;
-            var brandRows = activeRows.Where(value => value.BrandId == brand.Id).ToArray();
-            var trimIds = brandRows.Select(value => value.Trim.Id).ToArray();
+            var brand = brands.First(value => value.Id == scope.BrandId);
+            var brandCandidates = candidates.Where(value => value.BrandId == brand.Id).ToArray();
+            var trimCandidates = brandCandidates.Where(value => value.Kind == MarketCandidateKind.Trim).ToArray();
+            var modelCandidates = brandCandidates.Where(value => value.Kind == MarketCandidateKind.Model).ToArray();
+            var trimIds = trimCandidates.Where(value => value.Resolution == MarketCandidateResolution.Published && value.TrimId != null).Select(value => value.TrimId!.Value).Distinct().ToArray();
             var completeFields = 0;
             var missing = 0;
             foreach (var trimId in trimIds)
             {
                 var hasPrice = currentPrices.Any(value => value.TrimId == trimId);
                 var hasPriceSource = currentPrices.Any(value => value.TrimId == trimId && value.SourceFactId is not null);
-                var hasPowertrain = profileTrimIds.Contains(trimId);
-                var coreSpecCount = specRows.Where(value => value.TrimId == trimId).Select(value => value.Code).Distinct().Count();
+                var hasPowertrain = profiles.Any(value => value.TrimId == trimId && value.SourceFactId is not null);
+                var coreSpecCount = specRows.Where(value => value.TrimId == trimId && value.SourceFactId != null).Select(value => value.Code).Distinct().Count();
                 var present = 1 + (hasPrice ? 1 : 0) + (hasPriceSource ? 1 : 0) + (hasPowertrain ? 1 : 0) + coreSpecCount;
                 completeFields += present;
                 missing += requiredPerTrim - present;
             }
-            var completeness = trimIds.Length == 0 ? 0 : decimal.Round((decimal)completeFields / (trimIds.Length * requiredPerTrim), 6);
-            var staleCount = trimIds.Count(id => staleTrimIds.Contains(id));
-            var freshness = trimIds.Length == 0 ? 0 : decimal.Round((decimal)(trimIds.Length - staleCount) / trimIds.Length, 6);
-            var published = trimIds.Count(id => currentPrices.Any(value => value.TrimId == id));
-            var blocked = trimIds.Count(id => blockedTrimIds.Contains(id)) + trimIds.Length - published;
+            var completeness = trimIds.Length == 0 ? 1m : decimal.Round((decimal)completeFields / (trimIds.Length * requiredPerTrim), 6);
+            var staleCount = brandCandidates.Count(value => staleCandidateIds.Contains(value.Id));
+            var freshness = brandCandidates.Length == 0 ? (scope.Included ? 0m : 1m) : decimal.Round((decimal)(brandCandidates.Length - staleCount) / brandCandidates.Length, 6);
+            var published = brandCandidates.Count(value => value.Resolution == MarketCandidateResolution.Published);
+            var inventoryGaps = modelCandidates.Count(value => value.TrimInventoryStatus == TrimInventoryStatus.BlockedWithReason);
+            var blocked = brandCandidates.Count(value => value.Resolution == MarketCandidateResolution.BlockedWithReason) + inventoryGaps;
+            var scopeSnapshot = scope.EvidenceSnapshotId is null ? null : evidenceSnapshots.FirstOrDefault(value => value.Id == scope.EvidenceSnapshotId);
+            var reviewed = scope.ReviewedAt is not null && !string.IsNullOrWhiteSpace(scope.ReviewedBy)
+                && scope.SourceId is not null && scopeSnapshot is not null && scopeSnapshot.SourceId == scope.SourceId
+                && scopeSnapshot.HttpStatus is >= 200 and < 300;
             coverageBrands.Add(new AdminCoverageBrand(
                 brand.Id,
                 brand.Name,
-                included,
-                trimIds.Length,
-                trimIds.Length,
+                scope.Included,
+                brandCandidates.Length,
+                brandCandidates.Count(value => value.Resolution == MarketCandidateResolution.Published),
                 published,
                 blocked,
                 staleCount,
                 completeness,
                 freshness,
-                missing));
+                missing,
+                modelCandidates.Length,
+                trimCandidates.Length,
+                inventoryGaps,
+                reviewed,
+                scope.ReviewedAt));
         }
 
         var includedRows = coverageBrands.Where(value => value.Included).ToArray();
-        var totalActive = includedRows.Sum(value => value.Mapped);
+        var totalActive = activeIds.Length;
+        var missingCoreTotal = includedRows.Sum(value => value.MissingCoreCount);
         var completenessTotal = totalActive == 0
             ? 0
-            : decimal.Round(includedRows.Sum(value => value.Completeness * value.Mapped) / totalActive, 6);
-        var freshnessTotal = totalActive == 0
-            ? 0
-            : decimal.Round(includedRows.Sum(value => value.Freshness * value.Mapped) / totalActive, 6);
+            : decimal.Round((decimal)(totalActive * requiredPerTrim - missingCoreTotal) / (totalActive * requiredPerTrim), 6);
+        var includedCandidateCount = candidates.Count(value => includedBrandIds.Contains(value.BrandId));
+        var freshnessTotal = includedCandidateCount == 0 ? 0 : decimal.Round((decimal)(includedCandidateCount - candidates.Count(value => includedBrandIds.Contains(value.BrandId) && staleCandidateIds.Contains(value.Id))) / includedCandidateCount, 6);
         var duplicates = DuplicateTrimGroups(trimRows).Count;
         var failures = new List<string>();
-        if (includedRows.Length < 15) failures.Add("BRAND_SCOPE_BELOW_INITIAL_VALIDATION_TARGET");
-        if (includedRows.Any(value => value.Discovered == 0)) failures.Add("INCLUDED_BRAND_WITHOUT_ACTIVE_MODEL_OR_TRIM");
-        if (includedRows.Any(value => value.Published < value.Mapped)) failures.Add("ACTIVE_TRIM_WITHOUT_VALID_PRICE_STATE");
+        if (latestReview is null) failures.Add("MARKET_SCOPE_REVIEW_MISSING");
+        if (latestReview is not null && latestReview.ReviewedBrandCount != scopes.Length) failures.Add("MARKET_SCOPE_REVIEW_COUNT_MISMATCH");
+        if (latestReview is not null && latestReview.IncludedBrandCount != includedRows.Length) failures.Add("MARKET_SCOPE_INCLUDED_COUNT_MISMATCH");
+        if (latestReview is not null && latestReview.ExcludedBrandCount != coverageBrands.Count(value => !value.Included)) failures.Add("MARKET_SCOPE_EXCLUDED_COUNT_MISMATCH");
+        if (latestReview is not null && latestReview.ModelCandidateCount != candidates.Count(value => includedBrandIds.Contains(value.BrandId) && value.Kind == MarketCandidateKind.Model)) failures.Add("MODEL_CANDIDATE_COUNT_MISMATCH");
+        if (latestReview is not null && latestReview.TrimCandidateCount != candidates.Count(value => includedBrandIds.Contains(value.BrandId) && value.Kind == MarketCandidateKind.Trim)) failures.Add("TRIM_CANDIDATE_COUNT_MISMATCH");
+        if (coverageBrands.Any(value => !value.Reviewed)) failures.Add("BRAND_SCOPE_NOT_FULLY_REVIEWED");
+        if (!includedRows.Any(value => value.BrandName == "Porsche")) failures.Add("PORSCHE_REQUIRED_IN_BRAND_SCOPE");
+        if (coverageBrands.Any(value => value.Included && value.BrandName is "Ferrari" or "Lamborghini" or "Lotus")) failures.Add("CONFIGURED_SUPERCAR_EXCLUSION_VIOLATED");
+        if (includedRows.Any(value => value.ModelCandidates == 0)) failures.Add("INCLUDED_BRAND_WITHOUT_ACTIVE_MODEL_CANDIDATE");
+        if (candidates.Any(value => includedBrandIds.Contains(value.BrandId) && staleCandidateIds.Contains(value.Id))) failures.Add("MARKET_CANDIDATE_SOURCE_FRESHNESS_SLA_FAILED");
+        if (candidates.Any(value => includedBrandIds.Contains(value.BrandId) && value.Resolution == MarketCandidateResolution.Published
+                && (value.ModelId is null || (value.Kind == MarketCandidateKind.Trim && value.TrimId is null)))) failures.Add("PUBLISHED_CANDIDATE_WITHOUT_CATALOG_MAPPING");
+        if (candidates.Any(value => includedBrandIds.Contains(value.BrandId) && value.Resolution == MarketCandidateResolution.BlockedWithReason
+                && string.IsNullOrWhiteSpace(value.BlockedReason))) failures.Add("BLOCKED_CANDIDATE_WITHOUT_REASON");
+        if (candidates.Any(value => includedBrandIds.Contains(value.BrandId) && value.Kind == MarketCandidateKind.Model
+                && value.TrimInventoryStatus == TrimInventoryStatus.BlockedWithReason && string.IsNullOrWhiteSpace(value.TrimInventoryReason))) failures.Add("UNEXPLAINED_TRIM_INVENTORY_GAP");
+        var mappedTrimIds = publishedTrimCandidates.Select(value => value.TrimId!.Value).ToHashSet();
+        if (activeRows.Any(value => !mappedTrimIds.Contains(value.Trim.Id))) failures.Add("ACTIVE_CATALOG_TRIM_NOT_IN_MARKET_INVENTORY");
+        if (activeIds.Any(trimId => !currentPrices.Any(value => value.TrimId == trimId && value.SourceFactId is not null))) failures.Add("ACTIVE_TRIM_WITHOUT_VALID_PRICE_STATE");
         if (completenessTotal < 0.95m) failures.Add("CORE_FIELD_COVERAGE_BELOW_95_PERCENT");
-        if (freshnessTotal < 1m) failures.Add("PRICE_OR_SOURCE_FRESHNESS_SLA_FAILED");
+        foreach (var domain in freshnessDomains.Where(value => !value.Passed)) failures.Add($"{domain.Domain.ToUpperInvariant().Replace('-', '_')}_FRESHNESS_SLA_FAILED");
         if (duplicates > 0) failures.Add("UNRESOLVED_HIGH_CONFIDENCE_DUPLICATE");
-        if (!await CurrentRulesAndTariffsAreVerifiedAsync(now, cancellationToken)) failures.Add("LEGAL_OR_ENERGY_SOURCE_NOT_CURRENT");
+        var gaps = candidates.Where(value => includedBrandIds.Contains(value.BrandId))
+            .SelectMany(value =>
+            {
+                var brandName = brands.First(brand => brand.Id == value.BrandId).Name;
+                var result = new List<AdminCoverageGap>();
+                if (value.Resolution == MarketCandidateResolution.BlockedWithReason)
+                    result.Add(new AdminCoverageGap(value.Id, brandName, value.Kind.ToString(), value.Name, "BLOCKED_WITH_REASON", value.BlockedReason!, value.LastSeenAt));
+                if (value.Kind == MarketCandidateKind.Model && value.TrimInventoryStatus == TrimInventoryStatus.BlockedWithReason)
+                    result.Add(new AdminCoverageGap(value.Id, brandName, value.Kind.ToString(), value.Name, "TRIM_INVENTORY_BLOCKED_WITH_REASON", value.TrimInventoryReason!, value.LastSeenAt));
+                return result;
+            }).OrderBy(value => value.BrandName).ThenBy(value => value.CandidateName).ToArray();
         return new AdminCoverageResponse(
             coverageBrands,
-            includedRows.Length,
-            activeRows.Select(value => value.ModelId).Distinct().Count(),
-            totalActive,
+            coverageBrands.Count,
+            candidates.Count(value => includedBrandIds.Contains(value.BrandId) && value.Kind == MarketCandidateKind.Model),
+            candidates.Count(value => includedBrandIds.Contains(value.BrandId) && value.Kind == MarketCandidateKind.Trim),
             completenessTotal,
             freshnessTotal,
             duplicates,
             failures.Count == 0,
             failures,
+            latestReview?.SchemaVersion,
+            latestReview?.ManifestHash,
+            coverageBrands.Count(value => value.Reviewed),
+            coverageBrands.Count(value => !value.Included),
+            includedCandidateCount,
+            candidates.Count(value => includedBrandIds.Contains(value.BrandId) && value.Resolution is MarketCandidateResolution.Published or MarketCandidateResolution.BlockedWithReason),
+            candidates.Count(value => includedBrandIds.Contains(value.BrandId) && value.Resolution == MarketCandidateResolution.BlockedWithReason)
+                + includedRows.Sum(value => value.TrimInventoryGaps),
+            includedRows.Sum(value => value.TrimInventoryGaps),
+            gaps,
+            freshnessDomains,
             now);
     }
 
@@ -283,27 +382,6 @@ public sealed class AdminQualityService(AppDbContext database, TimeProvider time
                 value.Id, value.Actor, value.Action, value.EntityType, value.EntityId, value.BeforeJson,
                 value.AfterJson, value.Reason, value.OccurredAt, value.CorrelationId))
             .ToArrayAsync(cancellationToken);
-
-    private async Task<bool> CurrentRulesAndTariffsAreVerifiedAsync(DateTimeOffset now, CancellationToken cancellationToken)
-    {
-        var ruleSourcesCurrent = await (
-                from rule in database.RegistrationRules.AsNoTracking()
-                join fact in database.SourceFacts.AsNoTracking() on rule.SourceFactId equals fact.Id
-                join snapshot in database.SourceSnapshots.AsNoTracking() on fact.SnapshotId equals snapshot.Id
-                join source in database.Sources.AsNoTracking() on snapshot.SourceId equals source.Id
-                where rule.EffectiveFrom <= now && (rule.EffectiveTo == null || rule.EffectiveTo > now)
-                select source.Active && snapshot.FetchedAt + source.RefreshInterval >= now)
-            .AllAsync(value => value, cancellationToken);
-        var energySourcesCurrent = await (
-                from price in database.EnergyPrices.AsNoTracking()
-                join fact in database.SourceFacts.AsNoTracking() on price.SourceFactId equals fact.Id
-                join snapshot in database.SourceSnapshots.AsNoTracking() on fact.SnapshotId equals snapshot.Id
-                join source in database.Sources.AsNoTracking() on snapshot.SourceId equals source.Id
-                where price.EffectiveFrom <= now && (price.EffectiveTo == null || price.EffectiveTo > now)
-                select source.Active && snapshot.FetchedAt + source.RefreshInterval >= now)
-            .AllAsync(value => value, cancellationToken);
-        return ruleSourcesCurrent && energySourcesCurrent;
-    }
 
     private static List<IGrouping<string, QualityTrimRow>> DuplicateTrimGroups(IEnumerable<QualityTrimRow> rows) =>
         rows.GroupBy(

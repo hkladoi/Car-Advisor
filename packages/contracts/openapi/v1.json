@@ -1947,6 +1947,26 @@
         }
       }
     },
+    "/api/v1/coverage": {
+      "get": {
+        "tags": [
+          "Coverage"
+        ],
+        "operationId": "GetPublicCoverage",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCoverageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/calculators/energy": {
       "post": {
         "tags": [
@@ -2577,6 +2597,60 @@
           "missingCoreCount": {
             "type": "integer",
             "format": "int32"
+          },
+          "modelCandidates": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trimCandidates": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trimInventoryGaps": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reviewed": {
+            "type": "boolean"
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminCoverageGap": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brandName": {
+            "type": "string",
+            "nullable": true
+          },
+          "candidateKind": {
+            "type": "string",
+            "nullable": true
+          },
+          "candidateName": {
+            "type": "string",
+            "nullable": true
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastSeenAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -2622,6 +2696,52 @@
             "type": "array",
             "items": {
               "type": "string"
+            },
+            "nullable": true
+          },
+          "scopeVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "manifestHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "reviewedBrandCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "excludedBrandCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "discoveredCandidateCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "resolvedCandidateCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "documentedBlockedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trimInventoryGapCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "candidateGaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminCoverageGap"
+            },
+            "nullable": true
+          },
+          "freshnessDomains": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminFreshnessDomain"
             },
             "nullable": true
           },
@@ -2976,6 +3096,31 @@
             "nullable": true
           },
           "active": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminFreshnessDomain": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "staleCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "freshness": {
+            "type": "number",
+            "format": "double"
+          },
+          "passed": {
             "type": "boolean"
           }
         },

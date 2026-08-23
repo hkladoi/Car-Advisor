@@ -41,6 +41,7 @@ class RegistrySource(BaseModel):
     robots_note: str = Field(min_length=1, max_length=2000)
     terms_note: str = Field(min_length=1, max_length=2000)
     automated_fetch: bool = True
+    http_user_agent: str | None = Field(default=None, min_length=3, max_length=500)
 
     @model_validator(mode="after")
     def validate_origin(self) -> "RegistrySource":

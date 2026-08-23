@@ -77,11 +77,18 @@ def main() -> None:
     status, coverage, _ = call("/api/v1/admin/coverage", token=token)
     require(status, 200, coverage)
     assert isinstance(coverage, dict)
-    assert coverage["activeTrimCount"] >= 12 and coverage["brandScopeCount"] >= 11
+    assert coverage["brandScopeCount"] >= 11
     assert 0 <= coverage["coreCompleteness"] <= 1
     assert 0 <= coverage["freshness"] <= 1
-    assert coverage["fullMarketGatePassed"] is False
-    assert "BRAND_SCOPE_BELOW_INITIAL_VALIDATION_TARGET" in coverage["gateFailures"]
+    has_v28_scope = coverage.get("scopeVersion") == "v2.8"
+    if has_v28_scope:
+        assert coverage["activeModelCount"] >= 255 and coverage["activeTrimCount"] >= 49
+        assert coverage["fullMarketGatePassed"] is True
+        assert coverage["gateFailures"] == []
+    else:
+        assert coverage["activeModelCount"] == 0 and coverage["activeTrimCount"] == 0
+        assert coverage["fullMarketGatePassed"] is False
+        assert "MARKET_SCOPE_REVIEW_MISSING" in coverage["gateFailures"]
     assert len(coverage["brands"]) == coverage["brandScopeCount"]
     for brand in coverage["brands"]:
         for field in ("discovered", "mapped", "published", "blocked", "stale", "completeness", "freshness"):
@@ -433,12 +440,14 @@ def main() -> None:
     assert "httponly" in cookie_header and "samesite=strict" in cookie_header
     status, proxy_coverage, _ = call("/api/admin/coverage", base=WEB, opener=opener)
     require(status, 200, proxy_coverage)
-    assert isinstance(proxy_coverage, dict) and proxy_coverage["fullMarketGatePassed"] is False
+    assert isinstance(proxy_coverage, dict)
+    assert proxy_coverage["fullMarketGatePassed"] is coverage["fullMarketGatePassed"]
 
     request = Request(f"{WEB}/admin", headers={"Accept": "text/html"})  # noqa: S310
     with opener.open(request, timeout=60) as response:  # noqa: S310
         html = response.read().decode("utf-8")
-    for expected in ("Trust is an operating system.", "FULL-MARKET GATE", "BLOCKED", "Coverage &amp; QA"):
+    expected_gate_stamp = "PASS" if coverage["fullMarketGatePassed"] else "BLOCKED"
+    for expected in ("Trust is an operating system.", "FULL-MARKET GATE", expected_gate_stamp, "Coverage &amp; QA"):
         assert expected in html, expected
     assert ADMIN_PASSWORD not in html and login["token"] not in html
 

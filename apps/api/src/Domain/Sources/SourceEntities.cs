@@ -54,6 +54,7 @@ public sealed class Source : Entity
     public string Name { get; set; } = string.Empty;
     public string Url { get; set; } = string.Empty;
     public string Domain { get; set; } = string.Empty;
+    public string Category { get; set; } = "unknown";
     public SourceAuthorityLevel AuthorityLevel { get; set; } = SourceAuthorityLevel.Unknown;
     public SourceContentType ContentType { get; set; }
     public string? RobotsNote { get; set; }
@@ -151,4 +152,64 @@ public sealed class CoverageMetric : Entity
     public int BlockedCount { get; set; }
     public int StaleCount { get; set; }
     public DateTimeOffset CalculatedAt { get; set; }
+}
+
+public enum MarketCandidateKind
+{
+    Model,
+    Trim,
+}
+
+public enum MarketCandidateResolution
+{
+    Published,
+    BlockedWithReason,
+}
+
+public enum TrimInventoryStatus
+{
+    NotApplicable,
+    Complete,
+    BlockedWithReason,
+}
+
+public sealed class MarketCandidate : Entity
+{
+    public string Market { get; set; } = "VN";
+    public Guid BrandId { get; set; }
+    public Guid SourceId { get; set; }
+    public Guid EvidenceSnapshotId { get; set; }
+    public string ExternalKey { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string? ParentExternalKey { get; set; }
+    public MarketCandidateKind Kind { get; set; }
+    public MarketStatus MarketStatus { get; set; } = MarketStatus.Unknown;
+    public MarketCandidateResolution Resolution { get; set; }
+    public Guid? ModelId { get; set; }
+    public Guid? TrimId { get; set; }
+    public string? BlockedReason { get; set; }
+    public TrimInventoryStatus TrimInventoryStatus { get; set; }
+    public string? TrimInventoryReason { get; set; }
+    public DateTimeOffset DiscoveredAt { get; set; }
+    public DateTimeOffset LastSeenAt { get; set; }
+    public DateTimeOffset ReviewedAt { get; set; }
+    public string ReviewedBy { get; set; } = string.Empty;
+}
+
+public sealed class MarketScopeReview : Entity
+{
+    public string Market { get; set; } = "VN";
+    public string SchemaVersion { get; set; } = string.Empty;
+    public string ManifestHash { get; set; } = string.Empty;
+    public int ReviewedBrandCount { get; set; }
+    public int IncludedBrandCount { get; set; }
+    public int ExcludedBrandCount { get; set; }
+    public int ModelCandidateCount { get; set; }
+    public int TrimCandidateCount { get; set; }
+    public Guid PolicySourceId { get; set; }
+    public Guid PolicySnapshotId { get; set; }
+    public DateTimeOffset ObservedAt { get; set; }
+    public DateTimeOffset ReviewedAt { get; set; }
+    public string ReviewedBy { get; set; } = string.Empty;
+    public string ReviewReason { get; set; } = string.Empty;
 }

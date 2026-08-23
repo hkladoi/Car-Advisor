@@ -26,8 +26,12 @@ internal static class CatalogModelConfiguration
                 "ck_brand_scopes_effective_period",
                 "effective_to IS NULL OR effective_from < effective_to"));
             entity.Property(value => value.Reason).HasMaxLength(500);
+            entity.Property(value => value.Market).HasMaxLength(8);
+            entity.Property(value => value.ReviewedBy).HasMaxLength(320);
             entity.HasOne<Brand>().WithMany().HasForeignKey(value => value.BrandId).OnDelete(DeleteBehavior.Cascade);
-            entity.HasIndex(value => new { value.BrandId, value.EffectiveFrom }).IsUnique();
+            entity.HasOne<Source>().WithMany().HasForeignKey(value => value.SourceId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<SourceSnapshot>().WithMany().HasForeignKey(value => value.EvidenceSnapshotId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(value => new { value.Market, value.BrandId, value.EffectiveFrom }).IsUnique();
         });
 
         modelBuilder.Entity<VehicleModel>(entity =>

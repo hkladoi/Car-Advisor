@@ -1,0 +1,284 @@
+{
+  "schema_version": "v2.8",
+  "market": "VN",
+  "observed_at": "2026-08-23T06:10:00Z",
+  "reviewed_at": "2026-08-23T06:15:00Z",
+  "reviewed_by": "coverage-review@vietnam-car-platform.local",
+  "review_reason": "V2.8 full-market review of current official Vietnam manufacturer and authorised-distributor listings. Commercial-only vehicles, grey imports and configured supercar brands are outside scope; missing trim inventories remain explicit gaps and no vehicle identity is invented.",
+  "brands": [
+    {
+      "name": "Audi", "slug": "audi", "country_code": "DE", "official_url": "https://www.audi.vn/vi/models/", "included": true,
+      "reason": "The current Audi Vietnam lineup is cross-reviewed against the authorised Audi Ho Chi Minh dealer registry because the manufacturer CDN blocks the ingestion network.", "source_id": "audi-vietnam-market",
+      "models": [
+        {"name":"A5","slug":"a5"},{"name":"A6","slug":"a6"},{"name":"A6 e-tron","slug":"a6-e-tron"},{"name":"A7","slug":"a7"},{"name":"A8 L","slug":"a8-l"},
+        {"name":"Q2","slug":"q2"},{"name":"Q3","slug":"q3"},{"name":"Q5","slug":"q5"},{"name":"Q6 e-tron","slug":"q6-e-tron"},{"name":"Q7","slug":"q7"},
+        {"name":"Q8","slug":"q8"},{"name":"e-tron GT","slug":"e-tron-gt"}
+      ]
+    },
+    {
+      "name": "BMW", "slug": "bmw", "country_code": "DE", "official_url": "https://www.thacoauto.vn/", "included": true,
+      "reason": "BMW passenger vehicles are officially distributed in Vietnam by THACO AUTO.", "source_id": "thaco-passenger-market",
+      "models": [
+        {"name":"2 Series Gran Coupe","slug":"2-series-gran-coupe"},{"name":"3 Series","slug":"3-series"},{"name":"4 Series","slug":"4-series"},{"name":"5 Series","slug":"5-series"},
+        {"name":"7 Series","slug":"7-series"},{"name":"8 Series","slug":"8-series"},{"name":"Z4","slug":"z4"},{"name":"X1","slug":"x1"},
+        {"name":"X3","slug":"x3","trims":[{"name":"X3 20 All New 2026","slug":"20-all-new-2026","source_id":"bmw-x3"}]},
+        {"name":"X4","slug":"x4"},{"name":"X5","slug":"x5"},{"name":"X6","slug":"x6"},{"name":"X7","slug":"x7"},{"name":"XM","slug":"xm"},
+        {"name":"i4","slug":"i4"},{"name":"i5","slug":"i5"},{"name":"i7","slug":"i7"},{"name":"iX1","slug":"ix1"},{"name":"iX3","slug":"ix3"},{"name":"iX","slug":"ix"}
+      ]
+    },
+    {
+      "name": "BYD", "slug": "byd", "country_code": "CN", "official_url": "https://prod.byd.com/vn/", "included": true,
+      "reason": "BYD Auto Vietnam lists a current official new-energy passenger range.", "source_id": "byd-vietnam-market",
+      "models": [
+        {"name":"ATTO 3","slug":"atto-3"},{"name":"SEAL","slug":"seal"},{"name":"DOLPHIN","slug":"dolphin"},{"name":"HAN","slug":"han"},{"name":"M6","slug":"m6"},
+        {"name":"SEALION 8","slug":"sealion-8"},{"name":"ATTO 2","slug":"atto-2"},
+        {"name":"Sealion 6","slug":"sealion-6","trims":[{"name":"Sealion 6 Dynamic","slug":"dynamic","source_id":"byd-sealion6"}]},
+        {"name":"SEAL 5","slug":"seal-5"},{"name":"M9","slug":"m9"}
+      ]
+    },
+    {
+      "name": "Dongfeng", "slug": "dongfeng", "country_code": "CN", "official_url": "https://dongfengcar.vn/trang-chu-1/", "included": true,
+      "reason": "The reviewed Carvivu Vietnam listing confirms availability, while Dongfeng's global manufacturer registry closes candidate identity because the local host currently refuses ingestion connections.", "source_id": "dongfeng-vietnam-market",
+      "models": [{"name":"Box","slug":"box"},{"name":"E70","slug":"e70"},{"name":"Mage","slug":"mage"},{"name":"Huge","slug":"huge"}]
+    },
+    {
+      "name": "Ford", "slug": "ford", "country_code": "US", "official_url": "https://www.ford.com.vn/vehicles/", "included": true,
+      "reason": "Ford Vietnam's official sitemap closes the current model inventory while its vehicle index rejects the reviewed crawler identity.", "source_id": "ford-vietnam-market",
+      "models": [{"name":"Territory","slug":"territory"},{"name":"Everest","slug":"everest"},{"name":"Ranger","slug":"ranger"},{"name":"Ranger Raptor","slug":"ranger-raptor"},{"name":"Explorer","slug":"explorer"},{"name":"Mustang Mach-E","slug":"mustang-mach-e"}]
+    },
+    {
+      "name": "GAC", "slug": "gac", "country_code": "CN", "official_url": "https://gacmotorvn.com.vn/", "included": true,
+      "reason": "TC Services is the authorised Vietnam distributor and lists current GAC passenger models.", "source_id": "gac-vietnam-market",
+      "models": [{"name":"GS3 EMZOOM","slug":"gs3-emzoom"},{"name":"M8","slug":"m8"},{"name":"M6 Pro","slug":"m6-pro"},{"name":"GS8","slug":"gs8"}]
+    },
+    {
+      "name": "Geely", "slug": "geely", "country_code": "CN", "official_url": "https://geely.vn/bo-suu-tap/", "included": true,
+      "reason": "Tasco Auto's official Geely Vietnam collection identifies the complete current range.", "source_id": "geely-vietnam-market",
+      "models": [
+        {"name":"Coolray","slug":"coolray","trims":[{"name":"Coolray Executive","slug":"executive","source_id":"geely-coolray"}]},
+        {"name":"Okavango","slug":"okavango"},{"name":"EX2","slug":"ex2"},{"name":"EX5 EM-i","slug":"ex5-em-i"},
+        {"name":"EX5","slug":"ex5","trims":[{"name":"EX5 Pro","slug":"pro","source_id":"geely-ex5"}]},{"name":"Monjaro","slug":"monjaro"}
+      ]
+    },
+    {
+      "name": "Haima", "slug": "haima", "country_code": "CN", "official_url": "https://haimacar.vn/", "included": true,
+      "reason": "Carvivu's official Haima Vietnam operation lists a current passenger range.", "source_id": "haima-vietnam-market",
+      "models": [{"name":"8S","slug":"8s"},{"name":"7X","slug":"7x"},{"name":"7X-E","slug":"7x-e"}]
+    },
+    {
+      "name": "Haval", "slug": "haval", "country_code": "CN", "official_url": "https://gwm-thanhanvietnam.com.vn/", "included": true,
+      "reason": "The current authorised GWM dealer registry is used because the exclusive distributor host serves an obsolete placeholder to the ingestion network.", "source_id": "gwm-vietnam-market",
+      "models": [{"name":"H6 Hybrid","slug":"h6-hybrid"},{"name":"Jolion Hybrid","slug":"jolion-hybrid"}]
+    },
+    {
+      "name": "Honda", "slug": "honda", "country_code": "JP", "official_url": "https://www.honda.com.vn/o-to/san-pham", "included": true,
+      "reason": "Honda Vietnam maintains an official automobile product registry.", "source_id": "honda-vietnam-market",
+      "models": [
+        {"name":"City","slug":"city"},{"name":"BR-V","slug":"br-v"},{"name":"HR-V","slug":"hr-v"},
+        {"name":"CR-V","slug":"cr-v","trims":[{"name":"CR-V G","slug":"g","source_id":"honda-crv"}]},
+        {"name":"Civic","slug":"civic"},{"name":"Civic Type R","slug":"civic-type-r"},{"name":"Accord","slug":"accord"}
+      ]
+    },
+    {
+      "name": "Hyundai", "slug": "hyundai", "country_code": "KR", "official_url": "https://hyundai.thanhcong.vn/san-pham", "included": true,
+      "reason": "Hyundai Thanh Cong's official passenger registry is current and distinct from its commercial range.", "source_id": "hyundai-vietnam-market",
+      "models": [
+        {"name":"Grand i10","slug":"grand-i10"},{"name":"Grand i10 Sedan","slug":"grand-i10-sedan"},{"name":"Accent","slug":"accent"},{"name":"Elantra","slug":"elantra"},
+        {"name":"Venue","slug":"venue"},{"name":"Palisade","slug":"palisade"},{"name":"Creta","slug":"creta"},
+        {"name":"Tucson","slug":"tucson","trims":[{"name":"Tucson 1.6 T-GDI","slug":"1-6-t-gdi","source_id":"hyundai-tucson"}]},
+        {"name":"Santa Fe","slug":"santa-fe"},{"name":"Stargazer","slug":"stargazer"},{"name":"Custin","slug":"custin"},{"name":"IONIQ 5","slug":"ioniq-5"}
+      ]
+    },
+    {
+      "name": "Isuzu", "slug": "isuzu", "country_code": "JP", "official_url": "https://isuzu-vietnam.com/", "included": true,
+      "reason": "The official Isuzu Vietnam operation currently sells D-Max and mu-X in the passenger/light-duty scope.", "source_id": "isuzu-vietnam-market",
+      "models": [{"name":"D-Max","slug":"d-max"},{"name":"mu-X","slug":"mu-x"}]
+    },
+    {
+      "name": "Jaecoo", "slug": "jaecoo", "country_code": "CN", "official_url": "https://omodajaecoo.vn/product", "included": true,
+      "reason": "Geleximco's official joint product list exposes Jaecoo as a separate consumer marque.", "source_id": "omoda-jaecoo-vietnam-market",
+      "models": [
+        {"name":"J7","slug":"j7","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"J7 PHEV (SHS)","slug":"phev-shs"},{"name":"J7 Flagship","slug":"flagship"},{"name":"J7 AWD","slug":"awd"}]},
+        {"name":"J5","slug":"j5","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"J5 SHS-H","slug":"shs-h"},{"name":"J5 EV","slug":"ev"},{"name":"J5","slug":"j5"}]}
+      ]
+    },
+    {
+      "name": "Jeep", "slug": "jeep", "country_code": "US", "official_url": "https://jva.vn/vehicles.html", "included": true,
+      "reason": "Jeep Vietnam Automobiles lists and supports an official new-vehicle range.", "source_id": "jva-vietnam-market",
+      "models": [{"name":"Wrangler","slug":"wrangler"},{"name":"Gladiator","slug":"gladiator"},{"name":"Grand Cherokee","slug":"grand-cherokee"}]
+    },
+    {
+      "name": "Kia", "slug": "kia", "country_code": "KR", "official_url": "https://www.thacoauto.vn/", "included": true,
+      "reason": "Kia passenger vehicles are manufactured and officially distributed by THACO AUTO.", "source_id": "thaco-passenger-market",
+      "models": [
+        {"name":"Morning","slug":"morning"},{"name":"Soluto","slug":"soluto"},{"name":"K3","slug":"k3"},{"name":"K5","slug":"k5"},{"name":"Sonet","slug":"sonet"},
+        {"name":"Seltos","slug":"seltos","trims":[{"name":"New Seltos 1.5 AT","slug":"1-5-at","source_id":"kia-seltos"}]},
+        {"name":"Carens","slug":"carens"},{"name":"Carnival","slug":"carnival"},{"name":"Sportage","slug":"sportage"},{"name":"Sorento","slug":"sorento"}
+      ]
+    },
+    {
+      "name": "Land Rover", "slug": "land-rover", "country_code": "GB", "official_url": "https://www.landrover-vn.com/vehicles/overview", "included": true,
+      "reason": "The authorised Land Rover Vietnam site maintains a current premium SUV registry.", "source_id": "land-rover-vietnam-market",
+      "models": [{"name":"Defender","slug":"defender"},{"name":"Discovery","slug":"discovery"},{"name":"Discovery Sport","slug":"discovery-sport"},{"name":"Range Rover Evoque","slug":"range-rover-evoque"},{"name":"Range Rover Velar","slug":"range-rover-velar"},{"name":"Range Rover Sport","slug":"range-rover-sport"},{"name":"Range Rover","slug":"range-rover"}]
+    },
+    {
+      "name": "Lexus", "slug": "lexus", "country_code": "JP", "official_url": "https://www.lexus.com.vn/", "included": true,
+      "reason": "Lexus Vietnam lists a current official premium passenger range.", "source_id": "lexus-vietnam-market",
+      "models": [{"name":"ES","slug":"es"},{"name":"LS","slug":"ls"},{"name":"LM","slug":"lm"},{"name":"UX","slug":"ux"},{"name":"NX","slug":"nx"},{"name":"RX","slug":"rx"},{"name":"GX","slug":"gx"},{"name":"LX","slug":"lx"},{"name":"RZ","slug":"rz"}]
+    },
+    {
+      "name": "Lynk & Co", "slug": "lynk-co", "country_code": "CN", "official_url": "https://lynkco.com.vn/", "included": true,
+      "reason": "GreenLynk Automotives and Tasco Auto operate the official Lynk and Co Vietnam registry.", "source_id": "lynkco-vietnam-market",
+      "models": [{"name":"01","slug":"01"},{"name":"02","slug":"02"},{"name":"03","slug":"03"},{"name":"03+","slug":"03-plus"},{"name":"05","slug":"05"},{"name":"06","slug":"06"},{"name":"08","slug":"08"},{"name":"09","slug":"09"}]
+    },
+    {
+      "name": "Mazda", "slug": "mazda", "country_code": "JP", "official_url": "https://www.thacoauto.vn/", "included": true,
+      "reason": "Mazda passenger vehicles are manufactured and officially distributed by THACO AUTO.", "source_id": "thaco-passenger-market",
+      "models": [
+        {"name":"Mazda2","slug":"mazda2"},{"name":"Mazda3","slug":"mazda3"},{"name":"Mazda6","slug":"mazda6"},{"name":"CX-3","slug":"cx-3"},{"name":"CX-30","slug":"cx-30"},
+        {"name":"CX-5","slug":"cx-5","trims":[{"name":"CX-5 2.0L Luxury","slug":"2-0l-luxury","source_id":"mazda-cx5"}]},
+        {"name":"CX-8","slug":"cx-8"},{"name":"CX-60","slug":"cx-60"},{"name":"CX-80","slug":"cx-80"},{"name":"BT-50","slug":"bt-50"}
+      ]
+    },
+    {
+      "name": "Mercedes-Benz", "slug": "mercedes-benz", "country_code": "DE", "official_url": "https://www.mercedes-benz.com.vn/vi/passengercars/models.html", "included": true,
+      "reason": "Mercedes-Benz Vietnam maintains a current official passenger-car model registry.", "source_id": "mercedes-vietnam-market",
+      "models": [
+        {"name":"C-Class","slug":"c-class"},{"name":"E-Class","slug":"e-class"},{"name":"S-Class","slug":"s-class"},{"name":"Mercedes-Maybach S-Class","slug":"maybach-s-class"},
+        {"name":"CLA Coupe","slug":"cla-coupe"},{"name":"CLE Coupe","slug":"cle-coupe"},{"name":"Mercedes-AMG SL","slug":"amg-sl"},
+        {"name":"GLA","slug":"gla"},{"name":"GLB","slug":"glb"},{"name":"GLC","slug":"glc"},{"name":"GLC Coupe","slug":"glc-coupe"},
+        {"name":"GLE","slug":"gle"},{"name":"GLE Coupe","slug":"gle-coupe"},{"name":"GLS","slug":"gls"},{"name":"Mercedes-Maybach GLS","slug":"maybach-gls"},{"name":"G-Class","slug":"g-class"},
+        {"name":"EQB","slug":"eqb"},{"name":"EQE","slug":"eqe"},{"name":"EQE SUV","slug":"eqe-suv"},{"name":"EQS","slug":"eqs"},{"name":"EQS SUV","slug":"eqs-suv"},{"name":"Mercedes-Maybach EQS SUV","slug":"maybach-eqs-suv"},{"name":"V-Class","slug":"v-class"}
+      ]
+    },
+    {
+      "name": "MG", "slug": "mg", "country_code": "GB", "official_url": "https://mgmotor.vn/", "included": true,
+      "reason": "SAIC Motor Vietnam's official MG site lists nine current passenger models.", "source_id": "mg-vietnam-market",
+      "models": [{"name":"G50","slug":"g50"},{"name":"Cyberster","slug":"cyberster"},{"name":"MG7","slug":"mg7"},{"name":"MG4","slug":"mg4"},{"name":"MG HS","slug":"mg-hs"},{"name":"New MG5","slug":"new-mg5"},{"name":"RX5","slug":"rx5"},{"name":"ZS","slug":"zs"},{"name":"MG5","slug":"mg5"}]
+    },
+    {
+      "name": "MINI", "slug": "mini", "country_code": "GB", "official_url": "https://www.thacoauto.vn/", "included": true,
+      "reason": "MINI passenger vehicles are officially distributed in Vietnam by THACO AUTO.", "source_id": "thaco-passenger-market",
+      "models": [{"name":"Cooper 3 Door","slug":"cooper-3-door"},{"name":"Cooper 5 Door","slug":"cooper-5-door"},{"name":"Cooper Convertible","slug":"cooper-convertible"},{"name":"Countryman","slug":"countryman"},{"name":"Aceman","slug":"aceman"}]
+    },
+    {
+      "name": "Mitsubishi", "slug": "mitsubishi", "country_code": "JP", "official_url": "https://mitsubishi-motors.com.vn/", "included": true,
+      "reason": "Mitsubishi Motors Vietnam maintains a current official passenger and pickup registry.", "source_id": "mitsubishi-vietnam-market",
+      "models": [
+        {"name":"Attrage","slug":"attrage"},{"name":"Xforce","slug":"xforce","trims":[{"name":"Xforce GLX","slug":"glx","source_id":"mitsubishi-xforce"}]},
+        {"name":"Xpander","slug":"xpander"},{"name":"Xpander Cross","slug":"xpander-cross"},{"name":"Triton","slug":"triton"},{"name":"Pajero Sport","slug":"pajero-sport"},{"name":"Destinator","slug":"destinator","market_status":"Upcoming"}
+      ]
+    },
+    {
+      "name": "Nissan", "slug": "nissan", "country_code": "JP", "official_url": "https://nissanvietnam.vn/", "included": true,
+      "reason": "Nissan Vietnam's authorised operation maintains a current passenger and pickup registry.", "source_id": "nissan-vietnam-market",
+      "models": [{"name":"Almera","slug":"almera"},{"name":"Navara","slug":"navara"},{"name":"Kicks e-POWER","slug":"kicks-e-power"}]
+    },
+    {
+      "name": "OMODA", "slug": "omoda", "country_code": "CN", "official_url": "https://omodajaecoo.vn/product", "included": true,
+      "reason": "Geleximco's official joint product list exposes OMODA as a separate consumer marque.", "source_id": "omoda-jaecoo-vietnam-market",
+      "models": [
+        {"name":"C5","slug":"c5","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"C5 Flagship","slug":"flagship"},{"name":"C5 Premium","slug":"premium"},{"name":"C5 Luxury","slug":"luxury","source_id":"omoda-c5"},{"name":"C5 SHS-H","slug":"shs-h"}]},
+        {"name":"C7","slug":"c7","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"C7","slug":"c7"}]}
+      ]
+    },
+    {
+      "name": "Peugeot", "slug": "peugeot", "country_code": "FR", "official_url": "https://www.thacoauto.vn/", "included": true,
+      "reason": "Peugeot passenger vehicles are manufactured and officially distributed by THACO AUTO.", "source_id": "thaco-passenger-market",
+      "models": [{"name":"2008","slug":"2008"},{"name":"3008","slug":"3008"},{"name":"5008","slug":"5008"},{"name":"408","slug":"408"},{"name":"Traveller","slug":"traveller"}]
+    },
+    {
+      "name": "Porsche", "slug": "porsche", "country_code": "DE", "official_url": "https://www.porsche.com/pap/_vietnam_/models/", "included": true,
+      "reason": "Porsche is explicitly included by product policy and operates an official Vietnam model registry.", "source_id": "porsche-vietnam-market",
+      "models": [{"name":"718","slug":"718"},{"name":"911","slug":"911"},{"name":"Taycan","slug":"taycan"},{"name":"Panamera","slug":"panamera"},{"name":"Macan","slug":"macan"},{"name":"Cayenne","slug":"cayenne"}]
+    },
+    {
+      "name": "RAM", "slug": "ram", "country_code": "US", "official_url": "https://jva.vn/vehicles.html", "included": true,
+      "reason": "Jeep Vietnam Automobiles lists and supports RAM 1500 as an official new-vehicle range.", "source_id": "jva-vietnam-market",
+      "models": [{"name":"1500","slug":"1500"}]
+    },
+    {
+      "name": "Skoda", "slug": "skoda", "country_code": "CZ", "official_url": "https://skoda-vietnam.vn/", "included": true,
+      "reason": "Skoda Vietnam and Thanh Cong maintain an official current passenger registry.", "source_id": "skoda-vietnam-market",
+      "models": [{"name":"Kushaq","slug":"kushaq"},{"name":"Slavia","slug":"slavia"},{"name":"Karoq","slug":"karoq"},{"name":"Kodiaq","slug":"kodiaq"}]
+    },
+    {
+      "name": "Subaru", "slug": "subaru", "country_code": "JP", "official_url": "https://www.subaru.asia/vn/vi/vehicles/", "included": true,
+      "reason": "Motor Image Vietnam maintains Subaru's official Vietnam vehicle registry.", "source_id": "subaru-vietnam-market",
+      "models": [{"name":"Forester","slug":"forester"},{"name":"Crosstrek","slug":"crosstrek"},{"name":"Outback","slug":"outback"},{"name":"BRZ","slug":"brz"},{"name":"WRX","slug":"wrx"},{"name":"WRX Wagon","slug":"wrx-wagon"}]
+    },
+    {
+      "name": "Suzuki", "slug": "suzuki", "country_code": "JP", "official_url": "https://suzuki.com.vn/", "included": true,
+      "reason": "Vietnam Suzuki maintains an official automobile registry separate from commercial products.", "source_id": "suzuki-vietnam-market",
+      "models": [{"name":"Jimny","slug":"jimny"},{"name":"XL7 Hybrid","slug":"xl7-hybrid"},{"name":"Fronx","slug":"fronx"},{"name":"Swift","slug":"swift"}]
+    },
+    {
+      "name": "Tank", "slug": "tank", "country_code": "CN", "official_url": "https://gwm-thanhanvietnam.com.vn/", "included": true,
+      "reason": "GWM Thanh An lists Tank as a separate officially distributed premium off-road marque.", "source_id": "gwm-vietnam-market",
+      "models": [{"name":"300","slug":"300"},{"name":"500","slug":"500"}]
+    },
+    {
+      "name": "Toyota", "slug": "toyota", "country_code": "JP", "official_url": "https://www.toyota.com.vn/danh-sach-xe", "included": true,
+      "reason": "Toyota Motor Vietnam publishes a current official list with explicit variant inventory.", "source_id": "toyota-vietnam-market",
+      "models": [
+        {"name":"Innova Cross","slug":"innova-cross","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"INNOVA CROSS 2.0HEV","slug":"2-0hev"},{"name":"INNOVA CROSS 2.0V","slug":"2-0v"},{"name":"INNOVA CROSS 2.0G","slug":"2-0g"}]},
+        {"name":"Veloz Cross","slug":"veloz-cross","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"VELOZ CROSS CVT TOP","slug":"cvt-top"},{"name":"VELOZ CROSS CVT","slug":"cvt"}]},
+        {"name":"Avanza Premio","slug":"avanza-premio","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"AVANZA PREMIO CVT","slug":"cvt"},{"name":"AVANZA PREMIO MT","slug":"mt"}]},
+        {"name":"Alphard","slug":"alphard","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"ALPHARD HEV","slug":"hev"}]},
+        {"name":"Yaris Cross","slug":"yaris-cross","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"YARIS CROSS HEV","slug":"hev"},{"name":"Yaris Cross","slug":"yaris-cross","source_id":"toyota-yaris-cross"}]},
+        {"name":"Corolla Cross","slug":"corolla-cross","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"COROLLA CROSS HEV","slug":"hev"},{"name":"COROLLA CROSS XĂNG","slug":"gasoline"}]},
+        {"name":"Raize","slug":"raize","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"Raize","slug":"raize"}]},
+        {"name":"Fortuner","slug":"fortuner","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"FORTUNER 2.7AT 4x2","slug":"2-7at-4x2"},{"name":"FORTUNER LEGENDER 2.7AT 4x2","slug":"legender-2-7at-4x2"},{"name":"FORTUNER LEGENDER 2.7AT 4x4","slug":"legender-2-7at-4x4"}]},
+        {"name":"Land Cruiser 300","slug":"land-cruiser-300","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"Land Cruiser 300","slug":"land-cruiser-300"}]},
+        {"name":"Land Cruiser Prado","slug":"land-cruiser-prado","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"LAND CRUISER PRADO","slug":"land-cruiser-prado"}]},
+        {"name":"Vios","slug":"vios","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"VIOS 1.5E-CVT","slug":"1-5e-cvt"},{"name":"VIOS 1.5E-MT","slug":"1-5e-mt"},{"name":"VIOS 1.5G-CVT","slug":"1-5g-cvt"}]},
+        {"name":"Camry","slug":"camry","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"Camry HEV Luxury","slug":"hev-luxury"},{"name":"Camry HEV Premium","slug":"hev-premium"}]},
+        {"name":"Hilux","slug":"hilux","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"HILUX PRO 2.8 4x2 AT","slug":"pro-2-8-4x2-at"},{"name":"HILUX STANDARD 2.8 4x2 MT","slug":"standard-2-8-4x2-mt"},{"name":"HILUX TRAILHUNTER 2.8 4x4 AT","slug":"trailhunter-2-8-4x4-at"}]},
+        {"name":"Wigo","slug":"wigo","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"WIGO G","slug":"g"}]},
+        {"name":"Land Cruiser FJ","slug":"land-cruiser-fj","market_status":"Upcoming","trim_inventory_status":"Complete","trim_inventory_reason":null,"trims":[{"name":"LAND CRUISER FJ","slug":"land-cruiser-fj","market_status":"Upcoming"}]}
+      ]
+    },
+    {
+      "name": "VinFast", "slug": "vinfast", "country_code": "VN", "official_url": "https://vinfastauto.com/vn_vi", "included": true,
+      "reason": "VinFast's official comparison registry lists the current private passenger range; commercial-only Green vehicles remain outside BrandScope.", "source_id": "vinfast-vietnam-market",
+      "models": [
+        {"name":"VF 2","slug":"vf-2","market_status":"Upcoming"},{"name":"VF 3","slug":"vf-3"},{"name":"VF 5","slug":"vf-5"},{"name":"VF 6","slug":"vf-6","trims":[{"name":"VF 6 Eco","slug":"eco","source_id":"vinfast-vf6"}]},
+        {"name":"VF MPV 7","slug":"vf-mpv-7"},{"name":"VF 7","slug":"vf-7"},{"name":"VF 8","slug":"vf-8"},{"name":"VF 9","slug":"vf-9"}
+      ]
+    },
+    {
+      "name": "Volkswagen", "slug": "volkswagen", "country_code": "DE", "official_url": "https://www.vw.com.vn/vi/sanpham.html", "included": true,
+      "reason": "Volkswagen Vietnam's official importer registry supplies the current passenger lineup.", "source_id": "volkswagen-vietnam-market",
+      "models": [{"name":"Golf","slug":"golf"},{"name":"Tiguan","slug":"tiguan"},{"name":"Teramont","slug":"teramont"},{"name":"Teramont Pro","slug":"teramont-pro"},{"name":"Teramont X","slug":"teramont-x"},{"name":"Teramont President","slug":"teramont-president"},{"name":"Viloran","slug":"viloran"},{"name":"Touareg","slug":"touareg"}]
+    },
+    {
+      "name": "Volvo", "slug": "volvo", "country_code": "SE", "official_url": "https://www.volvocars.vn/", "included": true,
+      "reason": "Volvo Car Vietnam's importer registry and dated launch announcements supply the current and announced passenger lineup.", "source_id": "volvo-vietnam-market",
+      "models": [{"name":"EC40","slug":"ec40"},{"name":"XC40","slug":"xc40"},{"name":"XC60","slug":"xc60"},{"name":"XC90","slug":"xc90"},{"name":"S90","slug":"s90"},{"name":"EX90","slug":"ex90","market_status":"Announced"},{"name":"ES90","slug":"es90","market_status":"Announced"}]
+    },
+    {
+      "name": "Wey", "slug": "wey", "country_code": "CN", "official_url": "https://gwm-thanhanvietnam.com.vn/", "included": true,
+      "reason": "GWM Thanh An lists Wey as a separate officially distributed premium new-energy marque.", "source_id": "gwm-vietnam-market",
+      "models": [{"name":"80 PHEV","slug":"80-phev"}]
+    },
+    {
+      "name": "Wuling", "slug": "wuling", "country_code": "CN", "official_url": "https://wuling-ev.vn/", "included": true,
+      "reason": "TMT Motors maintains the official Wuling EV Vietnam product operation.", "source_id": "wuling-vietnam-market",
+      "models": [{"name":"MiniEV","slug":"miniev"},{"name":"Bingo","slug":"bingo"}]
+    },
+
+    {"name":"AION","slug":"aion","country_code":"CN","official_url":"https://www.aionauto.com/","included":false,"reason":"No current official Vietnam passenger listing; the brand stopped retail sales and remains retained outside active scope.","source_id":"full-market-scope-policy"},
+    {"name":"Hongqi","slug":"hongqi","country_code":"CN","official_url":"https://www.hongqi-auto.com/","included":false,"reason":"No current official Vietnam passenger listing; the brand stopped retail sales and remains retained outside active scope.","source_id":"full-market-scope-policy"},
+    {"name":"Ferrari","slug":"ferrari","country_code":"IT","official_url":"https://www.ferrari.com/","included":false,"reason":"Configured supercar exclusion in the V1-V3 product market policy.","source_id":"full-market-scope-policy"},
+    {"name":"Lamborghini","slug":"lamborghini","country_code":"IT","official_url":"https://www.lamborghini.com/","included":false,"reason":"Configured supercar exclusion in the V1-V3 product market policy.","source_id":"full-market-scope-policy"},
+    {"name":"Lotus","slug":"lotus","country_code":"GB","official_url":"https://www.lotuscars.com/","included":false,"reason":"Configured supercar exclusion in the V1-V3 product market policy.","source_id":"full-market-scope-policy"},
+    {"name":"Maserati","slug":"maserati","country_code":"IT","official_url":"https://www.maserati.com/","included":false,"reason":"Configured ultra-luxury performance exclusion analogous to the documented supercar exclusions.","source_id":"full-market-scope-policy"},
+    {"name":"Bentley","slug":"bentley","country_code":"GB","official_url":"https://www.bentleymotors.com/","included":false,"reason":"Configured ultra-luxury exclusion outside the mainstream, premium and Porsche product scope.","source_id":"full-market-scope-policy"},
+    {"name":"Rolls-Royce","slug":"rolls-royce","country_code":"GB","official_url":"https://www.rolls-roycemotorcars.com/","included":false,"reason":"Configured ultra-luxury exclusion outside the mainstream, premium and Porsche product scope.","source_id":"full-market-scope-policy"},
+    {"name":"Aston Martin","slug":"aston-martin","country_code":"GB","official_url":"https://www.astonmartin.com/","included":false,"reason":"Configured ultra-luxury performance exclusion analogous to the documented supercar exclusions.","source_id":"full-market-scope-policy"},
+    {"name":"McLaren","slug":"mclaren","country_code":"GB","official_url":"https://cars.mclaren.com/","included":false,"reason":"Configured supercar exclusion analogous to Ferrari and Lamborghini.","source_id":"full-market-scope-policy"},
+    {"name":"Jaguar","slug":"jaguar","country_code":"GB","official_url":"https://www.jaguar.com/","included":false,"reason":"No current official Vietnam new-car model registry during the reviewed transition period.","source_id":"full-market-scope-policy"},
+    {"name":"KGM","slug":"kgm","country_code":"KR","official_url":"https://www.kg-mobility.com/","included":false,"reason":"No verified current authorised Vietnam passenger listing was available at the review instant.","source_id":"full-market-scope-policy"},
+    {"name":"Tesla","slug":"tesla","country_code":"US","official_url":"https://www.tesla.com/","included":false,"reason":"No official manufacturer or authorised national distributor operation for new-car retail in Vietnam.","source_id":"full-market-scope-policy"}
+  ]
+}
