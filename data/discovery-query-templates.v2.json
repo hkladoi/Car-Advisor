@@ -1,0 +1,12 @@
+{
+  "schema_version": "v2.1",
+  "templates": {
+    "vehicle": "site:{domain} \"{brand}\" (\"mẫu xe\" OR \"ra mắt\" OR \"sản phẩm\") Việt Nam",
+    "price": "site:{domain} \"{brand}\" (\"bảng giá\" OR \"giá bán\" OR \"niêm yết\")",
+    "promotion": "site:{domain} \"{brand}\" (\"khuyến mãi\" OR \"ưu đãi\") ô tô",
+    "specs": "site:{domain} \"{brand}\" (\"thông số kỹ thuật\" OR \"trang bị\")",
+    "brochure": "site:{domain} \"{brand}\" (brochure OR catalog) filetype:pdf",
+    "dealer_offer": "site:{domain} \"{brand}\" (\"ưu đãi\" OR \"báo giá\") đại lý",
+    "finance_campaign": "site:{domain} \"{brand}\" (\"lãi suất\" OR \"hỗ trợ vay\") ô tô"
+  }
+}

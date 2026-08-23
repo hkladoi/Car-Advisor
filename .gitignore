@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+docs/CODEX-SECRETS.local.md
 
 # JavaScript
 node_modules/

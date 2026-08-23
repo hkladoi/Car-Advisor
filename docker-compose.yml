@@ -148,6 +148,12 @@ services:
       OBJECT_STORAGE_FORCE_PATH_STYLE: ${OBJECT_STORAGE_FORCE_PATH_STYLE:-true}
       SOURCE_REGISTRY_PATH: /app/data/source-registry.v1.json
       SNAPSHOT_EVENT_QUEUE: ${SNAPSHOT_EVENT_QUEUE:-ingestion:snapshots}
+      DISCOVERY_CANDIDATE_QUEUE: ${DISCOVERY_CANDIDATE_QUEUE:-ingestion:discovery-candidates}
+      DISCOVERY_QUERY_TEMPLATES_PATH: /app/data/discovery-query-templates.v2.json
+      BRAVE_SEARCH_API_KEY: ${BRAVE_SEARCH_API_KEY:-}
+      BRAVE_MONTHLY_REQUEST_BUDGET: ${BRAVE_MONTHLY_REQUEST_BUDGET:-1000}
+      BRAVE_DISCOVERY_CACHE_SECONDS: ${BRAVE_DISCOVERY_CACHE_SECONDS:-86400}
+      BRAVE_DISCOVERY_MAX_QUERIES: ${BRAVE_DISCOVERY_MAX_QUERIES:-4}
       POSTGRES_DSN: host=/var/run/postgresql dbname=${POSTGRES_DB:-vietnam_car_platform} user=${POSTGRES_USER:-vcp}
     depends_on:
       api:

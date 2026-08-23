@@ -10,6 +10,13 @@ import redis.asyncio as redis
 import structlog
 
 from ingestion.jobs import IngestionJob
+from ingestion.discovery import (
+    BraveSearchClient,
+    BraveSearchOptions,
+    DiscoveryRequest,
+    DiscoveryService,
+    QueryTemplateCatalog,
+)
 from ingestion.fetcher import KnownUrlFetcher
 from ingestion.logging import configure_logging
 from ingestion.metadata import SnapshotMetadataRepository
@@ -25,6 +32,20 @@ async def run_worker(settings: Settings) -> None:
     storage = S3CompatibleObjectStorage(settings)
     fetcher = KnownUrlFetcher(settings.ingestion_user_agent)
     metadata_repository = SnapshotMetadataRepository(settings.postgres_dsn)
+    discovery = DiscoveryService(
+        BraveSearchClient(
+            client,
+            BraveSearchOptions(
+                api_key=settings.brave_search_api_key.get_secret_value(),
+                monthly_request_budget=settings.brave_monthly_request_budget,
+                endpoint=settings.brave_search_endpoint,
+                timeout_seconds=settings.brave_search_timeout_seconds,
+                cache_seconds=settings.brave_discovery_cache_seconds,
+            ),
+        ),
+        QueryTemplateCatalog.load(Path(settings.discovery_query_templates_path)),
+        settings.brave_discovery_max_queries,
+    )
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
     for event in (signal.SIGINT, signal.SIGTERM):
@@ -55,6 +76,39 @@ async def run_worker(settings: Settings) -> None:
                     stale_source_ids=stale,
                     stale_count=len(stale),
                 )
+                continue
+            if job.job_type == "source_discovery":
+                try:
+                    batch = await discovery.discover(
+                        DiscoveryRequest(
+                            brand=job.brand or "",
+                            data_type=job.data_type or "",
+                            allowed_domains=job.allowed_domains,
+                            known_urls=job.known_urls,
+                            force_discovery=job.force_discovery,
+                        )
+                    )
+                    await client.rpush(
+                        settings.discovery_candidate_queue,
+                        batch.model_dump_json(),
+                    )
+                    await client.ltrim(settings.discovery_candidate_queue, -10_000, -1)
+                    logger.info(
+                        "source_discovery_complete",
+                        brand=batch.brand,
+                        data_type=batch.data_type,
+                        strategy=batch.strategy,
+                        candidates=len(batch.candidates),
+                        cache_hits=batch.cache_hits,
+                        charged_requests=batch.charged_requests,
+                    )
+                except Exception as error:
+                    logger.exception(
+                        "source_discovery_failed",
+                        brand=job.brand,
+                        data_type=job.data_type,
+                        error_type=type(error).__name__,
+                    )
                 continue
             try:
                 source = registry.by_id(job.source_id or "")

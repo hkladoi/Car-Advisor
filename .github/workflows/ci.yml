@@ -126,6 +126,15 @@ jobs:
           --no-build
       - name: Verify schema constraints
         run: docker compose exec -T postgres psql -U vcp -d vietnam_car_platform < scripts/verify-v1.1-schema.sql
+      - name: Verify V2.1 known-URL-first discovery gate
+        run: |
+          mkdir -p .tmp
+          docker compose run --rm --no-deps ingestion-worker \
+            python -m ingestion.cli discover-source \
+            --registry /app/data/source-registry.v1.json \
+            --templates /app/data/discovery-query-templates.v2.json \
+            --brand Toyota --data-type price > .tmp/v2.1-discovery.json
+          python scripts/verify_v2_1_discovery.py .tmp/v2.1-discovery.json
       - name: Validate V1.2 official seed contract
         run: >-
           docker compose run --rm --no-deps ingestion-worker

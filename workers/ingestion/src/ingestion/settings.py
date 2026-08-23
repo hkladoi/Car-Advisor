@@ -22,3 +22,11 @@ class Settings(BaseSettings):
     object_storage_secret_key: SecretStr = SecretStr("vcp-local-dev")
     object_storage_region: str = "auto"
     object_storage_force_path_style: bool = True
+    brave_search_api_key: SecretStr = SecretStr("")
+    brave_monthly_request_budget: int = Field(default=1000, ge=1, le=1_000_000)
+    brave_search_endpoint: str = "https://api.search.brave.com/res/v1/web/search"
+    brave_search_timeout_seconds: float = Field(default=15.0, ge=1.0, le=60.0)
+    brave_discovery_cache_seconds: int = Field(default=86400, ge=60, le=2_592_000)
+    brave_discovery_max_queries: int = Field(default=4, ge=1, le=20)
+    discovery_query_templates_path: str = "data/discovery-query-templates.v2.json"
+    discovery_candidate_queue: str = "ingestion:discovery-candidates"

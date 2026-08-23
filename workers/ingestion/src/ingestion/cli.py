@@ -6,7 +6,16 @@ import json
 from dataclasses import asdict
 from pathlib import Path
 
+import redis.asyncio as redis
+
 from ingestion.contracts import load_manual_import
+from ingestion.discovery import (
+    BraveSearchClient,
+    BraveSearchOptions,
+    DiscoveryRequest,
+    DiscoveryService,
+    QueryTemplateCatalog,
+)
 from ingestion.fetcher import KnownUrlFetcher, Snapshot
 from ingestion.gate import evaluate_seed_gate
 from ingestion.manifest import read_snapshot_manifest, write_snapshot_manifest
@@ -45,6 +54,18 @@ def _parser() -> argparse.ArgumentParser:
     _common_seed_arguments(publish)
     publish.add_argument("--manifest", type=Path, required=True)
     publish.add_argument("--dsn", required=True)
+
+    discover = subparsers.add_parser(
+        "discover-source",
+        help="Use known official URLs first, then budgeted Brave discovery when requested",
+    )
+    discover.add_argument("--registry", type=Path, required=True)
+    discover.add_argument("--brand", required=True)
+    discover.add_argument("--data-type", required=True)
+    discover.add_argument("--official-domain", action="append", default=[])
+    discover.add_argument("--known-url", action="append", default=[])
+    discover.add_argument("--force-discovery", action="store_true")
+    discover.add_argument("--templates", type=Path)
 
     for command, help_text in (
         ("validate-registration-seed", "Validate reviewed V1.5 registration rules"),
@@ -90,9 +111,63 @@ async def _fetch_seed(registry: SourceRegistry, source_ids: set[str], settings: 
     return await asyncio.gather(*(fetch_one(source_id) for source_id in sorted(source_ids)))
 
 
+async def _discover_source(args: argparse.Namespace, registry: SourceRegistry, settings: Settings) -> dict:
+    brand_key = " ".join(args.brand.lower().split())
+    matching_sources = [
+        source
+        for source in registry.sources
+        if brand_key in " ".join(
+            (source.id, source.name, source.owner, source.url)
+        ).lower()
+    ]
+    domains = args.official_domain or [
+        domain for source in matching_sources for domain in source.allowed_domains
+    ]
+    known_urls = args.known_url or [source.url for source in matching_sources]
+    if not domains:
+        raise ValueError(
+            "No official domain found for brand; pass --official-domain explicitly"
+        )
+
+    client = redis.from_url(settings.redis_url, decode_responses=True)
+    try:
+        service = DiscoveryService(
+            BraveSearchClient(
+                client,
+                BraveSearchOptions(
+                    api_key=settings.brave_search_api_key.get_secret_value(),
+                    monthly_request_budget=settings.brave_monthly_request_budget,
+                    endpoint=settings.brave_search_endpoint,
+                    timeout_seconds=settings.brave_search_timeout_seconds,
+                    cache_seconds=settings.brave_discovery_cache_seconds,
+                ),
+            ),
+            QueryTemplateCatalog.load(
+                args.templates or Path(settings.discovery_query_templates_path)
+            ),
+            settings.brave_discovery_max_queries,
+        )
+        batch = await service.discover(
+            DiscoveryRequest(
+                brand=args.brand,
+                data_type=args.data_type,
+                allowed_domains=domains,
+                known_urls=known_urls,
+                force_discovery=args.force_discovery,
+            )
+        )
+        return batch.model_dump(mode="json")
+    finally:
+        await client.aclose()
+
+
 def main() -> None:
     args = _parser().parse_args()
     registry = SourceRegistry.load(args.registry)
+    if args.command == "discover-source":
+        result = asyncio.run(_discover_source(args, registry, Settings()))
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     if args.command.endswith("energy-seed"):
         batch = load_energy_seed(args.seed)
         report = validate_energy_seed(batch, registry)
