@@ -1,0 +1,29 @@
+{
+  "schema_version": "v2.2",
+  "profiles": [
+    {"domain":"shop.vinfastauto.com","parser_id":"vinfast-html","version":"2.2.0","content_selectors":["main",".product-detail","body"],"title_selectors":["h1","title"]},
+    {"domain":"www.toyota.com.vn","parser_id":"toyota-html","version":"2.2.0","content_selectors":["main",".product-detail","article","body"],"title_selectors":["h1","title"]},
+    {"domain":"www.thacoauto.vn","parser_id":"thaco-html","version":"2.2.0","content_selectors":["main",".car-detail","article","body"],"title_selectors":["h1","title"]},
+    {"domain":"thacoauto.vn","parser_id":"thaco-html","version":"2.2.0","content_selectors":["main",".car-detail","article","body"],"title_selectors":["h1","title"]},
+    {"domain":"www.ford.com.vn","parser_id":"ford-html","version":"2.2.0","content_selectors":["main",".vehicle-page","body"],"title_selectors":["h1","title"]},
+    {"domain":"www.honda.com.vn","parser_id":"honda-html","version":"2.2.0","content_selectors":["main",".product-detail","article","body"],"title_selectors":["h1","title"]},
+    {"domain":"mitsubishi-motors.com.vn","parser_id":"mitsubishi-html","version":"2.2.0","content_selectors":["main","article",".news-detail","body"],"title_selectors":["h1","title"]},
+    {"domain":"www.byd.com","parser_id":"byd-html","version":"2.2.0","content_selectors":["main","article","body"],"title_selectors":["h1","title"]},
+    {"domain":"geely.vn","parser_id":"geely-html","version":"2.2.0","content_selectors":["main","article",".entry-content","body"],"title_selectors":["h1","title"]},
+    {"domain":"hyundai.thanhcong.vn","parser_id":"hyundai-html","version":"2.2.0","content_selectors":["main",".product-detail","article","body"],"title_selectors":["h1","title"]},
+    {"domain":"omoda.omodajaecoo.vn","parser_id":"omoda-html","version":"2.2.0","content_selectors":["main","article","body"],"title_selectors":["h1","title"]},
+    {"domain":"skoda-vietnam.vn","parser_id":"skoda-html","version":"2.2.0","content_selectors":["main","article","body"],"title_selectors":["h1","title"]},
+    {"domain":"www.skoda-vietnam.vn","parser_id":"skoda-html","version":"2.2.0","content_selectors":["main","article","body"],"title_selectors":["h1","title"]},
+    {"domain":"lynkco.com.vn","parser_id":"lynkco-html","version":"2.2.0","content_selectors":["main","article","body"],"title_selectors":["h1","title"]},
+    {"domain":"mgmotor.vn","parser_id":"mg-html","version":"2.2.0","content_selectors":["main","article","body"],"title_selectors":["h1","title"]},
+    {"domain":"volkswagen.com.vn","parser_id":"volkswagen-html","version":"2.2.0","content_selectors":["main","article","body"],"title_selectors":["h1","title"]},
+    {"domain":"moit.gov.vn","parser_id":"moit-html","version":"2.2.0","content_selectors":["main","article",".detail-content","body"],"title_selectors":["h1","title"]},
+    {"domain":"dms.gov.vn","parser_id":"dms-html","version":"2.2.0","content_selectors":["main","article",".detail-content","body"],"title_selectors":["h1","title"]},
+    {"domain":"www.evn.com.vn","parser_id":"evn-html","version":"2.2.0","content_selectors":["main","article",".news-detail","body"],"title_selectors":["h1","title"]},
+    {"domain":"vgreen.net","parser_id":"vgreen-html","version":"2.2.0","content_selectors":["main","article","body"],"title_selectors":["h1","title"]},
+    {"domain":"www.mof.gov.vn","parser_id":"mof-html","version":"2.2.0","content_selectors":["main","article",".detail-content","body"],"title_selectors":["h1","title"]},
+    {"domain":"vanban.chinhphu.vn","parser_id":"government-document-html","version":"2.2.0","content_selectors":["main","article",".content","body"],"title_selectors":["h1","title"]},
+    {"domain":"xaydungchinhsach.chinhphu.vn","parser_id":"government-policy-html","version":"2.2.0","content_selectors":["main","article",".detail-content","body"],"title_selectors":["h1","title"]},
+    {"domain":"www.vr.org.vn","parser_id":"vehicle-registry-html","version":"2.2.0","content_selectors":["main","article",".content","body"],"title_selectors":["h1","title"]}
+  ]
+}

@@ -20,6 +20,7 @@ from ingestion.fetcher import KnownUrlFetcher, Snapshot
 from ingestion.gate import evaluate_seed_gate
 from ingestion.manifest import read_snapshot_manifest, write_snapshot_manifest
 from ingestion.registry import SourceRegistry
+from ingestion.parsers import DomainParserRegistry, ParserProfileRegistry
 from ingestion.settings import Settings
 from ingestion.storage import S3CompatibleObjectStorage
 from ingestion.registration_seed import (
@@ -66,6 +67,13 @@ def _parser() -> argparse.ArgumentParser:
     discover.add_argument("--known-url", action="append", default=[])
     discover.add_argument("--force-discovery", action="store_true")
     discover.add_argument("--templates", type=Path)
+
+    validate_parsers = subparsers.add_parser(
+        "validate-parser-registry",
+        help="Verify every automated registered source resolves to a V2.2 parser",
+    )
+    validate_parsers.add_argument("--registry", type=Path, required=True)
+    validate_parsers.add_argument("--parsers", type=Path, required=True)
 
     for command, help_text in (
         ("validate-registration-seed", "Validate reviewed V1.5 registration rules"),
@@ -164,6 +172,28 @@ async def _discover_source(args: argparse.Namespace, registry: SourceRegistry, s
 def main() -> None:
     args = _parser().parse_args()
     registry = SourceRegistry.load(args.registry)
+    if args.command == "validate-parser-registry":
+        profiles = ParserProfileRegistry.load(args.parsers)
+        parsers = DomainParserRegistry(profiles)
+        covered = [
+            source.id
+            for source in registry.sources
+            if source.automated_fetch and source.category != "discovery"
+            if parsers.resolve(source, source.url)
+        ]
+        print(
+            json.dumps(
+                {
+                    "schema_version": profiles.schema_version,
+                    "profiles": len(profiles.profiles),
+                    "covered_sources": len(covered),
+                    "source_ids": covered,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
     if args.command == "discover-source":
         result = asyncio.run(_discover_source(args, registry, Settings()))
         print(json.dumps(result, ensure_ascii=False, indent=2))

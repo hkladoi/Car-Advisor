@@ -20,6 +20,7 @@ from ingestion.discovery import (
 from ingestion.fetcher import KnownUrlFetcher
 from ingestion.logging import configure_logging
 from ingestion.metadata import SnapshotMetadataRepository
+from ingestion.parsers import DomainParserRegistry, ParserCoordinator, ParserProfileRegistry
 from ingestion.registry import SourceRegistry
 from ingestion.settings import Settings
 from ingestion.storage import S3CompatibleObjectStorage
@@ -45,6 +46,13 @@ async def run_worker(settings: Settings) -> None:
         ),
         QueryTemplateCatalog.load(Path(settings.discovery_query_templates_path)),
         settings.brave_discovery_max_queries,
+    )
+    parser_coordinator = ParserCoordinator(
+        DomainParserRegistry(
+            ParserProfileRegistry.load(Path(settings.parser_registry_path)),
+            settings.parser_max_pdf_pages,
+        ),
+        settings.parser_max_content_bytes,
     )
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
@@ -114,6 +122,44 @@ async def run_worker(settings: Settings) -> None:
                 source = registry.by_id(job.source_id or "")
                 snapshot = await fetcher.fetch(source, storage)
                 snapshot_id = await asyncio.to_thread(metadata_repository.record, source, snapshot)
+                try:
+                    parse_outcome = await asyncio.to_thread(
+                        parser_coordinator.parse, source, snapshot, storage
+                    )
+                    await asyncio.to_thread(
+                        metadata_repository.mark_parsed,
+                        snapshot_id,
+                        parse_outcome.parser_version,
+                    )
+                    if parse_outcome.status == "parsed":
+                        await client.rpush(
+                            settings.parsed_document_queue,
+                            json.dumps(
+                                {
+                                    "source_id": source.id,
+                                    "snapshot_id": str(snapshot_id),
+                                    "content_hash": snapshot.content_hash,
+                                    "parser_version": parse_outcome.parser_version,
+                                    "parsed_object_key": parse_outcome.parsed_object_key,
+                                },
+                                ensure_ascii=False,
+                            ),
+                        )
+                        await client.ltrim(settings.parsed_document_queue, -10_000, -1)
+                    logger.info(
+                        "source_parse_complete",
+                        source_id=source.id,
+                        parser_version=parse_outcome.parser_version,
+                        parse_status=parse_outcome.status,
+                        parsed_object_key=parse_outcome.parsed_object_key,
+                    )
+                except Exception as error:
+                    logger.exception(
+                        "source_parse_failed",
+                        source_id=source.id,
+                        content_hash=snapshot.content_hash,
+                        error_type=type(error).__name__,
+                    )
                 await client.rpush(
                     settings.snapshot_event_queue,
                     json.dumps(asdict(snapshot), default=str, ensure_ascii=False),

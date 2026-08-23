@@ -76,6 +76,10 @@ docker compose --project-directory "$ROOT_DIR" run --rm --no-deps ingestion-work
   --templates /app/data/discovery-query-templates.v2.json \
   --brand Toyota --data-type price > "$TEMP_DIR/v2.1-discovery.json"
 "$PYTHON_BIN" "$ROOT_DIR/scripts/verify_v2_1_discovery.py" "$TEMP_DIR/v2.1-discovery.json"
+docker compose --project-directory "$ROOT_DIR" run --rm --no-deps ingestion-worker \
+  python -m ingestion.cli validate-parser-registry \
+  --registry /app/data/source-registry.v1.json \
+  --parsers /app/data/parser-registry.v2.json
 
 if [ "${SKIP_SEED:-0}" != "1" ]; then
   uid_gid="$(id -u):$(id -g)"

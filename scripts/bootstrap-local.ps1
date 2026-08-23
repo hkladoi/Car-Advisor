@@ -117,6 +117,7 @@ $discoveryJson = & docker compose --project-directory $root run --rm --no-deps i
 if ($LASTEXITCODE -ne 0) { throw "V2.1 discovery smoke failed." }
 [IO.File]::WriteAllLines($discoveryResult, $discoveryJson, [Text.UTF8Encoding]::new($false))
 Invoke-Checked $python @((Join-Path $root "scripts/verify_v2_1_discovery.py"), $discoveryResult)
+Invoke-SeedCommand @("ingestion-worker", "python", "-m", "ingestion.cli", "validate-parser-registry", "--registry", "/app/data/source-registry.v1.json", "--parsers", "/app/data/parser-registry.v2.json")
 
 if (-not $SkipSeed) {
     $tempMount = "${tempDir}:/app/.tmp"

@@ -19,7 +19,7 @@ Decisions and gate evidence belong in `docs/status/`.
 ## Current state
 
 - V1.0–V1.10 and the V1 FINAL GATE are complete.
-- V2 is in progress from V2.1; see `docs/status/v2-status.md`.
+- V2.1 and V2.2 are complete; V2.3 is next. See `docs/status/v2-status.md`.
 - V3 must not start until the V2 FINAL GATE passes; see
   `docs/status/v3-status.md`.
 

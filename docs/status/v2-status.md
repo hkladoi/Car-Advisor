@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-23
 
-Overall: **IN PROGRESS — V2.2**
+Overall: **IN PROGRESS — V2.3**
 
 ## Governing decisions
 
@@ -34,7 +34,7 @@ No material conflict between the two source documents has been found so far.
 ## Milestones and gates
 
 - [x] V2.1 Brave discovery — PASS 2026-08-23
-- [ ] V2.2 Domain parsers
+- [x] V2.2 Domain parsers — PASS 2026-08-23
 - [ ] V2.3 Structured extraction
 - [ ] V2.4 Change detection, review and rollback
 - [ ] V2.5 Automated monitoring
@@ -83,3 +83,37 @@ smoke was not fabricated or run. The deterministic HTTP contract test uses
 `httpx.MockTransport` only in tests; production code always calls the real Brave
 endpoint. Add the key to `docs/CODEX-SECRETS.local.md` to run
 `discover-source --force-discovery` without changing code.
+
+## V2.2 gate — PASS
+
+Implemented evidence:
+
+- Versioned per-domain HTML parser profiles cover every current automated HTML
+  source. PDF, JSON and XML use explicit content-type parsers; unsupported
+  content fails closed.
+- HTML parses JSON-LD before configured content selectors, removes navigation,
+  script/style and footer copy, and records canonical/meta data for provenance.
+- PDF workflow uses pinned `pypdf`, records metadata/page count and extracts text
+  per page with bounded page/content limits and warnings.
+- Worker writes a JSON parsed artifact below the immutable source content hash,
+  updates `source_snapshots.parser_version`, and queues only new parsed artifacts.
+- If the same content hash/parser version already exists, object download and
+  parsing are skipped. Snapshot bytes are SHA-256 verified before parsing.
+- Synthetic, rights-safe HTML fixtures are checked into `data/fixtures/parsers`;
+  PDF fixtures are generated in-memory by tests and are never production data.
+- HTTP-first/Playwright-only-for-HTML behavior remains enforced by
+  `KnownUrlFetcher`; parsers never trigger browser/network access.
+
+Gate commands/evidence:
+
+- `validate-parser-registry` — 24 HTML profiles and all 29 automated sources
+  resolve to a versioned parser.
+- `python -m pytest workers/ingestion/tests` — 37 passed.
+- `npm run lint:web && npm run test:web && npm run build:web` — pass (6 tests).
+- .NET Release build and 43 tests pass with zero warnings; EF reports no pending
+  model changes.
+- Worker/scheduler images build and both containers are healthy.
+- Real allowlisted Toyota fetch returned HTTP 200, stored a 194,178-byte
+  immutable snapshot, wrote a `toyota-html/2.2.0` parsed artifact and updated the
+  DB snapshot row. Repeating the fetch produced `parse_status=unchanged` and did
+  not add a second parsed event.

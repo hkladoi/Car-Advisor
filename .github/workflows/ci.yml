@@ -135,6 +135,12 @@ jobs:
             --templates /app/data/discovery-query-templates.v2.json \
             --brand Toyota --data-type price > .tmp/v2.1-discovery.json
           python scripts/verify_v2_1_discovery.py .tmp/v2.1-discovery.json
+      - name: Verify V2.2 domain parser registry gate
+        run: >-
+          docker compose run --rm --no-deps ingestion-worker
+          python -m ingestion.cli validate-parser-registry
+          --registry /app/data/source-registry.v1.json
+          --parsers /app/data/parser-registry.v2.json
       - name: Validate V1.2 official seed contract
         run: >-
           docker compose run --rm --no-deps ingestion-worker

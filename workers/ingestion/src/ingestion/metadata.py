@@ -148,6 +148,16 @@ class SnapshotMetadataRepository:
         missing = set(by_url) - self._registered_urls(by_url)
         return sorted(by_url[url] for url in stale | missing)
 
+    def mark_parsed(self, snapshot_id: uuid.UUID, parser_version: str) -> None:
+        with psycopg.connect(self._dsn) as connection, connection.cursor() as cursor:
+            cursor.execute(
+                "UPDATE source_snapshots SET parser_version = %s, updated_at = %s WHERE id = %s",
+                (parser_version, datetime.now(UTC), snapshot_id),
+            )
+            if cursor.rowcount != 1:
+                raise KeyError(f"Unknown source snapshot: {snapshot_id}")
+            connection.commit()
+
     def _registered_urls(self, by_url: dict[str, str]) -> set[str]:
         with psycopg.connect(self._dsn) as connection, connection.cursor() as cursor:
             cursor.execute("SELECT url FROM sources WHERE url = ANY(%s)", (list(by_url),))

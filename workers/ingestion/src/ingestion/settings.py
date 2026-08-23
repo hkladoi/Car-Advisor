@@ -30,3 +30,7 @@ class Settings(BaseSettings):
     brave_discovery_max_queries: int = Field(default=4, ge=1, le=20)
     discovery_query_templates_path: str = "data/discovery-query-templates.v2.json"
     discovery_candidate_queue: str = "ingestion:discovery-candidates"
+    parser_registry_path: str = "data/parser-registry.v2.json"
+    parsed_document_queue: str = "ingestion:parsed-documents"
+    parser_max_content_bytes: int = Field(default=20_000_000, ge=1024, le=100_000_000)
+    parser_max_pdf_pages: int = Field(default=500, ge=1, le=5000)
