@@ -2007,6 +2007,67 @@
         }
       }
     },
+    "/api/v1/energy/prices/history": {
+      "get": {
+        "tags": [
+          "Energy history"
+        ],
+        "operationId": "GetEnergyPriceHistory",
+        "parameters": [
+          {
+            "name": "EnergyType",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Provider",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "RegionCode",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Months",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyPriceHistoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/financing/calculate": {
       "post": {
         "tags": [
@@ -2186,6 +2247,138 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cars/{trimId}/prices": {
+      "get": {
+        "tags": [
+          "Pricing history"
+        ],
+        "operationId": "GetVehiclePriceHistory",
+        "parameters": [
+          {
+            "name": "trimId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "RegionScope",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Months",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehiclePriceHistoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cars/{trimId}/dealer-offers": {
+      "get": {
+        "tags": [
+          "Pricing history"
+        ],
+        "operationId": "GetVehicleDealerOfferHistory",
+        "parameters": [
+          {
+            "name": "trimId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "ProvinceCode",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Months",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealerOfferHistoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4361,6 +4554,62 @@
         },
         "additionalProperties": false
       },
+      "CashPriceRangeInsight": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string",
+            "nullable": true
+          },
+          "policy": {
+            "type": "string",
+            "nullable": true
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "observationCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distinctObservationDates": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "spanDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentAmount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "twelveMonthMinimum": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "twelveMonthMaximum": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "position": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "CatalogCar": {
         "type": "object",
         "properties": {
@@ -5212,6 +5461,41 @@
         },
         "additionalProperties": false
       },
+      "DealerOfferBenefitHistory": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "statedValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "isCashEquivalent": {
+            "type": "boolean"
+          },
+          "exclusivityGroup": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "DealerOfferDetail": {
         "type": "object",
         "properties": {
@@ -5261,6 +5545,120 @@
           },
           "source": {
             "$ref": "#/components/schemas/SourceBadge"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DealerOfferHistoryItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dealerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "branchName": {
+            "type": "string",
+            "nullable": true
+          },
+          "provinceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "headline": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "conditionsJson": {
+            "type": "string",
+            "nullable": true
+          },
+          "combinabilityGroup": {
+            "type": "string",
+            "nullable": true
+          },
+          "maximumEligibleCashReduction": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastVerifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isCurrent": {
+            "type": "boolean"
+          },
+          "isStale": {
+            "type": "boolean"
+          },
+          "benefits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DealerOfferBenefitHistory"
+            },
+            "nullable": true
+          },
+          "provenance": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/HistorySourceReference"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DealerOfferHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "vehicle": {
+            "$ref": "#/components/schemas/VehicleHistoryIdentity"
+          },
+          "current": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DealerOfferHistoryItem"
+            },
+            "nullable": true
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DealerOfferHistoryItem"
+            },
+            "nullable": true
+          },
+          "cashSemantics": {
+            "type": "string",
+            "nullable": true
+          },
+          "window": {
+            "$ref": "#/components/schemas/HistoryWindow"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -5470,6 +5868,116 @@
           },
           "currency": {
             "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EnergyPriceHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "series": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnergyPriceSeries"
+            },
+            "nullable": true
+          },
+          "window": {
+            "$ref": "#/components/schemas/HistoryWindow"
+          },
+          "semantics": {
+            "type": "string",
+            "nullable": true
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EnergyPriceObservation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "taxRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "taxIncluded": {
+            "type": "boolean"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isCurrent": {
+            "type": "boolean"
+          },
+          "provenance": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/HistorySourceReference"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EnergyPriceSeries": {
+        "type": "object",
+        "properties": {
+          "seriesKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "energyType": {
+            "type": "string",
+            "nullable": true
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "regionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "tierFromInclusive": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tierToInclusive": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "observations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnergyPriceObservation"
+            },
             "nullable": true
           }
         },
@@ -5999,6 +6507,65 @@
           "placeId": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "HistorySourceReference": {
+        "type": "object",
+        "properties": {
+          "sourceFactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "authority": {
+            "type": "string",
+            "nullable": true
+          },
+          "fetchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contentHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "confidence": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "HistoryWindow": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "months": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "truncated": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -6616,6 +7183,67 @@
         },
         "additionalProperties": false
       },
+      "PriceTimelineEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "series": {
+            "type": "string",
+            "nullable": true
+          },
+          "valueKind": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "scope": {
+            "type": "string",
+            "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isCurrent": {
+            "type": "boolean"
+          },
+          "isStale": {
+            "type": "boolean"
+          },
+          "provenance": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/HistorySourceReference"
+          }
+        },
+        "additionalProperties": false
+      },
       "PurchaseCashflowResult": {
         "type": "object",
         "properties": {
@@ -6972,6 +7600,58 @@
             "type": "number",
             "format": "double",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "VehicleHistoryIdentity": {
+        "type": "object",
+        "properties": {
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brandName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "trimName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelYear": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "VehiclePriceHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "vehicle": {
+            "$ref": "#/components/schemas/VehicleHistoryIdentity"
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceTimelineEvent"
+            },
+            "nullable": true
+          },
+          "currentVsTwelveMonthRange": {
+            "$ref": "#/components/schemas/CashPriceRangeInsight"
+          },
+          "window": {
+            "$ref": "#/components/schemas/HistoryWindow"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false

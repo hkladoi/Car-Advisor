@@ -16,6 +16,7 @@ export function SiteHeader() {
           <Link href="/calculators/on-road">Ra biển</Link>
           <Link href="/calculators/energy">Năng lượng</Link>
           <Link href="/charging">Trạm sạc</Link>
+          <Link href="/energy/history">Lịch sử giá</Link>
           <Link href="/affordability">Nuôi xe</Link>
           <Link href="/financing">Mua/vay</Link>
           <Link href="/compare">So sánh</Link>

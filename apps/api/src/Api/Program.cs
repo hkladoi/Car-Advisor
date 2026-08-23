@@ -13,6 +13,7 @@ using VietnamCarPlatform.Api.Features.Charging;
 using VietnamCarPlatform.Api.Features.Compare;
 using VietnamCarPlatform.Api.Features.Energy;
 using VietnamCarPlatform.Api.Features.Financing;
+using VietnamCarPlatform.Api.Features.Pricing;
 using VietnamCarPlatform.Api.Features.Registration;
 using VietnamCarPlatform.Api.Health;
 using VietnamCarPlatform.Api.Middleware;
@@ -55,6 +56,7 @@ builder.Services.AddScoped<IAffordabilityService, AffordabilityService>();
 builder.Services.AddScoped<IFinancingService, FinancingService>();
 builder.Services.AddScoped<ICompareService, CompareService>();
 builder.Services.AddScoped<IChargingService, ChargingService>();
+builder.Services.AddScoped<IHistoryService, HistoryService>();
 var goongOptions = new GoongOptions
 {
     ApiKey = builder.Configuration["GOONG_API_KEY"] ?? string.Empty,
@@ -199,6 +201,7 @@ app.MapAffordabilityEndpoints();
 app.MapFinancingEndpoints();
 app.MapCompareEndpoints();
 app.MapChargingEndpoints();
+app.MapHistoryEndpoints();
 app.MapAdminEndpoints();
 
 app.MapHealthChecks("/health/live", new HealthCheckOptions

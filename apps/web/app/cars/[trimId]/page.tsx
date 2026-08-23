@@ -1,13 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
-import { ArrowLeft, CalendarClock, Gift, GitCompareArrows, ImageOff, MapPin, ShieldCheck, WalletCards } from "lucide-react";
+import { ArrowLeft, CalendarClock, ExternalLink, Gift, GitCompareArrows, ImageOff, MapPin, ShieldCheck, TrendingDown, WalletCards } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { RegionSelector } from "@/components/region-selector";
+import { PriceHistoryChart } from "@/components/history-charts";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { SourceDetails } from "@/components/source-details";
 import { formatDate, formatMoney, formatNumber, getCar, type CarDetailResponse } from "@/lib/catalog-api";
+import { getDealerOfferHistory, getVehiclePriceHistory, type DealerOfferHistoryItem } from "@/lib/history-api";
 
 function factValue(fact: CarDetailResponse["specifications"][number]): string {
   if (fact.status !== "Official") return "Chưa có dữ liệu chính thức";
@@ -54,6 +56,26 @@ const marketStatusLabels: Record<string, string> = {
   Unknown: "chưa rõ",
 };
 
+const priceSeriesLabels: Record<string, string> = {
+  Msrp: "MSRP",
+  ManufacturerPromotionPrice: "Giá khuyến mại hãng",
+  ManufacturerPromotion: "Quyền lợi khuyến mại hãng",
+  DealerCashPrice: "Giá tiền mặt đại lý",
+  DealerCashOffer: "Quyền lợi tiền mặt đại lý",
+  DealerQuote: "Báo giá tham khảo",
+  ExpectedPrice: "Giá dự kiến",
+  Unannounced: "Chưa công bố",
+};
+
+const rangePositionLabels: Record<string, string> = {
+  At12MonthLow: "đang ở đáy 12 tháng",
+  Near12MonthLow: "đang gần vùng thấp 12 tháng",
+  MidRange: "đang ở giữa biên độ 12 tháng",
+  Near12MonthHigh: "đang gần vùng cao 12 tháng",
+  At12MonthHigh: "đang ở đỉnh 12 tháng",
+  Flat: "không đổi trong các mốc đủ điều kiện",
+};
+
 export async function generateMetadata({ params }: { params: Promise<{ trimId: string }> }): Promise<Metadata> {
   const { trimId } = await params;
   const detail = await getCar(trimId);
@@ -69,9 +91,14 @@ export default async function CarDetailPage({ params }: { params: Promise<{ trim
   const { trimId } = await params;
   const detail = await getCar(trimId);
   if (!detail) notFound();
+  const [priceHistory, offerHistory] = await Promise.all([
+    getVehiclePriceHistory(trimId),
+    getDealerOfferHistory(trimId),
+  ]);
   const { car } = detail;
-  const cashBenefits = (offer: CarDetailResponse["dealerOffers"][number]) => offer.benefits.filter((benefit) => benefit.isCashEquivalent);
-  const giftBenefits = (offer: CarDetailResponse["dealerOffers"][number]) => offer.benefits.filter((benefit) => !benefit.isCashEquivalent);
+  const cashBenefits = (offer: DealerOfferHistoryItem) => offer.benefits.filter((benefit) => benefit.isCashEquivalent);
+  const giftBenefits = (offer: DealerOfferHistoryItem) => offer.benefits.filter((benefit) => !benefit.isCashEquivalent);
+  const range = priceHistory.currentVsTwelveMonthRange;
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Vehicle",
@@ -143,6 +170,31 @@ export default async function CarDetailPage({ params }: { params: Promise<{ trim
                   ))}
                 </div>
               ) : <p className="empty-fact">Chưa có giá công khai cho trim này.</p>}
+
+              <div className="price-history-block">
+                <header><div><p className="machine-label">12-MONTH OBSERVED HISTORY</p><h3>Lịch sử giá và ưu đãi</h3></div><TrendingDown aria-hidden="true" size={24} /></header>
+                {range.available && range.currentAmount !== null && range.twelveMonthMinimum !== null && range.twelveMonthMaximum !== null ? (
+                  <div className="price-range-insight">
+                    <div><span>Giá tiền mặt hiện tại</span><strong>{formatMoney({ amount: range.currentAmount, currency: range.currency })}</strong></div>
+                    <div><span>Biên độ 12 tháng</span><strong>{formatMoney({ amount: range.twelveMonthMinimum, currency: range.currency })} – {formatMoney({ amount: range.twelveMonthMaximum, currency: range.currency })}</strong></div>
+                    <p>{range.position ? rangePositionLabels[range.position] ?? range.position : ""} · {range.observationCount} quan sát / {range.distinctObservationDates} ngày khác nhau.</p>
+                  </div>
+                ) : (
+                  <div className="price-range-insight price-range-insight--insufficient"><strong>Chưa đủ dữ liệu để kết luận giá đang thấp hay cao.</strong><span>{range.observationCount}/3 quan sát, trải {range.spanDays}/90 ngày tối thiểu. Không suy diễn từ một mốc giá.</span></div>
+                )}
+                <PriceHistoryChart timeline={priceHistory.timeline} />
+                <div className="price-timeline" aria-label="Các mốc giá và quyền lợi">
+                  {priceHistory.timeline.length === 0 ? <p className="empty-fact">Chưa có mốc lịch sử có nguồn.</p> : priceHistory.timeline.map((event) => (
+                    <article key={`${event.id}-${event.effectiveFrom}-${event.series}`}>
+                      <time dateTime={event.effectiveFrom}>{formatDate(event.effectiveFrom)}</time>
+                      <div><strong>{priceSeriesLabels[event.series] ?? event.series}</strong><span>{event.valueKind === "CashBenefit" ? "Quyền lợi tiền mặt — không phải giá xe" : event.valueKind === "BenefitValue" ? "Giá trị quyền lợi — không tự quy đổi thành tiền mặt" : event.status}</span></div>
+                      <b>{event.amount === null ? "Chưa công bố" : formatMoney({ amount: event.amount, currency: event.currency })}</b>
+                      {event.source ? <a href={event.source.url} target="_blank" rel="noreferrer">Nguồn <ExternalLink aria-hidden="true" size={12} /></a> : <span className="history-manual">Manual override có audit</span>}
+                    </article>
+                  ))}
+                </div>
+                <p className="history-policy-note">Chỉ MSRP/giá khuyến mại/giá tiền mặt chính thức đi vào biên độ. Cash benefit và dealer quote bị loại khỏi phép so sánh.</p>
+              </div>
             </section>
 
             <section className="detail-section" aria-labelledby="specs-title">
@@ -191,7 +243,7 @@ export default async function CarDetailPage({ params }: { params: Promise<{ trim
             <section className="detail-panel" aria-labelledby="offers-title">
               <WalletCards aria-hidden="true" size={22} />
               <h2 id="offers-title">Ưu đãi đại lý</h2>
-              {detail.dealerOffers.length > 0 ? detail.dealerOffers.map((offer) => (
+              {offerHistory.current.length > 0 ? offerHistory.current.map((offer) => (
                 <article className="dealer-offer" key={offer.id}>
                   <h3>{offer.headline}</h3>
                   <p><MapPin aria-hidden="true" size={14} /> {offer.dealerName} · {offer.branchName} · {offer.provinceCode}</p>
@@ -199,9 +251,11 @@ export default async function CarDetailPage({ params }: { params: Promise<{ trim
                   <div className="offer-benefits"><strong>Quà / quyền lợi phi tiền mặt</strong>{giftBenefits(offer).length > 0 ? giftBenefits(offer).map((benefit, index) => <span key={`${benefit.type}-${index}`}>{benefit.type}{benefit.statedValue !== null ? ` · giá trị công bố ${formatMoney({ amount: benefit.statedValue, currency: benefit.currency })}` : ""}{benefit.note ? ` · ${benefit.note}` : ""}</span>) : <span>Không có quà được công bố</span>}</div>
                   <p><CalendarClock aria-hidden="true" size={14} /> {formatDate(offer.effectiveFrom)}{offer.effectiveTo ? ` – ${formatDate(offer.effectiveTo)}` : " · chưa công bố ngày kết thúc"}</p>
                   <details><summary>Điều kiện áp dụng</summary><pre>{offer.conditionsJson || "Chưa công bố điều kiện chi tiết"}</pre></details>
-                  <SourceDetails source={offer.source} compact />
+                  {offer.source ? <a className="history-source-link" href={offer.source.url} target="_blank" rel="noreferrer">{offer.source.name}<ExternalLink aria-hidden="true" size={12} /></a> : <span className="history-manual">Manual override có audit</span>}
                 </article>
               )) : <p className="empty-fact">Chưa có ưu đãi đại lý còn hiệu lực được publish.</p>}
+              {offerHistory.history.length > 0 && <details className="offer-history-disclosure"><summary>{offerHistory.history.length} ưu đãi đã hết hiệu lực / không còn current</summary><div>{offerHistory.history.map((offer) => <article key={offer.id}><strong>{offer.headline}</strong><span>{offer.dealerName} · {offer.branchName} · {offer.provinceCode}</span><span>{formatDate(offer.effectiveFrom)}{offer.effectiveTo ? ` – ${formatDate(offer.effectiveTo)}` : ""} · {offer.status}{offer.isStale ? " · stale" : ""}</span>{offer.maximumEligibleCashReduction !== null && <b>Giảm tiền mặt tối đa đủ điều kiện: {formatMoney({ amount: offer.maximumEligibleCashReduction, currency: offer.currency })}</b>}</article>)}</div></details>}
+              <p className="history-policy-note">Chỉ quyền lợi có cấu trúc và được đánh dấu tương đương tiền mặt mới làm giảm tiền mua xe; giá trị quà tặng không được cộng vào “tiết kiệm tiền mặt”. Trong cùng nhóm loại trừ chỉ lấy quyền lợi tiền mặt lớn nhất đủ điều kiện.</p>
             </section>
 
             <section className="detail-panel" aria-labelledby="warranty-title">

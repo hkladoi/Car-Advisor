@@ -19,7 +19,7 @@ Decisions and gate evidence belong in `docs/status/`.
 ## Current state
 
 - V1.0–V1.10 and the V1 FINAL GATE are complete.
-- V2.1–V2.6 are complete; V2.7 price and offer history UX is next. See
+- V2.1–V2.7 are complete; V2.8 full-market coverage completion is next. See
   `docs/status/v2-status.md`.
 - V3 must not start until the V2 FINAL GATE passes; see
   `docs/status/v3-status.md`.
@@ -119,6 +119,7 @@ dotnet test VietnamCarPlatform.sln --configuration Release
 python -m pip install -r workers/ingestion/requirements.txt
 python -m pytest workers/ingestion/tests
 python scripts/verify_v2_6_charging.py
+python scripts/verify_v2_7_history.py
 docker compose up --build -d --wait
 docker compose ps
 docker compose logs -f api ingestion-worker ingestion-scheduler
@@ -139,6 +140,7 @@ dotnet ef migrations has-pending-model-changes --project apps/api/src/Infrastruc
 - API liveness/readiness: <http://localhost:8080/health/live> and
   <http://localhost:8080/health/ready>
 - MinIO console: <http://localhost:9001>
+- Energy price history: <http://localhost:3000/energy/history>
 - PostgreSQL: `localhost:5432`; Redis: `localhost:6379`
 
 ## Debugging and recovery

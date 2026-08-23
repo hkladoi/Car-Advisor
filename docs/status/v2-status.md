@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-23
 
-Overall: **IN PROGRESS — V2.7**
+Overall: **IN PROGRESS — V2.8**
 
 ## Governing decisions
 
@@ -39,7 +39,7 @@ No material conflict between the two source documents has been found so far.
 - [x] V2.4 Change detection, review and rollback — PASS 2026-08-23
 - [x] V2.5 Automated monitoring — PASS 2026-08-23
 - [x] V2.6 Charging and map enrichment — PASS 2026-08-23
-- [ ] V2.7 Price and offer history UX
+- [x] V2.7 Price and offer history UX — PASS 2026-08-23
 - [ ] V2.8 Full-market coverage
 - [ ] V2 FINAL GATE
 
@@ -332,3 +332,62 @@ latitude/longitude bounding-box filters meet the current acceptance path. Goong
 map tiles are also not exposed to the browser because the product's stricter
 server-secret rule takes priority; a coordinate plot plus on-demand server
 geocoding preserves map usefulness without leaking credentials.
+
+## V2.7 gate — PASS
+
+Implemented evidence:
+
+- `GET /api/v1/cars/{trimId}/prices` returns a bounded effective-dated timeline
+  for official MSRP, actual manufacturer-promotion/dealer cash prices, expected
+  or unannounced states, manufacturer benefits and structured dealer cash
+  benefits. Every event retains source-fact provenance or labels an audited
+  manual override.
+- `GET /api/v1/cars/{trimId}/dealer-offers` separates current from expired/stale
+  offers, keeps branch/province/conditions/verification date and itemized
+  benefits, and computes at most the largest cash value inside each exclusivity
+  group. Gifts and stated non-cash value never reduce the cash purchase price.
+- “Current low vs 12-month range” is withheld unless there are at least three
+  official observed cash-price points on three distinct dates spanning at least
+  90 days inside the trailing year. Dealer quotes, expected prices, unannounced
+  states and cash-benefit amounts are excluded from the range calculation.
+- `GET /api/v1/energy/prices/history` groups observations by energy type,
+  provider, region, unit and electricity tier, so unlike quantities are never
+  joined into one trend. The dedicated `/energy/history` page exposes filterable
+  MOIT fuel and EVN electricity history with effective periods and source links.
+- Vehicle detail now includes the price/benefit timeline, source links, range
+  sufficiency disclosure and current/expired offer history. Recharts is pinned
+  at `3.10.1`; a line is rendered only with at least two observations. A single
+  observation stays visible but is explicitly not drawn as a trend.
+- Price archive creation now closes an otherwise open historic effective period
+  at archive time. Legacy open archive rows are also bounded by `archived_at` in
+  history queries, preventing old values from appearing current forever.
+
+Gate commands/evidence:
+
+- API Release build succeeds with zero warnings; 57 tests pass, including the
+  3-point/90-day range threshold, no-current behavior, benefit exclusion and
+  exclusivity math. EF reports no pending model changes; no migration was needed
+  because V1 already supplied effective-dated price/promotion/offer/energy tables
+  and the separate `price_history` table.
+- Web lint, 10 Vitest tests and production build pass; `/cars/[trimId]` and
+  `/energy/history` are present in the build. The generated client comes from the
+  live OpenAPI document containing all three V2.7 endpoints.
+- `scripts/verify_v2_7_history.py` passes against seven healthy services. It
+  confirms the real one-observation catalog correctly withholds a range claim,
+  temporarily proves the three-observation path using an existing source-backed
+  MSRP, removes exactly those temporary rows in `finally`, and confirms the DB
+  returns to its original `price_history` count.
+- The same gate reads nine real, source-backed MOIT/EVN energy series and nine
+  observations, verifies invalid query/unknown trim errors, source separation,
+  SSR pages, exact chart dependency and unit formatting.
+- Real Chromium verification covered desktop vehicle history, 390×844 mobile
+  vehicle history and desktop energy history. All screens remained readable,
+  links/timelines were accessible and the console reported zero errors or
+  warnings. Visual QA caught and fixed both a misleading single-point chart axis
+  and duplicated `VND/VND/...` labels before acceptance.
+
+Recorded decision: historical ownership-cost recomputation remains deferred
+because the plan explicitly marks it optional, while all three mandatory V2.7
+history items are complete. This does not remove the reproducibility inputs
+already returned by current calculators and can be added later without changing
+the effective-dated history contracts.

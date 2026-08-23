@@ -614,7 +614,7 @@ public sealed class AdminReviewService(AppDbContext database, TimeProvider timeP
         RegionScope = price.RegionScope,
         Status = price.Status,
         EffectiveFrom = price.EffectiveFrom,
-        EffectiveTo = price.EffectiveTo,
+        EffectiveTo = price.EffectiveTo ?? now,
         SourceFactId = price.SourceFactId,
         ManualOverrideReason = price.ManualOverrideReason,
         ArchivedAt = now,

@@ -596,6 +596,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/energy/prices/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetEnergyPriceHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/financing/calculate": {
         parameters: {
             query?: never;
@@ -654,6 +670,38 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["CalculateOperatingOwnershipCost"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cars/{trimId}/prices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetVehiclePriceHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cars/{trimId}/dealer-offers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetVehicleDealerOfferHistory"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1406,6 +1454,26 @@ export interface components {
             /** Format: date-time */
             generatedAt?: string;
         };
+        CashPriceRangeInsight: {
+            available?: boolean;
+            basis?: string | null;
+            policy?: string | null;
+            reasonCode?: string | null;
+            /** Format: int32 */
+            observationCount?: number;
+            /** Format: int32 */
+            distinctObservationDates?: number;
+            /** Format: int32 */
+            spanDays?: number;
+            /** Format: double */
+            currentAmount?: number | null;
+            /** Format: double */
+            twelveMonthMinimum?: number | null;
+            /** Format: double */
+            twelveMonthMaximum?: number | null;
+            currency?: string | null;
+            position?: string | null;
+        };
         CatalogCar: {
             /** Format: uuid */
             trimId?: string;
@@ -1663,6 +1731,17 @@ export interface components {
             exclusivityGroup?: string | null;
             note?: string | null;
         };
+        DealerOfferBenefitHistory: {
+            type?: string | null;
+            /** Format: double */
+            cashValue?: number | null;
+            /** Format: double */
+            statedValue?: number | null;
+            currency?: string | null;
+            isCashEquivalent?: boolean;
+            exclusivityGroup?: string | null;
+            note?: string | null;
+        };
         DealerOfferDetail: {
             /** Format: uuid */
             id?: string;
@@ -1678,6 +1757,40 @@ export interface components {
             effectiveTo?: string | null;
             benefits?: components["schemas"]["DealerOfferBenefitDetail"][] | null;
             source?: components["schemas"]["SourceBadge"];
+        };
+        DealerOfferHistoryItem: {
+            /** Format: uuid */
+            id?: string;
+            dealerName?: string | null;
+            branchName?: string | null;
+            provinceCode?: string | null;
+            headline?: string | null;
+            status?: string | null;
+            conditionsJson?: string | null;
+            combinabilityGroup?: string | null;
+            /** Format: double */
+            maximumEligibleCashReduction?: number | null;
+            currency?: string | null;
+            /** Format: date-time */
+            effectiveFrom?: string;
+            /** Format: date-time */
+            effectiveTo?: string | null;
+            /** Format: date-time */
+            lastVerifiedAt?: string;
+            isCurrent?: boolean;
+            isStale?: boolean;
+            benefits?: components["schemas"]["DealerOfferBenefitHistory"][] | null;
+            provenance?: string | null;
+            source?: components["schemas"]["HistorySourceReference"];
+        };
+        DealerOfferHistoryResponse: {
+            vehicle?: components["schemas"]["VehicleHistoryIdentity"];
+            current?: components["schemas"]["DealerOfferHistoryItem"][] | null;
+            history?: components["schemas"]["DealerOfferHistoryItem"][] | null;
+            cashSemantics?: string | null;
+            window?: components["schemas"]["HistoryWindow"];
+            /** Format: date-time */
+            generatedAt?: string;
         };
         EnergyBreakdownItem: {
             component?: string | null;
@@ -1753,6 +1866,42 @@ export interface components {
             /** Format: double */
             gridEnergyKwh?: number;
             currency?: string | null;
+        };
+        EnergyPriceHistoryResponse: {
+            series?: components["schemas"]["EnergyPriceSeries"][] | null;
+            window?: components["schemas"]["HistoryWindow"];
+            semantics?: string | null;
+            /** Format: date-time */
+            generatedAt?: string;
+        };
+        EnergyPriceObservation: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: double */
+            amount?: number;
+            /** Format: double */
+            taxRate?: number;
+            taxIncluded?: boolean;
+            /** Format: date-time */
+            effectiveFrom?: string;
+            /** Format: date-time */
+            effectiveTo?: string | null;
+            isCurrent?: boolean;
+            provenance?: string | null;
+            source?: components["schemas"]["HistorySourceReference"];
+        };
+        EnergyPriceSeries: {
+            seriesKey?: string | null;
+            energyType?: string | null;
+            provider?: string | null;
+            regionCode?: string | null;
+            unit?: string | null;
+            currency?: string | null;
+            /** Format: int32 */
+            tierFromInclusive?: number;
+            /** Format: int32 */
+            tierToInclusive?: number | null;
+            observations?: components["schemas"]["EnergyPriceObservation"][] | null;
         };
         EnergyProfileReference: {
             /** Format: uuid */
@@ -1939,6 +2088,28 @@ export interface components {
             /** Format: double */
             longitude?: number;
             placeId?: string | null;
+        };
+        HistorySourceReference: {
+            /** Format: uuid */
+            sourceFactId?: string;
+            /** Format: uuid */
+            sourceId?: string;
+            name?: string | null;
+            url?: string | null;
+            authority?: string | null;
+            /** Format: date-time */
+            fetchedAt?: string;
+            contentHash?: string | null;
+            confidence?: string | null;
+        };
+        HistoryWindow: {
+            /** Format: date-time */
+            from?: string;
+            /** Format: date-time */
+            to?: string;
+            /** Format: int32 */
+            months?: number;
+            truncated?: boolean;
         };
         InputPriceReference: {
             /** Format: uuid */
@@ -2156,6 +2327,26 @@ export interface components {
             effectiveTo?: string | null;
             source?: components["schemas"]["SourceBadge"];
         };
+        PriceTimelineEvent: {
+            /** Format: uuid */
+            id?: string;
+            series?: string | null;
+            valueKind?: string | null;
+            /** Format: double */
+            amount?: number | null;
+            currency?: string | null;
+            status?: string | null;
+            scope?: string | null;
+            label?: string | null;
+            /** Format: date-time */
+            effectiveFrom?: string;
+            /** Format: date-time */
+            effectiveTo?: string | null;
+            isCurrent?: boolean;
+            isStale?: boolean;
+            provenance?: string | null;
+            source?: components["schemas"]["HistorySourceReference"];
+        };
         PurchaseCashflowResult: {
             /** Format: double */
             vehicleDebtRatio?: number;
@@ -2277,6 +2468,23 @@ export interface components {
             powertrain?: string | null;
             /** Format: double */
             seats?: number | null;
+        };
+        VehicleHistoryIdentity: {
+            /** Format: uuid */
+            trimId?: string;
+            brandName?: string | null;
+            modelName?: string | null;
+            trimName?: string | null;
+            /** Format: int32 */
+            modelYear?: number;
+        };
+        VehiclePriceHistoryResponse: {
+            vehicle?: components["schemas"]["VehicleHistoryIdentity"];
+            timeline?: components["schemas"]["PriceTimelineEvent"][] | null;
+            currentVsTwelveMonthRange?: components["schemas"]["CashPriceRangeInsight"];
+            window?: components["schemas"]["HistoryWindow"];
+            /** Format: date-time */
+            generatedAt?: string;
         };
         WarrantyDetail: {
             /** Format: int32 */
@@ -4038,6 +4246,40 @@ export interface operations {
             };
         };
     };
+    GetEnergyPriceHistory: {
+        parameters: {
+            query?: {
+                EnergyType?: string;
+                Provider?: string;
+                RegionCode?: string;
+                Months?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnergyPriceHistoryResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     CalculatePurchaseFinancing: {
         parameters: {
             query?: never;
@@ -4191,6 +4433,92 @@ export interface operations {
             };
             /** @description Unprocessable Content */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    GetVehiclePriceHistory: {
+        parameters: {
+            query?: {
+                RegionScope?: string;
+                Months?: number;
+            };
+            header?: never;
+            path: {
+                trimId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VehiclePriceHistoryResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    GetVehicleDealerOfferHistory: {
+        parameters: {
+            query?: {
+                ProvinceCode?: string;
+                Months?: number;
+            };
+            header?: never;
+            path: {
+                trimId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealerOfferHistoryResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
