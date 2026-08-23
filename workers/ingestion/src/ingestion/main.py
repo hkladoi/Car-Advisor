@@ -18,6 +18,14 @@ from ingestion.discovery import (
     QueryTemplateCatalog,
 )
 from ingestion.fetcher import KnownUrlFetcher
+from ingestion.extraction import (
+    CandidateFactRepository,
+    CatalogEntityRepository,
+    LocalLlmJsonSchemaExtractor,
+    LocalLlmOptions,
+    StructuredExtractionEngine,
+    StructuredExtractionPipeline,
+)
 from ingestion.logging import configure_logging
 from ingestion.metadata import SnapshotMetadataRepository
 from ingestion.parsers import DomainParserRegistry, ParserCoordinator, ParserProfileRegistry
@@ -53,6 +61,23 @@ async def run_worker(settings: Settings) -> None:
             settings.parser_max_pdf_pages,
         ),
         settings.parser_max_content_bytes,
+    )
+    llm = None
+    if settings.local_llm_base_url.strip() and settings.local_llm_model.strip():
+        llm = LocalLlmJsonSchemaExtractor(
+            LocalLlmOptions(
+                base_url=settings.local_llm_base_url,
+                model=settings.local_llm_model,
+                api_key=settings.local_llm_api_key.get_secret_value(),
+                timeout_seconds=settings.local_llm_timeout_seconds,
+                max_input_chars=settings.local_llm_max_input_chars,
+            )
+        )
+    extraction_pipeline = StructuredExtractionPipeline(
+        storage=storage,
+        catalog_repository=CatalogEntityRepository(settings.postgres_dsn),
+        fact_repository=CandidateFactRepository(settings.postgres_dsn),
+        engine=StructuredExtractionEngine(llm),
     )
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
@@ -153,6 +178,56 @@ async def run_worker(settings: Settings) -> None:
                         parse_status=parse_outcome.status,
                         parsed_object_key=parse_outcome.parsed_object_key,
                     )
+                    try:
+                        extraction_outcome = await extraction_pipeline.process(
+                            source,
+                            snapshot_id,
+                            parse_outcome.parsed_object_key,
+                            snapshot.content_hash,
+                        )
+                        if extraction_outcome.status == "extracted":
+                            batch = extraction_outcome.batch
+                            await client.rpush(
+                                settings.extracted_candidate_queue,
+                                json.dumps(
+                                    {
+                                        "source_id": source.id,
+                                        "snapshot_id": str(snapshot_id),
+                                        "content_hash": snapshot.content_hash,
+                                        "artifact_key": extraction_outcome.artifact_key,
+                                        "fact_count": len(batch.facts) if batch else 0,
+                                        "inserted_facts": extraction_outcome.inserted_facts,
+                                        "entity_resolution": (
+                                            batch.entity_resolution.model_dump(mode="json")
+                                            if batch else None
+                                        ),
+                                    },
+                                    ensure_ascii=False,
+                                ),
+                            )
+                            await client.ltrim(settings.extracted_candidate_queue, -10_000, -1)
+                        logger.info(
+                            "source_extraction_complete",
+                            source_id=source.id,
+                            extraction_status=extraction_outcome.status,
+                            artifact_key=extraction_outcome.artifact_key,
+                            inserted_facts=extraction_outcome.inserted_facts,
+                            fact_count=(
+                                len(extraction_outcome.batch.facts)
+                                if extraction_outcome.batch else 0
+                            ),
+                            resolution_status=(
+                                extraction_outcome.batch.entity_resolution.status
+                                if extraction_outcome.batch else None
+                            ),
+                        )
+                    except Exception as error:
+                        logger.exception(
+                            "source_extraction_failed",
+                            source_id=source.id,
+                            content_hash=snapshot.content_hash,
+                            error_type=type(error).__name__,
+                        )
                 except Exception as error:
                     logger.exception(
                         "source_parse_failed",

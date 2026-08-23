@@ -34,3 +34,9 @@ class Settings(BaseSettings):
     parsed_document_queue: str = "ingestion:parsed-documents"
     parser_max_content_bytes: int = Field(default=20_000_000, ge=1024, le=100_000_000)
     parser_max_pdf_pages: int = Field(default=500, ge=1, le=5000)
+    local_llm_base_url: str = ""
+    local_llm_model: str = ""
+    local_llm_api_key: SecretStr = SecretStr("")
+    local_llm_timeout_seconds: float = Field(default=60.0, ge=1.0, le=300.0)
+    local_llm_max_input_chars: int = Field(default=40_000, ge=1000, le=200_000)
+    extracted_candidate_queue: str = "ingestion:extracted-candidates"

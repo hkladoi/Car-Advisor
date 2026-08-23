@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-23
 
-Overall: **IN PROGRESS — V2.3**
+Overall: **IN PROGRESS — V2.4**
 
 ## Governing decisions
 
@@ -35,7 +35,7 @@ No material conflict between the two source documents has been found so far.
 
 - [x] V2.1 Brave discovery — PASS 2026-08-23
 - [x] V2.2 Domain parsers — PASS 2026-08-23
-- [ ] V2.3 Structured extraction
+- [x] V2.3 Structured extraction — PASS 2026-08-23
 - [ ] V2.4 Change detection, review and rollback
 - [ ] V2.5 Automated monitoring
 - [ ] V2.6 Charging and map enrichment
@@ -117,3 +117,45 @@ Gate commands/evidence:
   immutable snapshot, wrote a `toyota-html/2.2.0` parsed artifact and updated the
   DB snapshot row. Repeating the fetch produced `parse_status=unchanged` and did
   not add a second parsed event.
+
+## V2.3 gate — PASS
+
+Implemented evidence:
+
+- `DeterministicExtractor` reads JSON-LD first, then bounded anchored patterns
+  for MSRP, dimensions, seats, power, torque, battery, range and official
+  consumption. It never infers a missing value.
+- `UnitNormalizer` handles Vietnamese price notation and canonical VND, mm, kW,
+  Nm, kWh, km, L/100km and kWh/100km values with plausible-range rejection while
+  retaining original raw value/unit.
+- Trim-first entity resolution uses normalized brand/model/trim names and aliases.
+  A unique trim/model must pass thresholds; close matches produce `ambiguous`
+  with alternatives and no guessed entity ID.
+- Confidence combines source authority, deterministic/JSON-LD/local-LLM method,
+  entity resolution and conflicts. Conflicting normalized values are retained as
+  reviewable candidates with capped confidence.
+- Optional local OpenAI-compatible extraction is disabled by default, runs only
+  after deterministic extraction yields no facts, requests strict JSON Schema,
+  validates through Pydantic and discards any raw value not grounded verbatim in
+  the parsed snapshot.
+- Candidate `SourceFact` IDs and extraction artifacts are deterministic and
+  idempotent. Candidates do not overwrite published catalog data.
+
+Gate commands/evidence:
+
+- `python -m pytest workers/ingestion/tests` — 42 passed, including unit
+  conversion, structured-first extraction, ambiguity refusal, LLM grounding and
+  immutable pipeline replay.
+- Worker/scheduler images build and services are healthy.
+- Real Toyota replay resolved the exact Vietnam trim, persisted one
+  `spec.seats=5` candidate with `VerifiedOfficial` confidence and
+  `structured-extraction/2.3.0` provenance. A second replay returned
+  `extraction_status=unchanged`, inserted zero facts and emitted no duplicate
+  candidate event.
+- Web lint/build and 6 tests pass; .NET Release build and 43 tests pass with zero
+  warnings; EF reports no pending model changes.
+
+Credential note: no local LLM endpoint/model is configured, so the optional
+fallback was not called. Its HTTP interaction is exercised only through a strict
+schema/grounding contract test; production remains deterministic-only until an
+operator supplies `LOCAL_LLM_BASE_URL` and `LOCAL_LLM_MODEL`.
