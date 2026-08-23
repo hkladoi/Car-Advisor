@@ -724,6 +724,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RecommendTrims"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/regions": {
         parameters: {
             query?: never;
@@ -2456,6 +2472,132 @@ export interface components {
             /** Format: double */
             loanInsuranceUpfront?: number;
             selectedDealerOfferIds?: string[] | null;
+        };
+        RecommendationCandidate: {
+            vehicle?: components["schemas"]["RecommendationVehicle"];
+            /** Format: int32 */
+            rank?: number | null;
+            /** Format: double */
+            completeness?: number;
+            completenessPassed?: boolean;
+            trustPassed?: boolean;
+            /** Format: double */
+            overallScore?: number | null;
+            /** Format: double */
+            pricePerformanceScore?: number | null;
+            components?: components["schemas"]["RecommendationComponent"][] | null;
+            reasons?: string[] | null;
+        };
+        RecommendationComponent: {
+            code?: string | null;
+            label?: string | null;
+            /** Format: double */
+            weight?: number;
+            rawMetrics?: components["schemas"]["RecommendationMetric"][] | null;
+            /** Format: double */
+            score?: number | null;
+            includedInOverall?: boolean;
+            trusted?: boolean;
+            sources?: components["schemas"]["RecommendationSource"][] | null;
+            explanation?: string | null;
+        };
+        RecommendationHardFiltersRequest: {
+            /** Format: double */
+            maximumPrice?: number | null;
+            bodyTypes?: string[] | null;
+            segments?: string[] | null;
+            powertrains?: string[] | null;
+            /** Format: double */
+            minimumSeats?: number | null;
+            requiredFeatureCodes?: string[] | null;
+        };
+        RecommendationMethodology: {
+            version?: string | null;
+            evaluationOrder?: string[] | null;
+            /** Format: double */
+            completenessThreshold?: number;
+            normalizedWeights?: {
+                [key: string]: number;
+            } | null;
+            overallFormula?: string | null;
+            pricePerformanceFormula?: string | null;
+            assumptions?: string[] | null;
+        };
+        RecommendationMetric: {
+            code?: string | null;
+            label?: string | null;
+            /** Format: double */
+            value?: number;
+            unit?: string | null;
+            direction?: string | null;
+        };
+        RecommendationRequest: {
+            hardFilters?: components["schemas"]["RecommendationHardFiltersRequest"];
+            weights?: components["schemas"]["RecommendationWeightsRequest"];
+            regionCode?: string | null;
+            /** Format: date-time */
+            asOfDate?: string | null;
+            /** Format: int32 */
+            maximumResults?: number;
+        };
+        RecommendationResponse: {
+            methodology?: components["schemas"]["RecommendationMethodology"];
+            /** Format: int32 */
+            considered?: number;
+            /** Format: int32 */
+            hardFilterMatched?: number;
+            ranked?: components["schemas"]["RecommendationCandidate"][] | null;
+            dataWithheld?: components["schemas"]["RecommendationCandidate"][] | null;
+            hardFilterExcluded?: components["schemas"]["RecommendationCandidate"][] | null;
+            /** Format: date-time */
+            evaluatedAt?: string;
+        };
+        RecommendationSource: {
+            /** Format: uuid */
+            sourceFactId?: string;
+            /** Format: uuid */
+            sourceId?: string;
+            name?: string | null;
+            url?: string | null;
+            authority?: string | null;
+            contentType?: string | null;
+            /** Format: date-time */
+            fetchedAt?: string;
+            contentHash?: string | null;
+            factStatus?: string | null;
+            confidence?: string | null;
+            stale?: boolean;
+        };
+        RecommendationVehicle: {
+            /** Format: uuid */
+            trimId?: string;
+            brandName?: string | null;
+            modelName?: string | null;
+            trimName?: string | null;
+            /** Format: int32 */
+            modelYear?: number;
+            bodyType?: string | null;
+            segment?: string | null;
+            powertrain?: string | null;
+            /** Format: double */
+            currentPrice?: number | null;
+            currency?: string | null;
+        };
+        RecommendationWeightsRequest: {
+            /** Format: double */
+            priceValue?: number;
+            /** Format: double */
+            runningCost?: number;
+            /** Format: double */
+            space?: number;
+            /** Format: double */
+            safetyAdas?: number;
+            /** Format: double */
+            comfort?: number;
+            /** Format: double */
+            performance?: number;
+            /** Format: double */
+            technology?: number;
         };
         RegionItem: {
             code?: string | null;
@@ -4601,6 +4743,48 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    RecommendTrims: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecommendationRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecommendationResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

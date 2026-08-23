@@ -1,5 +1,14 @@
 [
   {
+    "date": "2026-08-23",
+    "macrostructure": "Split Studio",
+    "theme": "Cobalt",
+    "enrichment": "none",
+    "nav": "N13-shared",
+    "footer": "Ft5",
+    "brief": "V3.1 explainable deterministic vehicle recommendation"
+  },
+  {
     "date": "2026-08-22",
     "macrostructure": "Workbench",
     "theme": "Cobalt",
@@ -9,4 +18,3 @@
     "brief": "Vietnam Car Platform — trustworthy trim-first discovery"
   }
 ]
-

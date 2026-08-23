@@ -23,8 +23,10 @@ Decisions and gate evidence belong in `docs/status/`.
   `docs/status/v2-status.md`. The live reviewed scope is 51 brands (38 included,
   13 excluded), 255 model candidates, 49 explicit trim candidates and 236
   documented trim-inventory gaps; do not replace those gaps with invented data.
-- V3 is unlocked; V3.1 explainable recommendation is next. See
-  `docs/status/v3-status.md`.
+- V3.1 explainable recommendation is complete and its gate passed. The current
+  reviewed catalog is intentionally too sparse to publish a ranked result, so
+  `/recommend` exposes a data-withheld ledger instead of fabricated scores.
+  V3.2 accounts/privacy is next. See `docs/status/v3-status.md`.
 
 ## Architecture
 
@@ -124,6 +126,7 @@ python scripts/verify_v2_6_charging.py
 python scripts/verify_v2_7_history.py
 python scripts/verify_v2_8_coverage.py
 python scripts/verify_v2_final.py
+python scripts/verify_v3_1_recommendation.py
 docker compose up --build -d --wait
 docker compose ps
 docker compose logs -f api ingestion-worker ingestion-scheduler
@@ -146,6 +149,7 @@ dotnet ef migrations has-pending-model-changes --project apps/api/src/Infrastruc
 - MinIO console: <http://localhost:9001>
 - Energy price history: <http://localhost:3000/energy/history>
 - Public full-market coverage: <http://localhost:3000/coverage>
+- Explainable recommendation: <http://localhost:3000/recommend>
 - PostgreSQL: `localhost:5432`; Redis: `localhost:6379`
 
 ## Debugging and recovery

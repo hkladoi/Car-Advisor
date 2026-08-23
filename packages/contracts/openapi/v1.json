@@ -2410,6 +2410,56 @@
         }
       }
     },
+    "/api/v1/recommendations": {
+      "post": {
+        "tags": [
+          "Recommendation"
+        ],
+        "operationId": "RecommendTrims",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecommendationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/regions": {
       "get": {
         "tags": [
@@ -7510,6 +7560,412 @@
               "format": "uuid"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecommendationCandidate": {
+        "type": "object",
+        "properties": {
+          "vehicle": {
+            "$ref": "#/components/schemas/RecommendationVehicle"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "completeness": {
+            "type": "number",
+            "format": "double"
+          },
+          "completenessPassed": {
+            "type": "boolean"
+          },
+          "trustPassed": {
+            "type": "boolean"
+          },
+          "overallScore": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "pricePerformanceScore": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecommendationComponent"
+            },
+            "nullable": true
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecommendationComponent": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "weight": {
+            "type": "number",
+            "format": "double"
+          },
+          "rawMetrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecommendationMetric"
+            },
+            "nullable": true
+          },
+          "score": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "includedInOverall": {
+            "type": "boolean"
+          },
+          "trusted": {
+            "type": "boolean"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecommendationSource"
+            },
+            "nullable": true
+          },
+          "explanation": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecommendationHardFiltersRequest": {
+        "type": "object",
+        "properties": {
+          "maximumPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "bodyTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "powertrains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "minimumSeats": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "requiredFeatureCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecommendationMethodology": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "evaluationOrder": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "completenessThreshold": {
+            "type": "number",
+            "format": "double"
+          },
+          "normalizedWeights": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "overallFormula": {
+            "type": "string",
+            "nullable": true
+          },
+          "pricePerformanceFormula": {
+            "type": "string",
+            "nullable": true
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecommendationMetric": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "number",
+            "format": "double"
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true
+          },
+          "direction": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecommendationRequest": {
+        "type": "object",
+        "properties": {
+          "hardFilters": {
+            "$ref": "#/components/schemas/RecommendationHardFiltersRequest"
+          },
+          "weights": {
+            "$ref": "#/components/schemas/RecommendationWeightsRequest"
+          },
+          "regionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "asOfDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "maximumResults": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecommendationResponse": {
+        "type": "object",
+        "properties": {
+          "methodology": {
+            "$ref": "#/components/schemas/RecommendationMethodology"
+          },
+          "considered": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hardFilterMatched": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ranked": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecommendationCandidate"
+            },
+            "nullable": true
+          },
+          "dataWithheld": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecommendationCandidate"
+            },
+            "nullable": true
+          },
+          "hardFilterExcluded": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecommendationCandidate"
+            },
+            "nullable": true
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecommendationSource": {
+        "type": "object",
+        "properties": {
+          "sourceFactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "authority": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "fetchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contentHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "factStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "confidence": {
+            "type": "string",
+            "nullable": true
+          },
+          "stale": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecommendationVehicle": {
+        "type": "object",
+        "properties": {
+          "trimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brandName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "trimName": {
+            "type": "string",
+            "nullable": true
+          },
+          "modelYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bodyType": {
+            "type": "string",
+            "nullable": true
+          },
+          "segment": {
+            "type": "string",
+            "nullable": true
+          },
+          "powertrain": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecommendationWeightsRequest": {
+        "type": "object",
+        "properties": {
+          "priceValue": {
+            "type": "number",
+            "format": "double"
+          },
+          "runningCost": {
+            "type": "number",
+            "format": "double"
+          },
+          "space": {
+            "type": "number",
+            "format": "double"
+          },
+          "safetyAdas": {
+            "type": "number",
+            "format": "double"
+          },
+          "comfort": {
+            "type": "number",
+            "format": "double"
+          },
+          "performance": {
+            "type": "number",
+            "format": "double"
+          },
+          "technology": {
+            "type": "number",
+            "format": "double"
           }
         },
         "additionalProperties": false
