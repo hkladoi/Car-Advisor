@@ -459,16 +459,16 @@
     },
     {
       "id": "vinfast-free-charging-2026",
-      "name": "VinFast three-year V-Green free-charging policy 2026",
+      "name": "VinFast February 2026 charging-incentive policy",
       "owner": "VinFast Auto Vietnam",
       "category": "charging-promotion",
-      "url": "https://vinfastauto.com/vn_vi/vinfast-tang-qua-tet-khung-len-toi-3-nam-sac-pin-mien-phi-cho-khach-hang",
-      "allowed_domains": ["vinfastauto.com"],
+      "url": "https://static-cms-prod.vinfastauto.com/20260210_thong-bao-chinh-sach-uu-dai-sac-pin-cho-cac-dong-xe-o-to-dien-vinfast-thang-02.2026.pdf",
+      "allowed_domains": ["static-cms-prod.vinfastauto.com"],
       "authority": "BrandOfficial",
-      "content_type": "Html",
-      "refresh_hours": 24,
+      "content_type": "Pdf",
+      "refresh_hours": 168,
       "priority": 0,
-      "robots_note": "Official promotion policy; one daily conditional fetch for eligibility and end-date changes.",
+      "robots_note": "Official dated policy PDF; one weekly conditional fetch for integrity and availability checks.",
       "terms_note": "Publish normalized versioned eligibility and caps only; do not hard-code the brand benefit."
     },
     {

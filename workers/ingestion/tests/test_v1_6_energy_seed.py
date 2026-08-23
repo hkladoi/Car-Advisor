@@ -32,6 +32,17 @@ def test_reviewed_energy_seed_has_complete_v1_6_current_rates_and_profiles() -> 
     }
 
 
+def test_vinfast_promotion_uses_the_official_dated_policy_pdf() -> None:
+    registry = SourceRegistry.load(ROOT / "data" / "source-registry.v1.json")
+
+    source = registry.by_id("vinfast-free-charging-2026")
+
+    assert source.authority.value == "BrandOfficial"
+    assert source.content_type.value == "Pdf"
+    assert source.allowed_domains == ["static-cms-prod.vinfastauto.com"]
+    assert source.url.endswith("vinfast-thang-02.2026.pdf")
+
+
 def test_phev_profile_requires_separate_consumption_condition_labels() -> None:
     batch = load_energy_seed(ROOT / "data" / "seed" / "v1.6-energy.json")
     payload = batch.model_dump(mode="json")

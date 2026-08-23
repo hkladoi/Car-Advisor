@@ -1,6 +1,6 @@
 {
   "schema_version": "v1.2",
-  "generated_at": "2026-08-22T11:40:21.548109+00:00",
+  "generated_at": "2026-08-23T02:19:48.268257+00:00",
   "snapshots": [
     {
       "source_id": "byd-sealion6-charge-sustaining",
@@ -74,17 +74,17 @@
     },
     {
       "source_id": "vinfast-free-charging-2026",
-      "source_url": "https://vinfastauto.com/vn_vi/vinfast-tang-qua-tet-khung-len-toi-3-nam-sac-pin-mien-phi-cho-khach-hang",
-      "final_url": "https://vinfastauto.com/vn_vi/vinfast-tang-qua-tet-khung-len-toi-3-nam-sac-pin-mien-phi-cho-khach-hang",
-      "fetched_at": "2026-08-22T11:40:21.529814+00:00",
-      "content_hash": "2276df71b718fe35db6340c70a567f6e1079f6c265106e7ba1a1b18e6217f163",
-      "object_key": "sources/vinfast-free-charging-2026/sha256/2276df71b718fe35db6340c70a567f6e1079f6c265106e7ba1a1b18e6217f163.html",
+      "source_url": "https://static-cms-prod.vinfastauto.com/20260210_thong-bao-chinh-sach-uu-dai-sac-pin-cho-cac-dong-xe-o-to-dien-vinfast-thang-02.2026.pdf",
+      "final_url": "https://static-cms-prod.vinfastauto.com/20260210_thong-bao-chinh-sach-uu-dai-sac-pin-cho-cac-dong-xe-o-to-dien-vinfast-thang-02.2026.pdf",
+      "fetched_at": "2026-08-23T02:19:48.268257+00:00",
+      "content_hash": "7942a3680c734862e7401b2c7664c92ae75f9ea7640bbb8262cc6716d609886b",
+      "object_key": "sources/vinfast-free-charging-2026/sha256/7942a3680c734862e7401b2c7664c92ae75f9ea7640bbb8262cc6716d609886b.pdf",
       "http_status": 200,
-      "content_type": "text/html; charset=utf-8",
+      "content_type": "application/pdf",
       "etag": null,
-      "last_modified": null,
-      "size_bytes": 125802,
-      "fetch_method": "playwright"
+      "last_modified": "Sun, 23 Aug 2026 02:17:03 GMT",
+      "size_bytes": 281186,
+      "fetch_method": "http"
     },
     {
       "source_id": "vr-vf6-energy-label",
