@@ -145,16 +145,16 @@
     },
     {
       "id": "suzuki-vietnam-market",
-      "name": "Suzuki Vietnam official automobile registry",
+      "name": "Suzuki Vietnam official automobile sitemap",
       "owner": "Vietnam Suzuki",
       "category": "brand-registry",
-      "url": "https://suzuki.com.vn/",
+      "url": "https://suzuki.com.vn/sitemap.xml",
       "allowed_domains": ["suzuki.com.vn", "www.suzuki.com.vn"],
       "authority": "BrandOfficial",
-      "content_type": "Html",
+      "content_type": "Xml",
       "refresh_hours": 168,
       "priority": 10,
-      "robots_note": "Reviewed official landing page; one weekly conditional fetch.",
+      "robots_note": "Reviewed first-party sitemap exposing current automobile product URLs; one weekly conditional fetch.",
       "terms_note": "Passenger candidates only; commercial products are outside this product scope."
     },
     {
@@ -229,16 +229,16 @@
     },
     {
       "id": "mercedes-vietnam-market",
-      "name": "Mercedes-Benz Vietnam official model registry",
+      "name": "Mercedes-Benz Vietnam official new-car inventory sitemap",
       "owner": "Mercedes-Benz Vietnam",
       "category": "brand-registry",
-      "url": "https://www.mercedes-benz.com.vn/vi/passengercars/models.html",
+      "url": "https://www.mercedes-benz.com.vn/sitemaps/emh/sitemap_vn.xml",
       "allowed_domains": ["www.mercedes-benz.com.vn"],
       "authority": "BrandOfficial",
-      "content_type": "Html",
+      "content_type": "Xml",
       "refresh_hours": 168,
       "priority": 10,
-      "robots_note": "Reviewed official passenger-car model index; one weekly conditional fetch.",
+      "robots_note": "Reviewed first-party inventory sitemap advertised by robots.txt; one weekly conditional fetch.",
       "terms_note": "Candidate names and provenance only; page copy and assets are not republished."
     },
     {

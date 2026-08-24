@@ -233,7 +233,9 @@ class MarketScopePublisher:
             with connection.cursor() as cursor:
                 cursor.execute("DELETE FROM market_candidates WHERE market=%s", (manifest.market,))
             for brand in manifest.brands:
-                self._publish_brand(connection, manifest, brand, source_ids, snapshot_ids)
+                self._publish_brand(
+                    connection, manifest, brand, source_ids, snapshot_ids, snapshots
+                )
             enqueue_catalog_search_sync(
                 connection,
                 "MarketScopePublished",
@@ -393,6 +395,7 @@ class MarketScopePublisher:
         brand: MarketBrandScope,
         source_ids: dict[str, uuid.UUID],
         snapshot_ids: dict[str, uuid.UUID],
+        snapshots: dict[str, Snapshot],
     ) -> None:
         brand_id = _stable_id("brand", brand.slug)
         scope_source_id = source_ids[brand.source_id]
@@ -438,7 +441,14 @@ class MarketScopePublisher:
             )
         for model in brand.models:
             self._publish_model_candidate(
-                connection, manifest, brand, brand_id, model, source_ids, snapshot_ids
+                connection,
+                manifest,
+                brand,
+                brand_id,
+                model,
+                source_ids,
+                snapshot_ids,
+                snapshots,
             )
 
     def _publish_model_candidate(
@@ -450,6 +460,7 @@ class MarketScopePublisher:
         candidate: MarketModelCandidate,
         source_ids: dict[str, uuid.UUID],
         snapshot_ids: dict[str, uuid.UUID],
+        snapshots: dict[str, Snapshot],
     ) -> None:
         registry_id = candidate.source_id or brand.source_id
         source_id = source_ids[registry_id]
@@ -476,10 +487,20 @@ class MarketScopePublisher:
             connection, manifest, brand_id, source_id, snapshot_id, "Model", candidate.external_key,
             candidate.name, None, candidate.market_status, candidate.resolution.value, model_id, None,
             candidate.blocked_reason, candidate.trim_inventory_status.value, candidate.trim_inventory_reason,
+            max(manifest.observed_at, snapshots[registry_id].fetched_at),
         )
         for trim in candidate.trims:
             self._publish_trim_candidate(
-                connection, manifest, brand, brand_id, candidate, model_id, trim, source_ids, snapshot_ids
+                connection,
+                manifest,
+                brand,
+                brand_id,
+                candidate,
+                model_id,
+                trim,
+                source_ids,
+                snapshot_ids,
+                snapshots,
             )
 
     def _publish_trim_candidate(
@@ -493,6 +514,7 @@ class MarketScopePublisher:
         candidate: MarketTrimCandidate,
         source_ids: dict[str, uuid.UUID],
         snapshot_ids: dict[str, uuid.UUID],
+        snapshots: dict[str, Snapshot],
     ) -> None:
         registry_id = candidate.source_id or model.source_id or brand.source_id
         source_id = source_ids[registry_id]
@@ -509,6 +531,7 @@ class MarketScopePublisher:
             connection, manifest, brand_id, source_id, snapshot_id, "Trim", trim_external_key,
             candidate.name, model.external_key, candidate.market_status, candidate.resolution.value,
             model_id, trim_id, candidate.blocked_reason, "NotApplicable", None,
+            max(manifest.observed_at, snapshots[registry_id].fetched_at),
         )
 
     @staticmethod
@@ -675,6 +698,7 @@ class MarketScopePublisher:
         blocked_reason: str | None,
         trim_inventory_status: str,
         trim_inventory_reason: str | None,
+        last_seen_at: datetime,
     ) -> None:
         candidate_id = _stable_id("market-candidate", manifest.market, str(brand_id), kind, external_key)
         with connection.cursor() as cursor:
@@ -696,7 +720,7 @@ class MarketScopePublisher:
                 (
                     candidate_id, manifest.market, brand_id, source_id, snapshot_id, external_key, name,
                     parent_external_key, kind, market_status, resolution, model_id, trim_id, blocked_reason,
-                    trim_inventory_status, trim_inventory_reason, manifest.observed_at, manifest.observed_at,
+                    trim_inventory_status, trim_inventory_reason, manifest.observed_at, last_seen_at,
                     manifest.reviewed_at, manifest.reviewed_by, manifest.reviewed_at, manifest.reviewed_at,
                 ),
             )

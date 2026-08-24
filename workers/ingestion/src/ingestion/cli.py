@@ -184,10 +184,26 @@ async def _fetch_market_scope_sources(
             )
             return snapshot
 
-    outcomes = await asyncio.gather(
-        *(fetch_one(source_id) for source_id in sorted(source_ids)),
+    ordered_source_ids = sorted(source_ids)
+    outcomes = list(await asyncio.gather(
+        *(fetch_one(source_id) for source_id in ordered_source_ids),
         return_exceptions=True,
-    )
+    ))
+    # Manufacturer CDNs occasionally throttle the initial concurrent wave even
+    # for their lightweight first-party XML/HTML endpoints. Retry only failed
+    # sources once, sequentially, after the rest of the reviewed market batch
+    # has drained. A persistent failure still blocks publication; no cached or
+    # synthetic source is substituted.
+    for index, outcome in enumerate(outcomes):
+        if not isinstance(outcome, Exception):
+            continue
+        source_id = ordered_source_ids[index]
+        print(f"market-scope fetch retry scheduled: {source_id}", flush=True)
+        await asyncio.sleep(2)
+        try:
+            outcomes[index] = await fetch_one(source_id)
+        except Exception as error:
+            outcomes[index] = error
     failures = [str(outcome) for outcome in outcomes if isinstance(outcome, BaseException)]
     if failures:
         raise RuntimeError("Market scope fetch failures:\n" + "\n".join(failures))

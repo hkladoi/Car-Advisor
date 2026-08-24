@@ -463,6 +463,17 @@ V2.8 treats the model as published and the trim inventory as an explicit,
 sourced gap. This satisfies the design's `UNKNOWN`/blocked transparency rule
 without fabricating product data or silently reducing the market denominator.
 
+Recorded source decision: Mercedes-Benz Vietnam and Vietnam Suzuki protect
+their rendered landing pages with WAF rules that can reject GitHub-hosted
+browser fetches. Their reviewed source IDs therefore use their own first-party
+XML sitemaps instead: Mercedes' current new-car inventory sitemap advertised by
+its `robots.txt`, and Suzuki's automobile/product sitemap. Both remain official
+domain snapshots, preserve the 51-brand denominator and avoid mirrors, cached
+search results or fabricated fallback data. A repeat publication keeps the
+content-addressed evidence snapshot immutable while advancing candidate
+`last_seen_at` to the latest successful official fetch, so unchanged content
+does not become falsely stale on an upgraded long-running database.
+
 ## V2 FINAL GATE — PASS
 
 Final acceptance evidence:
@@ -503,7 +514,7 @@ Clean-bootstrap regression on 2026-08-24:
 - The new live V2.3 gate proves a structured Toyota `spec.seats=5` candidate
   cached before catalog publication is deterministically promoted to a
   `resolved_trim`/`VerifiedOfficial` fact after publication, while a second
-  replay remains idempotent. The complete worker suite is now 79/79.
+  replay remains idempotent. The complete worker suite is now 80/80.
 - The V2 FINAL gate reconciles current source freshness and owns only V2 source
   categories; the not-yet-published EEA source is explicitly deferred to V3.3.
   Freshness uses the latest successful immutable snapshot when legacy source

@@ -301,7 +301,7 @@ Gate evidence:
 - `dotnet build VietnamCarPlatform.sln --configuration Release --no-restore`
   — PASS, 0 warnings/errors; .NET tests — 85/85 PASS. EF reports no pending
   model changes.
-- Worker tests — 79/79 PASS. Web lint PASS, Vitest 12 files / 19 tests PASS with
+- Worker tests — 80/80 PASS. Web lint PASS, Vitest 12 files / 19 tests PASS with
   no unhandled teardown errors, and the 26-route production build PASS.
 - OpenAPI and TypeScript generation are deterministic. SHA-256 values are
   `aa19b30560c713a9853887b170fca67921a2f6b1c460604077d72ea768d4427c`
@@ -348,7 +348,7 @@ Final measured results:
 - `python scripts/verify_v3_final.py` — PASS and confirms all seven Compose
   services healthy, V3.5 as latest migration, no V3.2 gate account, no active
   final-load key, no unfinished search event and no temporary gate database.
-- Full build/regression: .NET 85/85; worker 79/79; web 12 files / 19 tests,
+- Full build/regression: .NET 85/85; worker 80/80; web 12 files / 19 tests,
   lint and 26-route production build; EF model/migration parity; deterministic
   OpenAPI/generated client; Compose config/bootstrap syntax; secret scan.
 
