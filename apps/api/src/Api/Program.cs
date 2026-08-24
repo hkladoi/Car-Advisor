@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.RateLimiting;
+using System.Globalization;
 using System.Threading.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.OpenApi.Models;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using StackExchange.Redis;
 using VietnamCarPlatform.Api.Features.Accounts;
 using VietnamCarPlatform.Api.Features.Affordability;
 using VietnamCarPlatform.Api.Features.Admin;
@@ -16,6 +19,7 @@ using VietnamCarPlatform.Api.Features.Coverage;
 using VietnamCarPlatform.Api.Features.Energy;
 using VietnamCarPlatform.Api.Features.Financing;
 using VietnamCarPlatform.Api.Features.Pricing;
+using VietnamCarPlatform.Api.Features.PartnerApi;
 using VietnamCarPlatform.Api.Features.Registration;
 using VietnamCarPlatform.Api.Features.Recommendation;
 using VietnamCarPlatform.Api.Health;
@@ -50,6 +54,13 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration["REDIS_URL"] ?? "localhost:6379";
     options.InstanceName = "vcp:";
 });
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
+{
+    var options = ConfigurationOptions.Parse(builder.Configuration["REDIS_URL"] ?? "localhost:6379");
+    options.AbortOnConnectFail = false;
+    options.ClientName = "vietnam-car-platform-api";
+    return ConnectionMultiplexer.Connect(options);
+});
 builder.Services.AddScoped<CatalogCache>();
 builder.Services.AddHostedService<CatalogSearchProjectionWorker>();
 builder.Services.AddScoped<ICatalogService, CatalogService>();
@@ -64,6 +75,8 @@ builder.Services.AddScoped<IHistoryService, HistoryService>();
 builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 builder.Services.AddScoped<IAccountAuthService, AccountAuthService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IPartnerApiService, PartnerApiService>();
+builder.Services.AddSingleton<IPartnerApiRateCounter, RedisPartnerApiRateCounter>();
 var goongOptions = new GoongOptions
 {
     ApiKey = builder.Configuration["GOONG_API_KEY"] ?? string.Empty,
@@ -122,10 +135,39 @@ builder.Services.AddRateLimiter(options =>
                 AutoReplenishment = true,
             }));
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (rejection, cancellationToken) =>
+    {
+        var context = rejection.HttpContext;
+        if (rejection.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+        {
+            context.Response.Headers.RetryAfter = Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds))
+                .ToString(CultureInfo.InvariantCulture);
+        }
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(
+            new ApiError(
+                "RATE_LIMITED",
+                "The request rate limit has been reached.",
+                [],
+                context.TraceIdentifier),
+            cancellationToken);
+    };
 });
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new() { Title = "Vietnam Car Platform API", Version = "v1" });
+    options.SwaggerDoc("v1", new()
+    {
+        Title = "Vietnam Car Platform API",
+        Version = PartnerApiPolicy.ContractVersion,
+        Description = "Stable v1 public and read-only partner contracts. Data reuse is source-specific; see /api/v1/partner/policy.",
+    });
+    options.AddSecurityDefinition("PartnerApiKey", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.ApiKey,
+        In = ParameterLocation.Header,
+        Name = "X-VCP-API-Key",
+        Description = "Read-only partner API key. Never place this value in a browser bundle, URL or log.",
+    });
 });
 
 builder.Services.AddHttpClient("readiness", client => client.Timeout = TimeSpan.FromSeconds(2));
@@ -199,12 +241,12 @@ app.UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", 
 app.UseRateLimiter();
 
 app.MapGet("/api/v1/system/info", () => Results.Ok(new
-    {
-        service = "vietnam-car-platform-api",
-        version = typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown",
-        architecture = "modular-monolith",
-        dataUnit = "trim"
-    }))
+{
+    service = "vietnam-car-platform-api",
+    version = typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown",
+    architecture = "modular-monolith",
+    dataUnit = "trim"
+}))
     .WithName("GetSystemInfo")
     .WithTags("System")
     .Produces(StatusCodes.Status200OK);
@@ -220,6 +262,7 @@ app.MapHistoryEndpoints();
 app.MapCoverageEndpoints();
 app.MapRecommendationEndpoints();
 app.MapAccountEndpoints();
+app.MapPartnerApiEndpoints();
 app.MapAdminEndpoints();
 
 app.MapHealthChecks("/health/live", new HealthCheckOptions

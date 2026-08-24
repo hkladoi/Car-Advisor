@@ -6,6 +6,7 @@ using VietnamCarPlatform.Domain.Accounts;
 using VietnamCarPlatform.Domain.Admin;
 using VietnamCarPlatform.Domain.Common;
 using VietnamCarPlatform.Domain.Commerce;
+using VietnamCarPlatform.Domain.Partners;
 using VietnamCarPlatform.Domain.Sources;
 using VietnamCarPlatform.Domain.Rules;
 using VietnamCarPlatform.Infrastructure.Persistence;
@@ -174,6 +175,24 @@ public sealed class DomainSchemaTests
                 nameof(PublishedDataEvent.AvailableAt),
                 nameof(PublishedDataEvent.OccurredAt),
             ]));
+    }
+
+    [Fact]
+    public void PartnerApiKeysHaveHashedReadOnlyLifecycleAndPlanGuards()
+    {
+        using var db = CreateContext();
+        var designModel = db.GetService<IDesignTimeModel>().Model;
+        var key = designModel.FindEntityType(typeof(PartnerApiKey))!;
+        var plan = designModel.FindEntityType(typeof(PartnerApiUsagePlan))!;
+
+        Assert.Contains(key.GetCheckConstraints(), check => check.Name == "ck_partner_api_keys_hash");
+        Assert.Contains(key.GetCheckConstraints(), check => check.Name == "ck_partner_api_keys_scope");
+        Assert.Contains(key.GetCheckConstraints(), check => check.Name == "ck_partner_api_keys_revocation");
+        Assert.Contains(key.GetIndexes(), index => index.IsUnique
+            && index.Properties.Single().Name == nameof(PartnerApiKey.KeyPrefix));
+        Assert.Contains(plan.GetCheckConstraints(), check => check.Name == "ck_partner_api_usage_plans_limits");
+        Assert.Contains(plan.GetIndexes(), index => index.IsUnique
+            && index.Properties.Single().Name == nameof(PartnerApiUsagePlan.Code));
     }
 
     private static AppDbContext CreateContext()

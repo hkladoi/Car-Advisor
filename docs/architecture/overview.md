@@ -17,13 +17,20 @@ Worker failure may mark a source stale or a job failed, but may not delete or mu
 ## Module boundaries
 
 Catalog, Pricing, Registration, Energy, Ownership, Affordability, Financing,
-Compare, Sources, Admin and Coverage are separate module boundaries inside the
-API. Cross-module writes use explicit application services/transactions.
+Compare, Sources, Admin, Coverage and Partner API are separate module boundaries
+inside the API. Cross-module writes use explicit application services/transactions.
 Worker/admin publications write a durable `CatalogSearchSync.*` event in the
 same transaction as canonical facts. Horizontally safe API projectors use a
 PostgreSQL advisory lock to coalesce events, refresh the materialized search
 view asynchronously, schedule failed retries and invalidate catalog cache only
 after a successful refresh.
+
+The existing anonymous `/api/v1` product surface and the read-only
+`/api/v1/partner` integration surface share reviewed catalog services rather
+than duplicate data. Partner credentials are returned once, stored as
+prefix-plus-SHA-256 only, policy-version bound and administratively audited.
+PostgreSQL owns key/plan lifecycle; an atomic Redis minute/month counter enforces
+usage across API replicas and fails closed. See ADR-012.
 
 ## Runtime versions
 

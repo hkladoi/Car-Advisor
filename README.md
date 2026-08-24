@@ -50,6 +50,11 @@ dotnet build apps/api/src/Api/VietnamCarPlatform.Api.csproj
 npm run generate:api-client
 ```
 
+The versioned read-only partner API is documented in
+`docs/api/public-partner-v1.md`; its source-specific reuse rules are in
+`docs/api/data-attribution-policy.md`. The current public policy endpoint is
+`GET http://localhost:8080/api/v1/partner/policy`.
+
 ## Troubleshooting
 
 - `health/ready` is unhealthy: verify PostgreSQL, Redis and MinIO health in `docker compose ps`; readiness intentionally fails when any source-of-truth dependency is missing.
@@ -67,7 +72,7 @@ npm run generate:api-client
 - UNKNOWN is distinct from NOT_AVAILABLE and NOT_APPLICABLE.
 - Calculator responses include assumptions, applied rule/source IDs, warnings and calculation time.
 
-Current progress is tracked in `docs/status/v1-status.md`.
+Current progress is tracked in `docs/status/v3-status.md`.
 
 Operational onboarding and final-release evidence:
 

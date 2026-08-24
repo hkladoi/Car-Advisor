@@ -2,13 +2,13 @@
 
 Last updated: 2026-08-24
 
-Overall: **IN PROGRESS — V3.5**
+Overall: **IN PROGRESS — V3 FINAL GATE**
 
 - [x] V3.1 Explainable recommendation
 - [x] V3.2 Accounts, privacy, watchlists and alerts
 - [x] V3.3 Trusted real-world data
 - [x] V3.4 Search scale (only after benchmark evidence)
-- [ ] V3.5 Versioned public/partner API
+- [x] V3.5 Versioned public/partner API
 - [ ] V3 FINAL GATE
 
 The design document governs product behavior and the plan governs order. Each
@@ -246,4 +246,69 @@ Gate evidence:
   table/function/two lifecycle checks, then ran the V3.4 down migration and
   verified both objects were removed before the isolated database was dropped.
 
-V3.5 versioned public/partner API is now the only unlocked milestone.
+## V3.5 — Versioned public/partner read API — PASS
+
+Delivered:
+
+- Stable `/api/v1/partner` GET surface for policy, credential metadata, brands,
+  catalog search and provenance-bearing vehicle detail. Existing anonymous
+  `/api/v1` behavior remains compatible; partner reads reuse the reviewed
+  PostgreSQL catalog services and never call an upstream provider.
+- 256-bit `vcp_v1_` key material returned only at issuance. PostgreSQL stores a
+  non-secret 60-bit lookup prefix and SHA-256 hash, never plaintext. Hashes are
+  compared in fixed time; optional expiry, immediate revocation and active-plan
+  status are enforced on every request.
+- PostgreSQL usage-plan/key lifecycle with `catalog.read` scope, exact policy
+  acceptance, unique prefix/hash, coherent expiry/revocation constraints and
+  auditable Administrator-only issuance/revocation. Viewer list responses expose
+  lifecycle metadata only.
+- Atomic Redis fixed UTC-minute/month counters across API replicas. Sandbox is
+  30/minute, 10,000/month, page size 25; standard is 300/minute,
+  500,000/month, page size 100. Denied calls do not consume quota and counter
+  failure denies closed with `503`.
+- Common `ApiError` responses plus quota/reset/retry, contract, policy, link and
+  no-store headers. OpenAPI declares the `PartnerApiKey` header scheme only on
+  protected operations.
+- Committed source-specific reuse policy, integration guide, ADR-012, generated
+  OpenAPI/TypeScript client and CI drift checks. Fact-level source URL/name/
+  authority/hash/status/confidence and EEA cohort attribution remain intact.
+
+Product-safe decisions where the design leaves implementation detail open:
+
+- The established anonymous API was not put behind a key. A separate partner
+  namespace prevents a breaking V1 change while giving integrations explicit
+  lifecycle and metering controls.
+- `SOURCE-SPECIFIC` is deliberately not presented as a blanket content licence.
+  Normalized facts may be used with retained provenance; source prose, images,
+  PDFs, maps and other assets require their own rights.
+- The schema major (`v1`) and accepted data-policy version (`2026-08-24`) are
+  independent. A material policy update can require key re-issuance without
+  silently changing permissions or the response contract.
+- PostgreSQL is the key/plan source of truth; Redis owns only atomic usage
+  counters. Protected reads fail closed during a Redis outage rather than allow
+  unmetered traffic.
+
+Gate evidence:
+
+- `python scripts/verify_v3_5_partner_api.py` — PASS: public policy, unified
+  `401/403/429`, current-policy acceptance, one-time issuance, no hash/plaintext
+  in list/audit, reviewed source provenance, all-GET OpenAPI surface, exact
+  sandbox limit after 30 accepted calls and immediate post-revoke rejection.
+- `python scripts/verify_v3_5_migration.py` — PASS on a disposable database for
+  `0 → 20260824032619_AddV35PartnerApi → 20260824023048_AddV34SearchSync →
+  20260824032619_AddV35PartnerApi`; both tables/plan seeds/constraints/indexes
+  were verified and the database removed.
+- `dotnet build VietnamCarPlatform.sln --configuration Release --no-restore`
+  — PASS, 0 warnings/errors; .NET tests — 85/85 PASS. EF reports no pending
+  model changes.
+- Worker tests — 78/78 PASS. Web lint PASS, Vitest 12 files / 19 tests PASS with
+  no unhandled teardown errors, and the 26-route production build PASS.
+- OpenAPI and TypeScript generation are deterministic. SHA-256 values are
+  `aa19b30560c713a9853887b170fca67921a2f6b1c460604077d72ea768d4427c`
+  and `2c5365327afd79dd677e95049f90cd5549a6938c2598d231266fb0a422e840ac`.
+- Production API image rebuilt and the live API/PostgreSQL/Redis path passed.
+  All temporary V3.5 migration databases and roles were removed.
+
+V3 FINAL GATE is now unlocked. No V3 FINAL acceptance claim is made here until
+target-traffic load, privacy lifecycle, recommendation integrity and complete
+regression evidence pass together.

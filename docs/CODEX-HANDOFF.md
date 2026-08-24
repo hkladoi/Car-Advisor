@@ -38,8 +38,13 @@ Decisions and gate evidence belong in `docs/status/`.
   added. Search-affecting publications now synchronize through a transactional
   outbox and retryable async projector; final gate event-to-index latency was
   256 ms.
-  V3.5 public/partner API is next. See `docs/status/v3-status.md`, ADR-002 and
-  ADR-011.
+- V3.5 public/partner API is complete. The separate read-only
+  `/api/v1/partner` surface uses one-time 256-bit credentials (hash/prefix only
+  at rest), PostgreSQL plans, atomic Redis minute/month quotas, exact policy
+  acceptance and source-specific attribution. See ADR-012 and
+  `docs/api/public-partner-v1.md`.
+- V3 FINAL GATE is next and is the only unlocked work. See
+  `docs/status/v3-status.md` before changing any implementation.
 
 ## Architecture
 
@@ -79,8 +84,8 @@ The bootstrap is repeatable. It creates `.env`, securely merges local provider
 keys, installs dependencies, builds and starts the Compose stack, waits for
 readiness, checks schema constraints, validates/fetches/publishes the official
 V1 seeds plus the official EEA V3.3 cohort snapshot, runs their golden checks
-and the V3.4 isolated PostgreSQL benchmark/async projection gate, then checks
-web/API health. Use
+the V3.4 isolated PostgreSQL benchmark/async projection gate and both V3.5
+partner API/migration gates, then checks web/API health. Use
 `-SkipInstall`/`SKIP_INSTALL=1` or `-SkipSeed`/`SKIP_SEED=1` only for an already
 prepared local environment.
 
@@ -150,6 +155,9 @@ python scripts/verify_v2_final.py
 python scripts/verify_v3_1_recommendation.py
 python scripts/verify_v3_2_accounts.py
 python scripts/verify_v3_3_real_world.py
+python scripts/verify_v3_4_search.py
+python scripts/verify_v3_5_partner_api.py
+python scripts/verify_v3_5_migration.py
 docker compose up --build -d --wait
 docker compose ps
 docker compose logs -f api ingestion-worker ingestion-scheduler
@@ -167,6 +175,7 @@ dotnet ef migrations has-pending-model-changes --project apps/api/src/Infrastruc
 
 - Web: <http://localhost:3000>
 - API Swagger: <http://localhost:8080/swagger>
+- Partner policy: <http://localhost:8080/api/v1/partner/policy>
 - API liveness/readiness: <http://localhost:8080/health/live> and
   <http://localhost:8080/health/ready>
 - MinIO console: <http://localhost:9001>
@@ -200,6 +209,14 @@ docker compose run --rm --no-deps --volume "${PWD}/.tmp:/app/.tmp" ingestion-wor
 docker compose run --rm --no-deps --volume "${PWD}/.tmp:/app/.tmp:ro" ingestion-worker python -m ingestion.cli publish-real-world-consumption --registry /app/data/source-registry.v1.json --manifest /app/.tmp/v3.3-real-world.json --dsn "host=/var/run/postgresql dbname=vietnam_car_platform user=vcp"
 python scripts/verify_v3_3_real_world.py
 ```
+
+V3.5 partner keys are server-side credentials. Use authenticated admin routes
+to issue a key after accepting the exact current policy; copy the plaintext once
+into a secret manager and never place it in `CODEX-SECRETS.local.md` if that file
+may be shared. Calls use `X-VCP-API-Key`; list/audit responses intentionally
+cannot recover the key. Rotate by issuing a replacement and revoking the old
+credential. See `docs/api/public-partner-v1.md` and
+`docs/api/data-attribution-policy.md`.
 
 ## Continuing implementation
 

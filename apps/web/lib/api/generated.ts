@@ -180,6 +180,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/partner-api/keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetAdminPartnerApiKeys"];
+        put?: never;
+        post: operations["IssueAdminPartnerApiKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/partner-api/keys/{id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RevokeAdminPartnerApiKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/auth/login": {
         parameters: {
             query?: never;
@@ -868,6 +900,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/partner/policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetPartnerApiPolicy"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/partner/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetPartnerCredential"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/partner/brands": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetPartnerBrands"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/partner/cars": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetPartnerCars"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/partner/cars/{trimId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetPartnerCarByTrimId"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/cars/{trimId}/prices": {
         parameters: {
             query?: never;
@@ -1432,6 +1544,40 @@ export interface components {
             lockField?: boolean;
             /** Format: date-time */
             lockExpiresAt?: string | null;
+        };
+        AdminPartnerApiKeyCreateRequest: {
+            name?: string | null;
+            planCode?: string | null;
+            policyVersion?: string | null;
+            /** Format: date-time */
+            expiresAt?: string | null;
+            reason?: string | null;
+        };
+        AdminPartnerApiKeyIssuedResponse: {
+            key?: components["schemas"]["AdminPartnerApiKeyResponse"];
+            apiKey?: string | null;
+            secretHandlingNotice?: string | null;
+        };
+        AdminPartnerApiKeyResponse: {
+            /** Format: uuid */
+            id?: string;
+            name?: string | null;
+            keyPrefix?: string | null;
+            scope?: string | null;
+            planCode?: string | null;
+            policyVersion?: string | null;
+            status?: string | null;
+            /** Format: date-time */
+            issuedAt?: string;
+            issuedBy?: string | null;
+            /** Format: date-time */
+            expiresAt?: string | null;
+            /** Format: date-time */
+            revokedAt?: string | null;
+            revokedBy?: string | null;
+        };
+        AdminPartnerApiKeyRevokeRequest: {
+            reason?: string | null;
         };
         AdminPublicationResponse: {
             /** Format: uuid */
@@ -2682,6 +2828,68 @@ export interface components {
             /** Format: int32 */
             totalPages?: number;
         };
+        PartnerApiMetadata: {
+            contractVersion?: string | null;
+            policyVersion?: string | null;
+            license?: string | null;
+            attribution?: string | null;
+            policyPath?: string | null;
+            /** Format: date-time */
+            generatedAt?: string;
+        };
+        PartnerApiPolicyResponse: {
+            contractVersion?: string | null;
+            policyVersion?: string | null;
+            scope?: string | null;
+            license?: string | null;
+            attributionRequired?: boolean;
+            attribution?: string | null;
+            policyDocument?: string | null;
+            permittedUses?: string[] | null;
+            prohibitedUses?: string[] | null;
+            usagePlans?: components["schemas"]["PartnerApiUsagePlanResponse"][] | null;
+            /** Format: date-time */
+            generatedAt?: string;
+        };
+        PartnerApiUsagePlanResponse: {
+            code?: string | null;
+            name?: string | null;
+            /** Format: int32 */
+            requestsPerMinute?: number;
+            /** Format: int64 */
+            requestsPerMonth?: number;
+            /** Format: int32 */
+            maxPageSize?: number;
+        };
+        PartnerBrandsResponse: {
+            data?: components["schemas"]["BrandsResponse"];
+            meta?: components["schemas"]["PartnerApiMetadata"];
+        };
+        PartnerCarResponse: {
+            data?: components["schemas"]["CarDetailResponse"];
+            meta?: components["schemas"]["PartnerApiMetadata"];
+        };
+        PartnerCarsResponse: {
+            data?: components["schemas"]["CarsResponse"];
+            meta?: components["schemas"]["PartnerApiMetadata"];
+        };
+        PartnerCredentialResponse: {
+            /** Format: uuid */
+            keyId?: string;
+            name?: string | null;
+            keyPrefix?: string | null;
+            scope?: string | null;
+            planCode?: string | null;
+            /** Format: int32 */
+            requestsPerMinute?: number;
+            /** Format: int64 */
+            requestsPerMonth?: number;
+            /** Format: int32 */
+            maxPageSize?: number;
+            /** Format: date-time */
+            expiresAt?: string | null;
+            meta?: components["schemas"]["PartnerApiMetadata"];
+        };
         PriceDetail: {
             /** Format: uuid */
             id?: string;
@@ -3518,6 +3726,118 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetAdminPartnerApiKeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminPartnerApiKeyResponse"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    IssueAdminPartnerApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminPartnerApiKeyCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminPartnerApiKeyIssuedResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RevokeAdminPartnerApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminPartnerApiKeyRevokeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminPartnerApiKeyResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5471,6 +5791,302 @@ export interface operations {
             };
             /** @description Unprocessable Content */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    GetPartnerApiPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartnerApiPolicyResponse"];
+                };
+            };
+        };
+    };
+    GetPartnerCredential: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartnerCredentialResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    GetPartnerBrands: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartnerBrandsResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    GetPartnerCars: {
+        parameters: {
+            query?: {
+                q?: string;
+                Page?: number;
+                PageSize?: number;
+                Sort?: string;
+                Brand?: string;
+                Model?: string;
+                Body?: string;
+                Segment?: string;
+                Powertrain?: string;
+                Seats?: number;
+                MsrpMin?: number;
+                MsrpMax?: number;
+                CurrentPriceMin?: number;
+                CurrentPriceMax?: number;
+                OnRoadMin?: number;
+                OnRoadMax?: number;
+                LengthMin?: number;
+                LengthMax?: number;
+                WidthMin?: number;
+                WidthMax?: number;
+                HeightMin?: number;
+                HeightMax?: number;
+                RangeMin?: number;
+                RangeMax?: number;
+                BatteryMin?: number;
+                BatteryMax?: number;
+                ConsumptionMin?: number;
+                ConsumptionMax?: number;
+                Features?: string;
+                FeatureMode?: string;
+                Colors?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartnerCarsResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    GetPartnerCarByTrimId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                trimId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartnerCarResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

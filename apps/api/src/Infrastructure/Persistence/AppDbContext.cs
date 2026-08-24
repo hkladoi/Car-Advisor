@@ -5,6 +5,7 @@ using VietnamCarPlatform.Domain.Affordability;
 using VietnamCarPlatform.Domain.Catalog;
 using VietnamCarPlatform.Domain.Commerce;
 using VietnamCarPlatform.Domain.Common;
+using VietnamCarPlatform.Domain.Partners;
 using VietnamCarPlatform.Domain.Rules;
 using VietnamCarPlatform.Domain.Sources;
 using VietnamCarPlatform.Infrastructure.Catalog;
@@ -40,6 +41,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<EnergyProfile> EnergyProfiles => Set<EnergyProfile>();
     public DbSet<RealWorldConsumptionAggregate> RealWorldConsumptionAggregates => Set<RealWorldConsumptionAggregate>();
     public DbSet<PublishedDataEvent> PublishedDataEvents => Set<PublishedDataEvent>();
+    public DbSet<PartnerApiUsagePlan> PartnerApiUsagePlans => Set<PartnerApiUsagePlan>();
+    public DbSet<PartnerApiKey> PartnerApiKeys => Set<PartnerApiKey>();
     public DbSet<WarrantyProfile> WarrantyProfiles => Set<WarrantyProfile>();
     public DbSet<Price> Prices => Set<Price>();
     public DbSet<PriceHistory> PriceHistory => Set<PriceHistory>();
@@ -124,6 +127,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         OperationalModelConfiguration.Configure(modelBuilder);
         AdminModelConfiguration.Configure(modelBuilder);
         AccountModelConfiguration.Configure(modelBuilder);
+        PartnerApiModelConfiguration.Configure(modelBuilder);
 
         modelBuilder.Entity<CurrentSearchableTrim>(entity =>
         {

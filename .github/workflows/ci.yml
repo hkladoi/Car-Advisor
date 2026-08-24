@@ -72,6 +72,8 @@ jobs:
           --configuration Release
           --no-build
       - run: sh ./scripts/export-openapi.sh
+      - name: Verify committed OpenAPI contract is current
+        run: git diff --exit-code -- packages/contracts/openapi/v1.json
       - uses: actions/upload-artifact@v4
         with:
           name: openapi
@@ -86,6 +88,10 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Verify generated TypeScript API client is current
+        run: |
+          npm run generate:api-client
+          git diff --exit-code -- apps/web/lib/api/generated.ts
       - run: npm run lint:web
       - run: npm run test:web
       - run: npm run build:web
@@ -239,6 +245,10 @@ jobs:
         run: python scripts/verify_v3_3_real_world.py
       - name: Verify V3.4 PostgreSQL search scale and async projection gate
         run: python scripts/verify_v3_4_search.py
+      - name: Verify V3.5 versioned partner API, quota and key lifecycle gate
+        run: python scripts/verify_v3_5_partner_api.py
+      - name: Verify V3.5 migration up, down and reapply in an isolated database
+        run: python scripts/verify_v3_5_migration.py
       - run: curl --fail http://localhost:8080/health/live
       - run: curl --fail http://localhost:8080/health/ready
       - run: curl --fail http://localhost:3000
