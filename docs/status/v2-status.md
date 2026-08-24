@@ -464,15 +464,17 @@ sourced gap. This satisfies the design's `UNKNOWN`/blocked transparency rule
 without fabricating product data or silently reducing the market denominator.
 
 Recorded source decision: Mercedes-Benz Vietnam and Vietnam Suzuki protect
-their rendered landing pages with WAF rules that can reject GitHub-hosted
-browser fetches. Their reviewed source IDs therefore use their own first-party
-XML sitemaps instead: Mercedes' current new-car inventory sitemap advertised by
-its `robots.txt`, and Suzuki's automobile/product sitemap. Both remain official
-domain snapshots, preserve the 51-brand denominator and avoid mirrors, cached
-search results or fabricated fallback data. A repeat publication keeps the
-content-addressed evidence snapshot immutable while advancing candidate
-`last_seen_at` to the latest successful official fetch, so unchanged content
-does not become falsely stale on an upgraded long-running database.
+their rendered landing pages and local sitemaps with WAF rules that reject
+GitHub-hosted browser fetches. Their reviewed source IDs therefore use other
+first-party manufacturer endpoints: the Mercedes-Benz Media JSON:API sitemap
+and Suzuki Motor Corporation's global automobile product page. Vietnam market
+availability remains controlled by the human-reviewed V2.8 manifest; these
+live snapshots establish current manufacturer provenance without mirrors,
+cached search results or fabricated fallback data, while preserving the
+51-brand denominator. A repeat publication keeps the content-addressed
+evidence snapshot immutable while advancing candidate `last_seen_at` to the
+latest successful official fetch, so unchanged content does not become falsely
+stale on an upgraded long-running database.
 
 ## V2 FINAL GATE — PASS
 

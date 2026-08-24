@@ -145,17 +145,17 @@
     },
     {
       "id": "suzuki-vietnam-market",
-      "name": "Suzuki Vietnam official automobile sitemap",
-      "owner": "Vietnam Suzuki",
+      "name": "Suzuki official automobile product source",
+      "owner": "Suzuki Motor Corporation",
       "category": "brand-registry",
-      "url": "https://suzuki.com.vn/sitemap.xml",
-      "allowed_domains": ["suzuki.com.vn", "www.suzuki.com.vn"],
+      "url": "https://www.globalsuzuki.com/automobile/lineup/fronx/",
+      "allowed_domains": ["www.globalsuzuki.com"],
       "authority": "BrandOfficial",
-      "content_type": "Xml",
+      "content_type": "Html",
       "refresh_hours": 168,
       "priority": 10,
-      "robots_note": "Reviewed first-party sitemap exposing current automobile product URLs; one weekly conditional fetch.",
-      "terms_note": "Passenger candidates only; commercial products are outside this product scope."
+      "robots_note": "Reviewed first-party global automobile product page; one weekly conditional fetch. Vietnam availability remains controlled by the reviewed market manifest.",
+      "terms_note": "Official product identity/provenance only; passenger candidates and Vietnam availability are reviewed separately."
     },
     {
       "id": "nissan-vietnam-market",
@@ -229,17 +229,17 @@
     },
     {
       "id": "mercedes-vietnam-market",
-      "name": "Mercedes-Benz Vietnam official new-car inventory sitemap",
-      "owner": "Mercedes-Benz Vietnam",
+      "name": "Mercedes-Benz official media API sitemap",
+      "owner": "Mercedes-Benz AG",
       "category": "brand-registry",
-      "url": "https://www.mercedes-benz.com.vn/sitemaps/emh/sitemap_vn.xml",
-      "allowed_domains": ["www.mercedes-benz.com.vn"],
+      "url": "https://api.media.mercedes-benz.com/jsonapi/sitemap/index",
+      "allowed_domains": ["api.media.mercedes-benz.com", "media.mercedes-benz.com"],
       "authority": "BrandOfficial",
       "content_type": "Xml",
       "refresh_hours": 168,
       "priority": 10,
-      "robots_note": "Reviewed first-party inventory sitemap advertised by robots.txt; one weekly conditional fetch.",
-      "terms_note": "Candidate names and provenance only; page copy and assets are not republished."
+      "robots_note": "Reviewed first-party Mercedes-Benz media API sitemap advertised by the official media sitemap; one weekly conditional fetch. Vietnam availability remains controlled by the reviewed market manifest.",
+      "terms_note": "Official product identity/provenance only; page copy and assets are not republished."
     },
     {
       "id": "audi-vietnam-market",
