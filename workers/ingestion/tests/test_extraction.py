@@ -226,6 +226,55 @@ def test_extraction_pipeline_is_immutable_and_idempotent() -> None:
     assert second.status == "unchanged" and facts.calls == 1
 
 
+def test_cached_unresolved_extraction_promotes_after_catalog_publication() -> None:
+    parsed = document("Toyota Yaris Cross. Số chỗ ngồi 5 chỗ.")
+    storage = _MemoryStorage()
+    parsed_key = "parsed/toyota-late-catalog.json"
+    storage.put_bytes(parsed_key, parsed.model_dump_json().encode(), "application/json")
+    facts = _FactRepository()
+    catalog_repository = _MutableCatalogRepository()
+    pipeline = StructuredExtractionPipeline(
+        storage=storage,
+        catalog_repository=catalog_repository,  # type: ignore[arg-type]
+        fact_repository=facts,  # type: ignore[arg-type]
+        engine=StructuredExtractionEngine(),
+    )
+    snapshot_id = uuid.uuid4()
+
+    unresolved = asyncio.run(
+        pipeline.process(
+            REGISTRY.by_id("toyota-yaris-cross"),
+            snapshot_id,
+            parsed_key,
+            parsed.content_hash,
+        )
+    )
+    catalog_repository.rows = catalog()
+    promoted = asyncio.run(
+        pipeline.process(
+            REGISTRY.by_id("toyota-yaris-cross"),
+            snapshot_id,
+            parsed_key,
+            parsed.content_hash,
+        )
+    )
+    replay = asyncio.run(
+        pipeline.process(
+            REGISTRY.by_id("toyota-yaris-cross"),
+            snapshot_id,
+            parsed_key,
+            parsed.content_hash,
+        )
+    )
+
+    assert unresolved.batch is not None
+    assert unresolved.batch.entity_resolution.status == "unresolved"
+    assert promoted.status == "extracted" and promoted.inserted_facts == 1
+    assert promoted.batch is not None
+    assert promoted.batch.entity_resolution.status == "resolved_trim"
+    assert replay.status == "unchanged" and facts.calls == 2
+
+
 class _MemoryStorage:
     def __init__(self) -> None:
         self.objects: dict[str, bytes] = {}
@@ -247,6 +296,14 @@ class _MemoryStorage:
 class _CatalogRepository:
     def load(self) -> list[CatalogVehicle]:
         return catalog()
+
+
+class _MutableCatalogRepository:
+    def __init__(self) -> None:
+        self.rows: list[CatalogVehicle] = []
+
+    def load(self) -> list[CatalogVehicle]:
+        return self.rows
 
 
 class _FactRepository:

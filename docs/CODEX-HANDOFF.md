@@ -86,10 +86,10 @@ From the repository root, run one of:
 The bootstrap is repeatable. It creates `.env`, securely merges local provider
 keys, installs dependencies, builds and starts the Compose stack, waits for
 readiness, checks schema constraints, validates/fetches/publishes the official
-V1 seeds plus the official EEA V3.3 cohort snapshot, runs their golden checks,
-the V3.4 isolated PostgreSQL benchmark/async projection gate, both V3.5 partner
-API/migration gates and the consolidated V3 FINAL gate, then checks web/API
-health. Use
+V1 seeds, the reviewed V2.8 full-market scope and the official EEA V3.3 cohort
+snapshot, then runs the V1, V2 and V3 milestone/final gates (including the V3.4
+isolated PostgreSQL benchmark/async projection gate and both V3.5 partner
+API/migration gates) before checking web/API health. Use
 `-SkipInstall`/`SKIP_INSTALL=1` or `-SkipSeed`/`SKIP_SEED=1` only for an already
 prepared local environment.
 
@@ -152,6 +152,9 @@ dotnet build VietnamCarPlatform.sln --configuration Release
 dotnet test VietnamCarPlatform.sln --configuration Release
 python -m pip install -r workers/ingestion/requirements.txt
 python -m pytest workers/ingestion/tests
+python scripts/verify_v2_3_extraction.py
+python scripts/verify_v2_4_change_review.py
+python scripts/verify_v2_5_monitoring.py
 python scripts/verify_v2_6_charging.py
 python scripts/verify_v2_7_history.py
 python scripts/verify_v2_8_coverage.py

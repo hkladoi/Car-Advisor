@@ -106,7 +106,13 @@ def assert_coverage(payload: dict[str, Any]) -> None:
 
 
 def assert_database() -> None:
-    require(psql('SELECT migration_id FROM "__EFMigrationsHistory" ORDER BY migration_id DESC LIMIT 1') == EXPECTED_MIGRATION, "V2.8 migration is not latest/applied")
+    require(
+        psql(
+            'SELECT count(*) FROM "__EFMigrationsHistory" '
+            f"WHERE migration_id='{EXPECTED_MIGRATION}'"
+        ) == "1",
+        "V2.8 migration is not applied exactly once",
+    )
     require(psql("SELECT count(*) FROM brand_scopes WHERE market='VN' AND effective_from<=now() AND (effective_to IS NULL OR effective_to>now())") == "51", "current BrandScope must contain 51 rows")
     require(psql("SELECT count(*) FROM brand_scopes WHERE market='VN' AND included AND effective_from<=now() AND (effective_to IS NULL OR effective_to>now())") == "38", "included BrandScope count changed")
     require(psql("SELECT count(*) FROM brand_scopes WHERE market='VN' AND NOT included AND effective_from<=now() AND (effective_to IS NULL OR effective_to>now())") == "13", "excluded BrandScope count changed")

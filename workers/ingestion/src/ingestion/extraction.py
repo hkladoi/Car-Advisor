@@ -626,11 +626,48 @@ class StructuredExtractionPipeline:
         )
         if await asyncio.to_thread(self.storage.exists, artifact_key):
             artifact = await asyncio.to_thread(self.storage.get_bytes, artifact_key)
+            cached_batch = ExtractionBatch.model_validate_json(artifact)
+            # Snapshot bytes are immutable, but catalog identity can legitimately
+            # become more specific after a reviewed brand/model/trim publication.
+            # Reconsider only non-trim resolutions and promote them only when the
+            # deterministic resolver reaches a strictly stronger identity. This
+            # keeps stable resolved facts idempotent without freezing an early
+            # unresolved artifact forever during clean bootstrap.
+            if cached_batch.entity_resolution.status != "resolved_trim":
+                parsed_bytes = await asyncio.to_thread(self.storage.get_bytes, parsed_object_key)
+                document = ParsedDocument.model_validate_json(parsed_bytes)
+                catalog = await asyncio.to_thread(self.catalog_repository.load)
+                refreshed_batch = await self.engine.extract(document, source, snapshot_id, catalog)
+                resolution_rank = {
+                    "unresolved": 0,
+                    "ambiguous": 0,
+                    "resolved_model": 1,
+                    "resolved_trim": 2,
+                }
+                if (
+                    resolution_rank[refreshed_batch.entity_resolution.status]
+                    > resolution_rank[cached_batch.entity_resolution.status]
+                ):
+                    inserted = await asyncio.to_thread(
+                        self.fact_repository.persist, refreshed_batch
+                    )
+                    await asyncio.to_thread(
+                        self.storage.put_bytes,
+                        artifact_key,
+                        refreshed_batch.model_dump_json(indent=2).encode("utf-8"),
+                        "application/json",
+                    )
+                    return ExtractionOutcome(
+                        status="extracted",
+                        artifact_key=artifact_key,
+                        inserted_facts=inserted,
+                        batch=refreshed_batch,
+                    )
             return ExtractionOutcome(
                 status="unchanged",
                 artifact_key=artifact_key,
                 inserted_facts=0,
-                batch=ExtractionBatch.model_validate_json(artifact),
+                batch=cached_batch,
             )
         parsed_bytes = await asyncio.to_thread(self.storage.get_bytes, parsed_object_key)
         document = ParsedDocument.model_validate_json(parsed_bytes)

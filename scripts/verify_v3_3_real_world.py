@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import time
 import urllib.request
 from pathlib import Path
 
@@ -12,6 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 API = "http://localhost:8080"
 WEB = "http://localhost:3000"
+EEA_SOURCE_ID = "eea-real-world-cars-2023-aggregate"
 
 
 def run(*args: str) -> subprocess.CompletedProcess[str]:
@@ -43,6 +45,40 @@ def html_get(path: str) -> str:
     with urllib.request.urlopen(f"{WEB}{path}", timeout=30) as response:  # noqa: S310 - fixed localhost gate
         assert response.status == 200, (path, response.status)
         return response.read().decode("utf-8")
+
+
+def reconcile_staleness() -> str:
+    script = """
+import asyncio
+import redis.asyncio as redis
+from ingestion.jobs import IngestionJob
+from ingestion.settings import Settings
+
+async def main():
+    settings = Settings()
+    client = redis.from_url(settings.redis_url, decode_responses=True)
+    job = IngestionJob.staleness_check()
+    await client.rpush(settings.ingestion_queue, job.model_dump_json())
+    await client.aclose()
+    print(job.run_id)
+
+asyncio.run(main())
+"""
+    run_id = run(
+        "docker", "compose", "exec", "-T", "ingestion-worker", "python", "-c", script
+    ).stdout.strip()
+    deadline = time.monotonic() + 60
+    latest = ""
+    while time.monotonic() < deadline:
+        latest = psql(
+            f"SELECT status FROM ingestion_job_runs WHERE id='{run_id}'::uuid"
+        )
+        if latest == "Succeeded":
+            return run_id
+        if latest in {"Failed", "Partial"}:
+            raise AssertionError(("staleness reconciliation failed", run_id, latest))
+        time.sleep(0.2)
+    raise AssertionError(("staleness reconciliation timed out", run_id, latest))
 
 
 def main() -> None:
@@ -116,6 +152,13 @@ SELECT json_build_object(
     ):
         assert required in html, required
 
+    staleness_run_id = reconcile_staleness()
+    assert int(psql(
+        "SELECT count(*) FROM monitoring_alerts "
+        "WHERE status='Open' AND severity IN ('High','Critical') "
+        f"AND source_key='{EEA_SOURCE_ID}'"
+    )) == 0
+
     print(json.dumps({
         "gate": "V3.3",
         "status": "PASS",
@@ -128,6 +171,7 @@ SELECT json_build_object(
         "compatibleLatestCohortCount": len(cohorts),
         "allReferencesExplicitlyNonTrim": True,
         "immutableSnapshotHash": evidence["latestHash"],
+        "stalenessReconciliationRunId": staleness_run_id,
     }, ensure_ascii=False, indent=2))
 
 

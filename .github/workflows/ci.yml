@@ -228,6 +228,41 @@ jobs:
         run: python scripts/backup_restore_test.py
       - name: Verify complete V1 release gate
         run: python scripts/verify_v1_final.py
+      - name: Verify V2.3 structured extraction and reconciliation gate
+        run: python scripts/verify_v2_3_extraction.py
+      - name: Verify V2.4 reviewed publication and rollback gate
+        run: python scripts/verify_v2_4_change_review.py
+      - name: Verify V2.5 automated monitoring gate
+        run: python scripts/verify_v2_5_monitoring.py
+      - name: Verify V2.6 charging and map integration gate
+        run: python scripts/verify_v2_6_charging.py
+      - name: Verify V2.7 price, offer and energy history gate
+        run: python scripts/verify_v2_7_history.py
+      - name: Validate reviewed V2.8 Vietnam full-market scope
+        run: >-
+          docker compose run --rm --no-deps ingestion-worker
+          python -m ingestion.cli validate-market-scope
+          --registry /app/data/source-registry.v1.json
+          --scope /app/data/manifests/v2.8-vietnam-market-scope.json
+      - name: Fetch immutable V2.8 official market snapshots
+        run: |
+          docker compose run --rm --no-deps --user "$(id -u):$(id -g)" --volume "$PWD/.tmp:/app/.tmp" ingestion-worker \
+            python -m ingestion.cli fetch-market-scope \
+            --registry /app/data/source-registry.v1.json \
+            --scope /app/data/manifests/v2.8-vietnam-market-scope.json \
+            --manifest /app/.tmp/v2.8-market-scope.json
+      - name: Publish reviewed V2.8 full-market scope
+        run: >-
+          docker compose run --rm --no-deps --volume "$PWD/.tmp:/app/.tmp:ro" ingestion-worker
+          python -m ingestion.cli publish-market-scope
+          --registry /app/data/source-registry.v1.json
+          --scope /app/data/manifests/v2.8-vietnam-market-scope.json
+          --manifest /app/.tmp/v2.8-market-scope.json
+          --dsn "host=/var/run/postgresql dbname=vietnam_car_platform user=vcp"
+      - name: Verify V2.8 full-market coverage gate
+        run: python scripts/verify_v2_8_coverage.py
+      - name: Verify complete V2 release gate
+        run: python scripts/verify_v2_final.py
       - name: Fetch immutable EEA real-world consumption aggregate
         run: |
           docker compose run --rm --no-deps --user "$(id -u):$(id -g)" --volume "$PWD/.tmp:/app/.tmp" ingestion-worker \

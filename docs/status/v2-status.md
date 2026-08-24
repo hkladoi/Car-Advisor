@@ -493,5 +493,24 @@ Final acceptance evidence:
   the V2.8 isolated up/down/up drill passes. All production images build and all
   seven Compose services are healthy. Gitleaks 8.29.0 finds no leak.
 
+Clean-bootstrap regression on 2026-08-24:
+
+- A disposable empty Compose project applied all 14 migrations, fetched the
+  real official V1 sources, then validated/fetched/published the reviewed V2.8
+  scope before running the V2 gates in order. It produced 51 reviewed brands,
+  255 model candidates, 49 trim candidates, 304/304 resolved candidates and
+  236 documented gaps; completeness and source freshness were both 100%.
+- The new live V2.3 gate proves a structured Toyota `spec.seats=5` candidate
+  cached before catalog publication is deterministically promoted to a
+  `resolved_trim`/`VerifiedOfficial` fact after publication, while a second
+  replay remains idempotent. The complete worker suite is now 79/79.
+- The V2 FINAL gate reconciles current source freshness and owns only V2 source
+  categories; the not-yet-published EEA source is explicitly deferred to V3.3.
+  Freshness uses the latest successful immutable snapshot when legacy source
+  metadata has no denormalized `last_fetched_at`, preventing false stale alerts
+  without hiding genuinely missing/expired sources. No V2-owned High/Critical
+  alert remained open. The disposable stack and all of its volumes were removed
+  after verification.
+
 The V2 FINAL GATE is therefore complete. V3 is unlocked and begins at V3.1;
 no V3 implementation was counted or started before this result.

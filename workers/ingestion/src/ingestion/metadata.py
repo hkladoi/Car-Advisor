@@ -136,11 +136,20 @@ class SnapshotMetadataRepository:
         with psycopg.connect(self._dsn) as connection, connection.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT url
-                FROM sources
-                WHERE url = ANY(%s)
-                  AND (last_fetched_at IS NULL OR last_fetched_at + refresh_interval < %s)
-                ORDER BY url
+                SELECT s.url
+                FROM sources s
+                LEFT JOIN source_snapshots ss
+                  ON ss.source_id = s.id
+                 AND ss.fetch_error IS NULL
+                 AND ss.http_status BETWEEN 200 AND 399
+                WHERE s.url = ANY(%s)
+                GROUP BY s.id, s.url, s.last_fetched_at, s.refresh_interval
+                HAVING COALESCE(
+                    GREATEST(s.last_fetched_at, MAX(ss.fetched_at))
+                        + s.refresh_interval < %s,
+                    TRUE
+                )
+                ORDER BY s.url
                 """,
                 (list(by_url), datetime.now(UTC)),
             )

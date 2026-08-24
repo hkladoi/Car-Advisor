@@ -301,7 +301,7 @@ Gate evidence:
 - `dotnet build VietnamCarPlatform.sln --configuration Release --no-restore`
   — PASS, 0 warnings/errors; .NET tests — 85/85 PASS. EF reports no pending
   model changes.
-- Worker tests — 78/78 PASS. Web lint PASS, Vitest 12 files / 19 tests PASS with
+- Worker tests — 79/79 PASS. Web lint PASS, Vitest 12 files / 19 tests PASS with
   no unhandled teardown errors, and the 26-route production build PASS.
 - OpenAPI and TypeScript generation are deterministic. SHA-256 values are
   `aa19b30560c713a9853887b170fca67921a2f6b1c460604077d72ea768d4427c`
@@ -348,9 +348,19 @@ Final measured results:
 - `python scripts/verify_v3_final.py` — PASS and confirms all seven Compose
   services healthy, V3.5 as latest migration, no V3.2 gate account, no active
   final-load key, no unfinished search event and no temporary gate database.
-- Full build/regression: .NET 85/85; worker 78/78; web 12 files / 19 tests,
+- Full build/regression: .NET 85/85; worker 79/79; web 12 files / 19 tests,
   lint and 26-route production build; EF model/migration parity; deterministic
   OpenAPI/generated client; Compose config/bootstrap syntax; secret scan.
+
+The complete release path was also repeated from an empty disposable Compose
+project on 2026-08-24. The real reviewed V2.8 publication yielded 304/304
+resolved candidates, and the official EEA publication yielded 322 cohorts with
+196 catalog-mapped rows before V3.3. V3.4 passed at 100,000 isolated rows; V3
+FINAL sustained 20.01 RPS for 1,200 requests with zero errors, restored all 14
+migrations in 21.156 seconds and left all seven services healthy. The disposable
+containers, database volumes and generated manifests were removed afterward;
+the persistent development stack was then restored with its 49 trims, 322 EEA
+cohorts and 196 mapped cohorts intact.
 
 V1, V2 and V3 are now complete under the supplied design and implementation
 plan. Any higher traffic target, new source coverage or new product feature is

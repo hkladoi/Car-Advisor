@@ -112,6 +112,8 @@ class MonitoringRepository:
         )
         if job.source_id and parse_status:
             self._resolve_alert("PARSER_CONSECUTIVE_FAILURE", job.source_id)
+        if job.source_id and http_status is not None and 200 <= http_status < 400:
+            self._resolve_alert("SOURCE_STALE", job.source_id)
 
     def partial(
         self,
@@ -134,6 +136,8 @@ class MonitoringRepository:
         )
         if job.source_id and parse_status:
             self._resolve_alert("PARSER_CONSECUTIVE_FAILURE", job.source_id)
+        if job.source_id and http_status is not None and 200 <= http_status < 400:
+            self._resolve_alert("SOURCE_STALE", job.source_id)
 
     def fail(
         self,

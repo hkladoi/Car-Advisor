@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any
 from urllib.request import Request, urlopen
@@ -59,6 +60,40 @@ def supported_recurring_sources() -> dict[str, str]:
         for source in registry["sources"]
         if source.get("automated_fetch", True) and source["category"] in monitor_by_category
     }
+
+
+def reconcile_staleness() -> str:
+    script = """
+import asyncio
+import redis.asyncio as redis
+from ingestion.jobs import IngestionJob
+from ingestion.settings import Settings
+
+async def main():
+    settings = Settings()
+    client = redis.from_url(settings.redis_url, decode_responses=True)
+    job = IngestionJob.staleness_check()
+    await client.rpush(settings.ingestion_queue, job.model_dump_json())
+    await client.aclose()
+    print(job.run_id)
+
+asyncio.run(main())
+"""
+    run_id = command(
+        "docker", "compose", "exec", "-T", "ingestion-worker", "python", "-c", script
+    ).stdout.strip()
+    deadline = time.monotonic() + 60
+    latest = ""
+    while time.monotonic() < deadline:
+        latest = psql(
+            f"SELECT status FROM ingestion_job_runs WHERE id='{run_id}'::uuid"
+        )
+        if latest == "Succeeded":
+            return run_id
+        if latest in {"Failed", "Partial"}:
+            raise AssertionError(f"staleness reconciliation ended as {latest}: {run_id}")
+        time.sleep(0.2)
+    raise AssertionError(f"staleness reconciliation timed out: {run_id} ({latest})")
 
 
 def main() -> None:
@@ -115,7 +150,29 @@ def main() -> None:
         require(marker in html, f"coverage dashboard is missing: {marker}")
 
     require(psql('SELECT count(*) FROM "__EFMigrationsHistory" WHERE migration_id=\'20260823062601_AddV28MarketCoverage\'') == "1", "V2.8 migration is not applied")
-    require(psql("SELECT count(*) FROM monitoring_alerts WHERE status='Open' AND severity IN ('High','Critical')") == "0", "high/critical monitoring alert remains open")
+    staleness_run_id = reconcile_staleness()
+    registry = json.loads((ROOT / "data/source-registry.v1.json").read_text(encoding="utf-8"))
+    v3_owned_sources = sorted(
+        source["id"]
+        for source in registry["sources"]
+        if source["category"] == "real-world-consumption"
+    )
+    v3_source_sql = ",".join(f"'{value}'" for value in v3_owned_sources)
+    v2_open_alerts = psql(
+        "SELECT count(*) FROM monitoring_alerts "
+        "WHERE status='Open' AND severity IN ('High','Critical') "
+        + (
+            f"AND (source_key IS NULL OR source_key NOT IN ({v3_source_sql}))"
+            if v3_source_sql
+            else ""
+        )
+    )
+    require(v2_open_alerts == "0", "a V2-owned high/critical monitoring alert remains open")
+    deferred_v3_alerts = int(psql(
+        "SELECT count(*) FROM monitoring_alerts "
+        "WHERE status='Open' AND severity IN ('High','Critical') "
+        + (f"AND source_key IN ({v3_source_sql})" if v3_source_sql else "AND FALSE")
+    ))
 
     print(json.dumps({
         "status": "PASS",
@@ -134,6 +191,8 @@ def main() -> None:
         },
         "parserFailurePreservedPublishedData": True,
         "dashboardVisible": True,
+        "stalenessReconciliationRunId": staleness_run_id,
+        "deferredV3SourceAlerts": deferred_v3_alerts,
     }, ensure_ascii=False, indent=2))
 
 
