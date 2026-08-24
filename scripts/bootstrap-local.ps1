@@ -146,7 +146,8 @@ if (-not $SkipSeed) {
         "verify_v1_8_financing.py", "verify_v1_9_compare.py",
         "verify_v1_10_admin.py", "verify_v1_final.py",
         "verify_v3_3_real_world.py", "verify_v3_4_search.py",
-        "verify_v3_5_partner_api.py", "verify_v3_5_migration.py")) {
+        "verify_v3_5_partner_api.py", "verify_v3_5_migration.py",
+        "verify_v3_final.py")) {
         Invoke-Checked $python @((Join-Path $root "scripts/$verification"))
     }
 }

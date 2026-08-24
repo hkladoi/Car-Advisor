@@ -43,8 +43,11 @@ Decisions and gate evidence belong in `docs/status/`.
   at rest), PostgreSQL plans, atomic Redis minute/month quotas, exact policy
   acceptance and source-specific attribution. See ADR-012 and
   `docs/api/public-partner-v1.md`.
-- V3 FINAL GATE is next and is the only unlocked work. See
-  `docs/status/v3-status.md` before changing any implementation.
+- V3 FINAL GATE is complete. The consolidated gate passed deterministic
+  recommendation, full privacy lifecycle, isolated 100,000-row search,
+  backup/restore and 1,200-response target load at 20 RPS with zero errors. See
+  ADR-013 and `docs/status/v3-status.md`. V1, V2 and V3 are complete; there is no
+  unlocked milestone in the supplied plan.
 
 ## Architecture
 
@@ -83,9 +86,10 @@ From the repository root, run one of:
 The bootstrap is repeatable. It creates `.env`, securely merges local provider
 keys, installs dependencies, builds and starts the Compose stack, waits for
 readiness, checks schema constraints, validates/fetches/publishes the official
-V1 seeds plus the official EEA V3.3 cohort snapshot, runs their golden checks
-the V3.4 isolated PostgreSQL benchmark/async projection gate and both V3.5
-partner API/migration gates, then checks web/API health. Use
+V1 seeds plus the official EEA V3.3 cohort snapshot, runs their golden checks,
+the V3.4 isolated PostgreSQL benchmark/async projection gate, both V3.5 partner
+API/migration gates and the consolidated V3 FINAL gate, then checks web/API
+health. Use
 `-SkipInstall`/`SKIP_INSTALL=1` or `-SkipSeed`/`SKIP_SEED=1` only for an already
 prepared local environment.
 
@@ -158,6 +162,8 @@ python scripts/verify_v3_3_real_world.py
 python scripts/verify_v3_4_search.py
 python scripts/verify_v3_5_partner_api.py
 python scripts/verify_v3_5_migration.py
+python scripts/load_v3_final.py
+python scripts/verify_v3_final.py
 docker compose up --build -d --wait
 docker compose ps
 docker compose logs -f api ingestion-worker ingestion-scheduler
@@ -220,8 +226,9 @@ credential. See `docs/api/public-partner-v1.md` and
 
 ## Continuing implementation
 
-Implement one milestone at a time in plan order. For every milestone: finish
-code and migration, add deterministic tests, run the relevant build/tests and
-integration gate, fix failures, then update the corresponding status document
-with commands and evidence. Do not advance while its gate is failing. Any
-design/plan conflict must be recorded with the chosen product-safe decision.
+The supplied V1→V3 plan is complete. Before adding future scope, read both source
+documents and all status/ADR evidence, define a new milestone with measurable
+acceptance criteria, and preserve current contracts and gates. For every future
+milestone: finish code/migration, add deterministic tests, run relevant
+build/tests/integration/load gates, fix failures, then update status and handoff.
+Any design conflict must be recorded with the chosen product-safe decision.

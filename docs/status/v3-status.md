@@ -2,14 +2,14 @@
 
 Last updated: 2026-08-24
 
-Overall: **IN PROGRESS — V3 FINAL GATE**
+Overall: **COMPLETE — V3 FINAL GATE PASS**
 
 - [x] V3.1 Explainable recommendation
 - [x] V3.2 Accounts, privacy, watchlists and alerts
 - [x] V3.3 Trusted real-world data
 - [x] V3.4 Search scale (only after benchmark evidence)
 - [x] V3.5 Versioned public/partner API
-- [ ] V3 FINAL GATE
+- [x] V3 FINAL GATE
 
 The design document governs product behavior and the plan governs order. Each
 milestone will record migrations, tests and gate evidence here before moving to
@@ -309,6 +309,50 @@ Gate evidence:
 - Production API image rebuilt and the live API/PostgreSQL/Redis path passed.
   All temporary V3.5 migration databases and roles were removed.
 
-V3 FINAL GATE is now unlocked. No V3 FINAL acceptance claim is made here until
-target-traffic load, privacy lifecycle, recommendation integrity and complete
-regression evidence pass together.
+## V3 FINAL GATE — PASS
+
+Acceptance evidence maps exactly to the three plan requirements:
+
+1. **Recommendation is explainable and reproducible.** The final gate reran the
+   versioned `v3.1-deterministic-1` methodology twice with identical stable
+   output. Hard filters still run first, all 49 candidates have closed
+   accounting, and the current honest result remains 0 ranked / 4 withheld;
+   incomplete or weak-source candidates receive reasons and never receive an
+   overall or P/P score.
+2. **User data/privacy controls are complete.** An anonymous private request was
+   rejected; registration without consent was rejected; an opted-in account
+   saved profile/comparison/49 watchlist rows, exported them, then permanently
+   deleted the account. Counts for account/session/profile/comparison/watchlist
+   changed to `0/0/0/0/0`, and the deleted session failed immediately.
+3. **Search and API pass target traffic.** ADR-013 resolves the design's missing
+   RPS number as an initial single-replica target of 20 RPS for 60 seconds,
+   1,200 measured real-data responses and zero errors. The mix is 9 catalog
+   searches, 6 details, 1 recommendation, 2 partner searches and 2 partner
+   details per second. The separate 100,000-row PostgreSQL benchmark preserves
+   the target-dataset search evidence without inserting synthetic rows into the
+   application database.
+
+Final measured results:
+
+- API load achieved 20.009 RPS with 0 HTTP/transport/payload errors. Warm-cache
+  p95: catalog search 38.075 ms (`<300`), detail 39.563 ms (`<400`),
+  recommendation 241.501 ms (`<700`), partner search 56.300 ms (`<300`) and
+  partner detail 53.973 ms (`<400`). The 251-use standard-plan key stayed inside
+  quota and was revoked after measurement.
+- Isolated 100,000-row PostgreSQL p95: substring 15.464 ms, fuzzy 30.090 ms,
+  faceted 0.580 ms and feature 0.340 ms, all below the 150 ms V3.4 threshold.
+  Live event-to-index projection completed in 455 ms with no unfinished event.
+- The final restore drill restored all 14 migrations and hash-verified 181
+  immutable objects in 25.765 seconds measured local RTO. Its isolated database
+  and bucket were removed; workers returned healthy.
+- `python scripts/verify_v3_final.py` — PASS and confirms all seven Compose
+  services healthy, V3.5 as latest migration, no V3.2 gate account, no active
+  final-load key, no unfinished search event and no temporary gate database.
+- Full build/regression: .NET 85/85; worker 78/78; web 12 files / 19 tests,
+  lint and 26-route production build; EF model/migration parity; deterministic
+  OpenAPI/generated client; Compose config/bootstrap syntax; secret scan.
+
+V1, V2 and V3 are now complete under the supplied design and implementation
+plan. Any higher traffic target, new source coverage or new product feature is
+future scope and must begin with an explicit milestone/ADR rather than silently
+weakening these gates.

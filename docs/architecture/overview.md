@@ -40,3 +40,12 @@ usage across API replicas and fails closed. See ADR-012.
 - PostgreSQL 16, Redis 7 and S3-compatible object storage.
 
 The design calls for an LTS/stable runtime rather than a particular major. .NET 8 is selected for reproducible local builds on the supplied environment; upgrading runtime major requires regression/golden tests and an ADR.
+
+## Initial V3 capacity target
+
+ADR-013 defines the measurable single-replica target as 20 RPS for 60 seconds
+with zero errors and the design p95 budgets: catalog below 300 ms, detail below
+400 ms and recommendation/heavy calculation below 700 ms. This API load gate is
+paired with the isolated 100,000-row PostgreSQL search benchmark. Raise and
+rerun both gates before claiming a higher traffic or materially larger-dataset
+capacity.

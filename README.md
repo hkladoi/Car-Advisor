@@ -55,6 +55,13 @@ The versioned read-only partner API is documented in
 `docs/api/data-attribution-policy.md`. The current public policy endpoint is
 `GET http://localhost:8080/api/v1/partner/policy`.
 
+Run the consolidated V3 release acceptance gate (recommendation, privacy,
+100,000-row search, restore drill and 20 RPS API load) with:
+
+```powershell
+python scripts/verify_v3_final.py
+```
+
 ## Troubleshooting
 
 - `health/ready` is unhealthy: verify PostgreSQL, Redis and MinIO health in `docker compose ps`; readiness intentionally fails when any source-of-truth dependency is missing.

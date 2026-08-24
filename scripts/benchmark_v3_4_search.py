@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
-import statistics
 import subprocess
 import uuid
 from pathlib import Path
@@ -20,6 +20,17 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 DATABASE_PATTERN = re.compile(r"^vcp_v34_bench_[0-9a-f]{10}$")
 QUERY_LIMIT_MS = 150.0
+
+
+def inclusive_percentile(values: list[float], percentile: float) -> float:
+    """Linear inclusive percentile without requiring Python 3.8 statistics.quantiles."""
+    ordered = sorted(values)
+    position = (len(ordered) - 1) * percentile
+    lower = math.floor(position)
+    upper = math.ceil(position)
+    if lower == upper:
+        return ordered[lower]
+    return ordered[lower] + (ordered[upper] - ordered[lower]) * (position - lower)
 
 
 def run(*args: str, input_text: str | None = None) -> subprocess.CompletedProcess[str]:
@@ -162,7 +173,7 @@ def main() -> None:
             plan(database, query)  # Warm relation/index pages before measuring.
             measurements = [plan(database, query) for _ in range(args.runs)]
             execution_times = [float(value["Execution Time"]) for value in measurements]
-            p95_ms = statistics.quantiles(execution_times, n=20, method="inclusive")[18]
+            p95_ms = inclusive_percentile(execution_times, 0.95)
             slowest = max(measurements, key=lambda value: float(value["Execution Time"]))
             nodes = node_types(slowest["Plan"])
             indexes = index_names(slowest["Plan"])
