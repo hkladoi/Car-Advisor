@@ -106,7 +106,7 @@ Implemented evidence:
 
 Gate commands/evidence:
 
-- `validate-parser-registry` — 24 HTML profiles and all 29 automated sources
+- `validate-parser-registry` — 25 HTML profiles and all automated sources
   resolve to a versioned parser.
 - `python -m pytest workers/ingestion/tests` — 37 passed.
 - `npm run lint:web && npm run test:web && npm run build:web` — pass (6 tests).

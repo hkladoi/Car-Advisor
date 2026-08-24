@@ -5,6 +5,7 @@
     {"domain":"isuzu-vietnam.com","parser_id":"isuzu-market-html","version":"2.8.0","content_selectors":["main","article","body"],"title_selectors":["h1","title"]},
     {"domain":"suzuki.com.vn","parser_id":"suzuki-market-html","version":"2.8.0","content_selectors":["main","article","body"],"title_selectors":["h1","title"]},
     {"domain":"www.suzuki.com.vn","parser_id":"suzuki-market-html","version":"2.8.0","content_selectors":["main","article","body"],"title_selectors":["h1","title"]},
+    {"domain":"www.globalsuzuki.com","parser_id":"suzuki-global-product-html","version":"2.8.1","content_selectors":["main","article","body"],"title_selectors":["h1","title"]},
     {"domain":"nissanvietnam.vn","parser_id":"nissan-market-html","version":"2.8.0","content_selectors":["main","article","body"],"title_selectors":["h1","title"]},
     {"domain":"www.nissanvietnam.vn","parser_id":"nissan-market-html","version":"2.8.0","content_selectors":["main","article","body"],"title_selectors":["h1","title"]},
     {"domain":"www.subaru.asia","parser_id":"subaru-market-html","version":"2.8.0","content_selectors":["main","article","body"],"title_selectors":["h1","title"]},
