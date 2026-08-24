@@ -19,6 +19,7 @@ public enum SourceContentType
     Pdf,
     Json,
     Xml,
+    Csv,
     Image,
     ManualDocument,
 }

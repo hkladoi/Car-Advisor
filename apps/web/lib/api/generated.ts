@@ -1811,6 +1811,7 @@ export interface components {
             colors?: components["schemas"]["ColorDetail"][] | null;
             warranty?: components["schemas"]["WarrantyDetail"];
             dealerOffers?: components["schemas"]["DealerOfferDetail"][] | null;
+            realWorldConsumption?: components["schemas"]["RealWorldConsumptionReference"][] | null;
             primarySource?: components["schemas"]["SourceBadge"];
             /** Format: date-time */
             generatedAt?: string;
@@ -2763,6 +2764,34 @@ export interface components {
             /** Format: double */
             loanInsuranceUpfront?: number;
             selectedDealerOfferIds?: string[] | null;
+        };
+        RealWorldConsumptionReference: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: int32 */
+            vehicleRegistrationYear?: number;
+            manufacturer?: string | null;
+            fuelType?: string | null;
+            /** Format: int32 */
+            sampleSize?: number;
+            /** Format: double */
+            realWorldFuelWeightedLitresPer100Km?: number | null;
+            /** Format: double */
+            officialWltpFuelWeightedLitresPer100Km?: number | null;
+            /** Format: double */
+            fuelWeightedAbsoluteGapLitresPer100Km?: number | null;
+            /** Format: double */
+            fuelWeightedPercentageGap?: number | null;
+            /** Format: double */
+            realWorldCo2WeightedGramsPerKm?: number | null;
+            /** Format: double */
+            officialWltpCo2WeightedGramsPerKm?: number | null;
+            geography?: string | null;
+            aggregationScope?: string | null;
+            isTrimSpecific?: boolean;
+            methodologyUrl?: string | null;
+            attribution?: string | null;
+            source?: components["schemas"]["SourceBadge"];
         };
         RecommendationCandidate: {
             vehicle?: components["schemas"]["RecommendationVehicle"];

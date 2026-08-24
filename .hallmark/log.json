@@ -1,5 +1,14 @@
 [
   {
+    "date": "2026-08-24",
+    "macrostructure": "Evidence Ledger",
+    "theme": "Cobalt",
+    "enrichment": "methodology and sample-size disclosure",
+    "nav": "N13-shared",
+    "footer": "Ft5",
+    "brief": "V3.3 official trim versus EEA real-world cohort separation"
+  },
+  {
     "date": "2026-08-23",
     "macrostructure": "Account Ledger",
     "theme": "Cobalt",

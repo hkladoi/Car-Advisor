@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import csv
 import hashlib
 import json
 import re
 import xml.etree.ElementTree as element_tree
 from dataclasses import dataclass
-from io import BytesIO
+from io import BytesIO, StringIO
 from pathlib import Path, PurePosixPath
 from typing import Any, Literal, Protocol
 from urllib.parse import urljoin, urlsplit
@@ -232,12 +233,43 @@ class XmlDocumentParser:
         )
 
 
+class CsvDocumentParser:
+    parser_id = "csv-structured"
+    parser_version = "csv-structured/3.3.0"
+
+    def parse(self, source: RegistrySource, snapshot: Snapshot, content: bytes) -> ParsedDocument:
+        try:
+            text = content.decode("utf-8-sig")
+        except UnicodeDecodeError as error:
+            raise ParserError("CSV source must be UTF-8 encoded") from error
+        reader = csv.DictReader(StringIO(text, newline=""))
+        if not reader.fieldnames or any(not (name or "").strip() for name in reader.fieldnames):
+            raise ParserError("CSV source requires a non-empty header row")
+        rows = list(reader)
+        if not rows:
+            raise ParserError("CSV source has no data rows")
+        if len(rows) > 100_000:
+            raise ParserError("CSV source exceeds the 100000-row structured parser limit")
+        return ParsedDocument(
+            source_id=source.id,
+            source_url=source.url,
+            final_url=snapshot.final_url,
+            content_hash=snapshot.content_hash,
+            content_type="Csv",
+            parser_id=self.parser_id,
+            parser_version=self.parser_version,
+            metadata={"row_count": str(len(rows)), "columns": ",".join(reader.fieldnames)},
+            structured_data=rows,
+        )
+
+
 class DomainParserRegistry:
     def __init__(self, profiles: ParserProfileRegistry, max_pdf_pages: int = 500) -> None:
         self._profiles = profiles
         self._pdf = PdfDocumentParser(max_pdf_pages)
         self._json = JsonDocumentParser()
         self._xml = XmlDocumentParser()
+        self._csv = CsvDocumentParser()
 
     def resolve(self, source: RegistrySource, final_url: str) -> SourceParser:
         if source.content_type is ContentType.PDF:
@@ -246,6 +278,8 @@ class DomainParserRegistry:
             return self._json
         if source.content_type is ContentType.XML:
             return self._xml
+        if source.content_type is ContentType.CSV:
+            return self._csv
         if source.content_type is not ContentType.HTML:
             raise UnsupportedParser(f"Unsupported content type: {source.content_type}")
         hostname = urlsplit(final_url).hostname

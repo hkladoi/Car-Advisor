@@ -22,6 +22,7 @@ class ContentType(StrEnum):
     PDF = "Pdf"
     JSON = "Json"
     XML = "Xml"
+    CSV = "Csv"
     MANUAL_DOCUMENT = "ManualDocument"
 
 

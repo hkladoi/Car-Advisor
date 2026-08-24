@@ -183,6 +183,38 @@ public sealed class EnergyProfile : SourcedEntity
     public string? ConsumptionNotes { get; set; }
 }
 
+public sealed class RealWorldConsumptionAggregate : SourcedEntity
+{
+    public Guid? BrandId { get; set; }
+    public int DatasetReportingYear { get; set; }
+    public int VehicleRegistrationYear { get; set; }
+    public string DatasetVersion { get; set; } = string.Empty;
+    public string Manufacturer { get; set; } = string.Empty;
+    public string NormalizedManufacturer { get; set; } = string.Empty;
+    public string FuelType { get; set; } = string.Empty;
+    public int SampleSize { get; set; }
+    public decimal? RealWorldFuelLitresPer100Km { get; set; }
+    public decimal? OfficialWltpFuelLitresPer100Km { get; set; }
+    public decimal? FuelAbsoluteGapLitresPer100Km { get; set; }
+    public decimal? FuelPercentageGap { get; set; }
+    public decimal? RealWorldCo2GramsPerKm { get; set; }
+    public decimal? OfficialWltpCo2GramsPerKm { get; set; }
+    public decimal? Co2AbsoluteGapGramsPerKm { get; set; }
+    public decimal? Co2PercentageGap { get; set; }
+    public decimal? RealWorldFuelWeightedLitresPer100Km { get; set; }
+    public decimal? OfficialWltpFuelWeightedLitresPer100Km { get; set; }
+    public decimal? FuelWeightedAbsoluteGapLitresPer100Km { get; set; }
+    public decimal? FuelWeightedPercentageGap { get; set; }
+    public decimal? RealWorldCo2WeightedGramsPerKm { get; set; }
+    public decimal? OfficialWltpCo2WeightedGramsPerKm { get; set; }
+    public decimal? Co2WeightedAbsoluteGapGramsPerKm { get; set; }
+    public decimal? Co2WeightedPercentageGap { get; set; }
+    public string Geography { get; set; } = "EU/EEA";
+    public string AggregationScope { get; set; } = "ManufacturerFuelRegistrationYear";
+    public string MethodologyUrl { get; set; } = string.Empty;
+    public string Attribution { get; set; } = string.Empty;
+}
+
 public sealed class WarrantyProfile : SourcedEntity
 {
     public Guid TrimId { get; set; }

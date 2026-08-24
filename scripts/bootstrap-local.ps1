@@ -137,11 +137,15 @@ if (-not $SkipSeed) {
     Invoke-SeedCommand @("--volume", $tempMount, "ingestion-worker", "python", "-m", "ingestion.cli", "fetch-energy-seed", "--registry", $registry, "--seed", "/app/data/seed/v1.6-energy.json", "--manifest", "/app/.tmp/v1.6-energy.json")
     Invoke-SeedCommand @("--volume", $readOnlyTempMount, "ingestion-worker", "python", "-m", "ingestion.cli", "publish-energy-seed", "--registry", $registry, "--seed", "/app/data/seed/v1.6-energy.json", "--manifest", "/app/.tmp/v1.6-energy.json", "--dsn", $dsn)
 
+    Invoke-SeedCommand @("--volume", $tempMount, "ingestion-worker", "python", "-m", "ingestion.cli", "fetch-real-world-consumption", "--registry", $registry, "--manifest", "/app/.tmp/v3.3-real-world.json")
+    Invoke-SeedCommand @("--volume", $readOnlyTempMount, "ingestion-worker", "python", "-m", "ingestion.cli", "publish-real-world-consumption", "--registry", $registry, "--manifest", "/app/.tmp/v3.3-real-world.json", "--dsn", $dsn)
+
     foreach ($verification in @(
         "verify_v1_3_catalog.py", "verify_v1_4_web.py", "verify_v1_5_onroad.py",
         "verify_v1_6_energy.py", "verify_v1_7_affordability.py",
         "verify_v1_8_financing.py", "verify_v1_9_compare.py",
-        "verify_v1_10_admin.py", "verify_v1_final.py")) {
+        "verify_v1_10_admin.py", "verify_v1_final.py",
+        "verify_v3_3_real_world.py")) {
         Invoke-Checked $python @((Join-Path $root "scripts/$verification"))
     }
 }

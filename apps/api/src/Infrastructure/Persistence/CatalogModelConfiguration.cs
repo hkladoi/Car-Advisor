@@ -246,6 +246,46 @@ internal static class CatalogModelConfiguration
         });
 
         modelBuilder.Entity<WarrantyProfile>(entity => entity.Property(value => value.Conditions).HasMaxLength(2000));
+
+        modelBuilder.Entity<RealWorldConsumptionAggregate>(entity =>
+        {
+            entity.ToTable("real_world_consumption_aggregates", table =>
+            {
+                table.HasCheckConstraint("ck_real_world_consumption_years", "dataset_reporting_year BETWEEN 2000 AND 2200 AND vehicle_registration_year BETWEEN 2000 AND dataset_reporting_year");
+                table.HasCheckConstraint("ck_real_world_consumption_sample", "sample_size > 0");
+                table.HasCheckConstraint("ck_real_world_consumption_metrics", "real_world_fuel_litres_per100km IS NOT NULL OR real_world_co2_grams_per_km IS NOT NULL");
+                table.HasCheckConstraint("ck_real_world_consumption_provenance", "source_fact_id IS NOT NULL");
+            });
+            entity.Property(value => value.DatasetVersion).HasMaxLength(100);
+            entity.Property(value => value.Manufacturer).HasMaxLength(240);
+            entity.Property(value => value.NormalizedManufacturer).HasMaxLength(240);
+            entity.Property(value => value.FuelType).HasMaxLength(80);
+            entity.Property(value => value.Geography).HasMaxLength(120);
+            entity.Property(value => value.AggregationScope).HasMaxLength(120);
+            entity.Property(value => value.MethodologyUrl).HasMaxLength(2048);
+            entity.Property(value => value.Attribution).HasMaxLength(1000);
+            entity.Property(value => value.ManualOverrideReason).HasMaxLength(1000);
+            entity.Property(value => value.RealWorldFuelLitresPer100Km).HasPrecision(12, 4);
+            entity.Property(value => value.OfficialWltpFuelLitresPer100Km).HasPrecision(12, 4);
+            entity.Property(value => value.FuelAbsoluteGapLitresPer100Km).HasPrecision(12, 4);
+            entity.Property(value => value.FuelPercentageGap).HasPrecision(12, 4);
+            entity.Property(value => value.RealWorldCo2GramsPerKm).HasColumnName("real_world_co2_grams_per_km").HasPrecision(12, 4);
+            entity.Property(value => value.OfficialWltpCo2GramsPerKm).HasColumnName("official_wltp_co2_grams_per_km").HasPrecision(12, 4);
+            entity.Property(value => value.Co2AbsoluteGapGramsPerKm).HasColumnName("co2_absolute_gap_grams_per_km").HasPrecision(12, 4);
+            entity.Property(value => value.Co2PercentageGap).HasColumnName("co2_percentage_gap").HasPrecision(12, 4);
+            entity.Property(value => value.RealWorldFuelWeightedLitresPer100Km).HasPrecision(12, 4);
+            entity.Property(value => value.OfficialWltpFuelWeightedLitresPer100Km).HasPrecision(12, 4);
+            entity.Property(value => value.FuelWeightedAbsoluteGapLitresPer100Km).HasPrecision(12, 4);
+            entity.Property(value => value.FuelWeightedPercentageGap).HasPrecision(12, 4);
+            entity.Property(value => value.RealWorldCo2WeightedGramsPerKm).HasColumnName("real_world_co2_weighted_grams_per_km").HasPrecision(12, 4);
+            entity.Property(value => value.OfficialWltpCo2WeightedGramsPerKm).HasColumnName("official_wltp_co2_weighted_grams_per_km").HasPrecision(12, 4);
+            entity.Property(value => value.Co2WeightedAbsoluteGapGramsPerKm).HasColumnName("co2_weighted_absolute_gap_grams_per_km").HasPrecision(12, 4);
+            entity.Property(value => value.Co2WeightedPercentageGap).HasColumnName("co2_weighted_percentage_gap").HasPrecision(12, 4);
+            entity.HasOne<Brand>().WithMany().HasForeignKey(value => value.BrandId).OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne<SourceFact>().WithMany().HasForeignKey(value => value.SourceFactId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(value => new { value.DatasetVersion, value.VehicleRegistrationYear, value.NormalizedManufacturer, value.FuelType }).IsUnique();
+            entity.HasIndex(value => new { value.BrandId, value.VehicleRegistrationYear, value.FuelType });
+        });
     }
 
     private static void ConfigureProfile<TEntity>(EntityTypeBuilder<TEntity> entity, string tableName)

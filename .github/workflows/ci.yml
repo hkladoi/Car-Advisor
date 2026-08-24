@@ -222,6 +222,21 @@ jobs:
         run: python scripts/backup_restore_test.py
       - name: Verify complete V1 release gate
         run: python scripts/verify_v1_final.py
+      - name: Fetch immutable EEA real-world consumption aggregate
+        run: |
+          docker compose run --rm --no-deps --user "$(id -u):$(id -g)" --volume "$PWD/.tmp:/app/.tmp" ingestion-worker \
+            python -m ingestion.cli fetch-real-world-consumption \
+            --registry /app/data/source-registry.v1.json \
+            --manifest /app/.tmp/v3.3-real-world.json
+      - name: Publish official EEA OBFCM cohorts
+        run: >-
+          docker compose run --rm --no-deps --volume "$PWD/.tmp:/app/.tmp:ro" ingestion-worker
+          python -m ingestion.cli publish-real-world-consumption
+          --registry /app/data/source-registry.v1.json
+          --manifest /app/.tmp/v3.3-real-world.json
+          --dsn "host=/var/run/postgresql dbname=vietnam_car_platform user=vcp"
+      - name: Verify V3.3 trustworthy real-world consumption gate
+        run: python scripts/verify_v3_3_real_world.py
       - run: curl --fail http://localhost:8080/health/live
       - run: curl --fail http://localhost:8080/health/ready
       - run: curl --fail http://localhost:3000

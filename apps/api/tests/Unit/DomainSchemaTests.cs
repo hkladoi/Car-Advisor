@@ -141,6 +141,24 @@ public sealed class DomainSchemaTests
             || property.Name.Contains("Cost", StringComparison.OrdinalIgnoreCase));
     }
 
+    [Fact]
+    public void RealWorldCohortsRequireSampleMethodologyIdentityAndProvenance()
+    {
+        using var db = CreateContext();
+        var designModel = db.GetService<IDesignTimeModel>().Model;
+        var aggregate = designModel.FindEntityType(typeof(RealWorldConsumptionAggregate))!;
+
+        Assert.Contains(aggregate.GetCheckConstraints(), check => check.Name == "ck_real_world_consumption_sample");
+        Assert.Contains(aggregate.GetCheckConstraints(), check => check.Name == "ck_real_world_consumption_provenance");
+        Assert.Contains(aggregate.GetIndexes(), index => index.IsUnique
+            && index.Properties.Select(property => property.Name).SequenceEqual([
+                nameof(RealWorldConsumptionAggregate.DatasetVersion),
+                nameof(RealWorldConsumptionAggregate.VehicleRegistrationYear),
+                nameof(RealWorldConsumptionAggregate.NormalizedManufacturer),
+                nameof(RealWorldConsumptionAggregate.FuelType),
+            ]));
+    }
+
     private static AppDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()

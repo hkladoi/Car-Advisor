@@ -1,12 +1,12 @@
 # V3 milestone status
 
-Last updated: 2026-08-23
+Last updated: 2026-08-24
 
-Overall: **IN PROGRESS — V3.3**
+Overall: **IN PROGRESS — V3.4**
 
 - [x] V3.1 Explainable recommendation
 - [x] V3.2 Accounts, privacy, watchlists and alerts
-- [ ] V3.3 Trusted real-world data
+- [x] V3.3 Trusted real-world data
 - [ ] V3.4 Search scale (only after benchmark evidence)
 - [ ] V3.5 Versioned public/partner API
 - [ ] V3 FINAL GATE
@@ -119,4 +119,74 @@ Gate evidence:
   authenticated dashboard and permanent deletion. Desktop and 375px mobile
   layouts have no horizontal overflow; console has no error.
 
-V3.3 trusted real-world data is now the only unlocked V3 milestone.
+## V3.3 — Trusted real-world consumption — PASS
+
+Delivered:
+
+- Official EEA OBFCM `2023_Cars_Aggregated.csv` ingestion through the existing
+  source-first worker. A successful fetch writes the 41,167-byte response to
+  immutable MinIO storage before validation or publication; the live snapshot
+  hash is `4b4544898ff1cbaf055c1fac909feda2c1fe036f29a612b924343562ed3f74f4`.
+- Strict UTF-8 CSV parser and V3.3 cohort contract for separate OBFCM and WLTP
+  figures, weighted/unweighted fuel and CO2 metrics, registration year, sample
+  size, geography, methodology, attribution and source fact. Invalid headers,
+  missing paired metrics, duplicate identities and non-positive samples fail.
+- Snapshot reconciliation removes cohorts withdrawn by a later official file
+  from the current read model while retaining immutable snapshots/source facts
+  as audit history.
+- Migration `20260824014143_AddV33RealWorldConsumption` adds provenance-guarded
+  `real_world_consumption_aggregates` with sample/year/metric checks, a unique
+  dataset-version × registration-year × manufacturer × fuel identity and
+  reviewed optional `BrandId` mapping.
+- Car detail API and UI expose the latest registration-year cohort per fuel.
+  Official Vietnam-trim consumption remains in the original trim contract;
+  real-world references are a separate array with `isTrimSpecific=false`,
+  sample size, methodology, attribution and original EEA source.
+- The UI presents an explicit `OFFICIAL TRIM ≠ REAL-WORLD COHORT` comparison.
+  It never replaces the trim figure, and an unmapped/unsupported brand gets a
+  truthful empty state.
+
+Product-safe decisions where the design leaves implementation detail open:
+
+- The EEA aggregate is used instead of trying to derive trim measurements from
+  the multi-million-row raw file. Its valid scope is manufacturer × fuel ×
+  registration year across reporting EU/EEA states, not a Vietnam trim.
+- Only a reviewed exact manufacturer-to-brand allowlist is linked. Ambiguous
+  corporate groups such as Stellantis, PSA, SAIC and Jaguar Land Rover remain
+  unmapped; no group-to-brand inference is allowed.
+- The API first filters by explicit trim energy/powertrain facts (for example,
+  the petrol Yaris never receives diesel or PHEV cohorts; BEVs receive no
+  liquid-fuel cohort). If the fuel is unknown, it preserves labeled brand-level
+  alternatives instead of guessing. For a brand/fuel it chooses the latest
+  registration year and the largest official sample when multiple legal
+  manufacturer entities exist.
+  It does not combine or average already-aggregated cohorts.
+- EEA attribution and methodology links are part of every API row. The source
+  registry records the EEA legal notice/data-policy obligation. See
+  `docs/adr/ADR-011-eea-real-world-cohort-scope.md`.
+
+Gate evidence:
+
+- Live fetch/publish: HTTP 200 official CSV, 322 cohorts, 196 exact mapped rows,
+  19 mapped Vietnam catalog brands, registration years 2021–2023 and total
+  sample size 6,515,134. A second publish held `322 rows / 322 IDs / 322 source
+  facts`, proving idempotence.
+- `python scripts/verify_v3_3_real_world.py` — PASS: immutable snapshot/source
+  policy/audit/provenance, 5.95 l/100 km official Yaris Cross trim fact kept
+  separate from one compatible 2023 EEA PETROL cohort reference, OpenAPI and
+  rendered page.
+- `dotnet build VietnamCarPlatform.sln --configuration Release` — PASS with 0
+  warnings/errors; .NET tests — 76/76 PASS, including schema and deterministic
+  cohort-selection policy.
+- Worker tests — 77/77 PASS, including the attributed real EEA excerpt, strict
+  schema/sample rejection and ambiguous manufacturer non-mapping.
+- Web lint PASS; Vitest — 12 files / 19 tests PASS; production Next.js build
+  PASS. OpenAPI and generated TypeScript client were regenerated.
+- Migration applied to the live Compose database with no pending model change.
+  A separate empty database applied all migrations through V3.3 and verified
+  the new table plus four check constraints before that isolated DB was removed.
+- All seven Compose services healthy. Playwright desktop/mobile QA confirmed
+  the official/cohort visual hierarchy, zero console errors and no horizontal
+  overflow at 390 px.
+
+V3.4 PostgreSQL-first search benchmarking is now the only unlocked milestone.

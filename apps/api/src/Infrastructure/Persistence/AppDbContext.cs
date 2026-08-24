@@ -38,6 +38,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<VehicleImage> VehicleImages => Set<VehicleImage>();
     public DbSet<PowertrainProfile> PowertrainProfiles => Set<PowertrainProfile>();
     public DbSet<EnergyProfile> EnergyProfiles => Set<EnergyProfile>();
+    public DbSet<RealWorldConsumptionAggregate> RealWorldConsumptionAggregates => Set<RealWorldConsumptionAggregate>();
     public DbSet<WarrantyProfile> WarrantyProfiles => Set<WarrantyProfile>();
     public DbSet<Price> Prices => Set<Price>();
     public DbSet<PriceHistory> PriceHistory => Set<PriceHistory>();

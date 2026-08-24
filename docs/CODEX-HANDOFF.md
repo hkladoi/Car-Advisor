@@ -1,6 +1,6 @@
 # Vietnam Car Platform — engineering handoff
 
-Last updated: 2026-08-23
+Last updated: 2026-08-24
 
 ## Product and source of truth
 
@@ -29,7 +29,11 @@ Decisions and gate evidence belong in `docs/status/`.
 - V3.2 opt-in accounts/privacy is complete. Anonymous behavior remains the
   default; account owners can save profile/comparisons/watchlist, inspect
   current alert signals, export all private data and permanently delete it.
-  V3.3 trusted real-world data is next. See `docs/status/v3-status.md`.
+- V3.3 trusted EEA real-world consumption is complete. The live data contains
+  322 manufacturer/fuel/year cohorts representing 6,515,134 reported vehicles;
+  only reviewed exact manufacturer mappings are linked, and every reference is
+  explicitly non-trim. V3.4 PostgreSQL-first search benchmarking is next. See
+  `docs/status/v3-status.md` and ADR-011.
 
 ## Architecture
 
@@ -68,7 +72,8 @@ From the repository root, run one of:
 The bootstrap is repeatable. It creates `.env`, securely merges local provider
 keys, installs dependencies, builds and starts the Compose stack, waits for
 readiness, checks schema constraints, validates/fetches/publishes the official
-V1 seeds, runs their golden checks and checks web/API health. Use
+V1 seeds plus the official EEA V3.3 cohort snapshot, runs their golden checks
+and checks web/API health. Use
 `-SkipInstall`/`SKIP_INSTALL=1` or `-SkipSeed`/`SKIP_SEED=1` only for an already
 prepared local environment.
 
@@ -130,6 +135,8 @@ python scripts/verify_v2_7_history.py
 python scripts/verify_v2_8_coverage.py
 python scripts/verify_v2_final.py
 python scripts/verify_v3_1_recommendation.py
+python scripts/verify_v3_2_accounts.py
+python scripts/verify_v3_3_real_world.py
 docker compose up --build -d --wait
 docker compose ps
 docker compose logs -f api ingestion-worker ingestion-scheduler
@@ -153,6 +160,7 @@ dotnet ef migrations has-pending-model-changes --project apps/api/src/Infrastruc
 - Energy price history: <http://localhost:3000/energy/history>
 - Public full-market coverage: <http://localhost:3000/coverage>
 - Explainable recommendation: <http://localhost:3000/recommend>
+- Account/privacy workspace: <http://localhost:3000/account>
 - PostgreSQL: `localhost:5432`; Redis: `localhost:6379`
 
 ## Debugging and recovery
@@ -167,6 +175,18 @@ dotnet ef migrations has-pending-model-changes --project apps/api/src/Infrastruc
   evidence.
 - The CI workflow in `.github/workflows/ci.yml` is the executable reference for
   all V1 seed and gate commands.
+- If a host-side migration reports PostgreSQL password authentication failure
+  while Compose is healthy, do not print or guess the password. Rebuild/start
+  the API with `APPLY_DATABASE_MIGRATIONS=true`; it uses the shared PostgreSQL
+  Unix socket. Confirm the applied migration in `__EFMigrationsHistory`.
+
+V3.3 live refresh is source-first and needs no API key:
+
+```powershell
+docker compose run --rm --no-deps --volume "${PWD}/.tmp:/app/.tmp" ingestion-worker python -m ingestion.cli fetch-real-world-consumption --registry /app/data/source-registry.v1.json --manifest /app/.tmp/v3.3-real-world.json
+docker compose run --rm --no-deps --volume "${PWD}/.tmp:/app/.tmp:ro" ingestion-worker python -m ingestion.cli publish-real-world-consumption --registry /app/data/source-registry.v1.json --manifest /app/.tmp/v3.3-real-world.json --dsn "host=/var/run/postgresql dbname=vietnam_car_platform user=vcp"
+python scripts/verify_v3_3_real_world.py
+```
 
 ## Continuing implementation
 

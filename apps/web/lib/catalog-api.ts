@@ -72,6 +72,26 @@ export type SourceBadge = {
   confidence: string;
 };
 
+export type RealWorldConsumptionReference = {
+  id: string;
+  vehicleRegistrationYear: number;
+  manufacturer: string;
+  fuelType: string;
+  sampleSize: number;
+  realWorldFuelWeightedLitresPer100Km: number | null;
+  officialWltpFuelWeightedLitresPer100Km: number | null;
+  fuelWeightedAbsoluteGapLitresPer100Km: number | null;
+  fuelWeightedPercentageGap: number | null;
+  realWorldCo2WeightedGramsPerKm: number | null;
+  officialWltpCo2WeightedGramsPerKm: number | null;
+  geography: string;
+  aggregationScope: string;
+  isTrimSpecific: boolean;
+  methodologyUrl: string;
+  attribution: string;
+  source: SourceBadge;
+};
+
 export type CarDetailResponse = {
   car: CatalogCar;
   trims: { trimId: string; name: string; slug: string; modelYear: number; currentPrice: MoneyValue | null; selected: boolean }[];
@@ -82,6 +102,7 @@ export type CarDetailResponse = {
   colors: { code: string; name: string; hexHint: string | null; type: string; availability: string; extraPrice: number | null; currency: string; source: SourceBadge | null }[];
   warranty: { vehicleMonths: number | null; vehicleKilometres: number | null; batteryMonths: number | null; batteryKilometres: number | null; conditions: string | null; source: SourceBadge | null } | null;
   dealerOffers: { id: string; dealerName: string; branchName: string; provinceCode: string; headline: string; status: string; conditionsJson: string; effectiveFrom: string; effectiveTo: string | null; benefits: { type: string; cashValue: number | null; statedValue: number | null; currency: string; isCashEquivalent: boolean; exclusivityGroup: string | null; note: string | null }[]; source: SourceBadge | null }[];
+  realWorldConsumption: RealWorldConsumptionReference[];
   primarySource: SourceBadge | null;
   generatedAt: string;
 };
@@ -143,4 +164,3 @@ export function formatNumber(value: number | null, unit?: string | null): string
 export function formatDate(value: string): string {
   return new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeZone: "Asia/Ho_Chi_Minh" }).format(new Date(value));
 }
-

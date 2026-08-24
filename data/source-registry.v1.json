@@ -2,6 +2,20 @@
   "schema_version": "v1.2",
   "sources": [
     {
+      "id": "eea-real-world-cars-2023-aggregate",
+      "name": "EEA 2023 cars real-world OBFCM aggregate",
+      "owner": "European Environment Agency",
+      "category": "real-world-consumption",
+      "url": "https://sdi.eea.europa.eu/webdav/datastore/public/eea_t_real-world-co2-emission_p_2024_v03_r00/2023_Cars_Aggregated.csv",
+      "allowed_domains": ["sdi.eea.europa.eu"],
+      "authority": "CompetentAuthority",
+      "content_type": "Csv",
+      "refresh_hours": 720,
+      "priority": 0,
+      "robots_note": "Official EEA Datahub aggregate endpoint; one monthly conditional snapshot fetch.",
+      "terms_note": "EEA materials and datasets are reusable with attribution under the EEA legal notice/data policy. Publish normalized aggregate facts, methodology, scope and sample size; never infer a Vietnam trim measurement."
+    },
+    {
       "id": "full-market-scope-policy",
       "name": "Vietnam Car Platform reviewed market-scope policy",
       "owner": "Vietnam Car Platform",

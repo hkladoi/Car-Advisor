@@ -39,6 +39,7 @@ from ingestion.market_scope import (
     load_market_scope,
     validate_market_scope,
 )
+from ingestion.real_world import RealWorldConsumptionPublisher, parse_eea_aggregate
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -86,6 +87,16 @@ def _parser() -> argparse.ArgumentParser:
         help="Queue one real Open Charge Map Vietnam sync when the optional server key is configured",
     )
     enqueue_charging.add_argument("--registry", type=Path, required=True)
+
+    for command, help_text in (
+        ("fetch-real-world-consumption", "Fetch the official EEA aggregate into immutable storage"),
+        ("publish-real-world-consumption", "Validate and publish EEA manufacturer/fuel cohorts"),
+    ):
+        real_world = subparsers.add_parser(command, help=help_text)
+        real_world.add_argument("--registry", type=Path, required=True)
+        real_world.add_argument("--manifest", type=Path, required=True)
+        if command == "publish-real-world-consumption":
+            real_world.add_argument("--dsn", required=True)
 
     for command, help_text in (
         ("validate-registration-seed", "Validate reviewed V1.5 registration rules"),
@@ -281,6 +292,32 @@ def main() -> None:
         return
     if args.command == "discover-source":
         result = asyncio.run(_discover_source(args, registry, Settings()))
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command.endswith("real-world-consumption"):
+        source_id = "eea-real-world-cars-2023-aggregate"
+        source = registry.by_id(source_id)
+        if source.category != "real-world-consumption" or source.content_type.value != "Csv":
+            raise ValueError("The reviewed EEA registry source must remain a CSV real-world-consumption source")
+        settings = Settings()
+        storage = S3CompatibleObjectStorage(settings)
+        if args.command == "fetch-real-world-consumption":
+            snapshots = asyncio.run(_fetch_seed(registry, {source_id}, settings))
+            write_snapshot_manifest(args.manifest, snapshots)
+            print(json.dumps({"snapshots": len(snapshots), "manifest": str(args.manifest)}, indent=2))
+            return
+        snapshots = read_snapshot_manifest(args.manifest)
+        if set(snapshots) != {source_id}:
+            raise ValueError("Real-world manifest must contain exactly the reviewed EEA source")
+        snapshot = snapshots[source_id]
+        rows = parse_eea_aggregate(storage.get_bytes(snapshot.object_key))
+        result = RealWorldConsumptionPublisher(args.dsn, storage).publish(source, snapshot, rows)
+        try:
+            from ingestion.cache import invalidate_catalog_cache
+
+            result["catalog_cache_keys_invalidated"] = invalidate_catalog_cache(settings.redis_url)
+        except Exception as error:
+            result["catalog_cache_invalidation_warning"] = type(error).__name__
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
     if args.command.endswith("market-scope"):

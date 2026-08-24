@@ -101,7 +101,7 @@ class KnownUrlFetcher:
         ):
             with attempt:
                 async with httpx.AsyncClient(
-                    headers={"User-Agent": user_agent or self._user_agent, "Accept": "text/html,application/pdf,application/json,application/xml;q=0.9,*/*;q=0.8"},
+                    headers={"User-Agent": user_agent or self._user_agent, "Accept": "text/html,application/pdf,application/json,text/csv,application/xml;q=0.9,*/*;q=0.8"},
                     follow_redirects=True,
                     timeout=self._timeout,
                     transport=self._transport,
@@ -163,5 +163,6 @@ def _extension(content_type: ContentType) -> str:
         ContentType.PDF: "pdf",
         ContentType.JSON: "json",
         ContentType.XML: "xml",
+        ContentType.CSV: "csv",
         ContentType.MANUAL_DOCUMENT: "bin",
     }[content_type]

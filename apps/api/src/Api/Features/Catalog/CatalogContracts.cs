@@ -214,6 +214,25 @@ public sealed record DealerOfferDetail(
     IReadOnlyList<DealerOfferBenefitDetail> Benefits,
     SourceBadge? Source);
 
+public sealed record RealWorldConsumptionReference(
+    Guid Id,
+    int VehicleRegistrationYear,
+    string Manufacturer,
+    string FuelType,
+    int SampleSize,
+    decimal? RealWorldFuelWeightedLitresPer100Km,
+    decimal? OfficialWltpFuelWeightedLitresPer100Km,
+    decimal? FuelWeightedAbsoluteGapLitresPer100Km,
+    decimal? FuelWeightedPercentageGap,
+    decimal? RealWorldCo2WeightedGramsPerKm,
+    decimal? OfficialWltpCo2WeightedGramsPerKm,
+    string Geography,
+    string AggregationScope,
+    bool IsTrimSpecific,
+    string MethodologyUrl,
+    string Attribution,
+    SourceBadge Source);
+
 public sealed record CarDetailResponse(
     CatalogCar Car,
     IReadOnlyList<TrimSwitchItem> Trims,
@@ -224,5 +243,6 @@ public sealed record CarDetailResponse(
     IReadOnlyList<ColorDetail> Colors,
     WarrantyDetail? Warranty,
     IReadOnlyList<DealerOfferDetail> DealerOffers,
+    IReadOnlyList<RealWorldConsumptionReference> RealWorldConsumption,
     SourceBadge? PrimarySource,
     DateTimeOffset GeneratedAt);

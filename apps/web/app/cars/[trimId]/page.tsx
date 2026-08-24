@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 
 import { RegionSelector } from "@/components/region-selector";
 import { PriceHistoryChart } from "@/components/history-charts";
+import { RealWorldConsumptionPanel } from "@/components/real-world-consumption";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { SourceDetails } from "@/components/source-details";
 import { WatchlistButton } from "@/features/account/watchlist-button";
@@ -212,6 +213,11 @@ export default async function CarDetailPage({ params }: { params: Promise<{ trim
                 </div>
               ) : <p className="empty-fact">Chưa có thông số đã chuẩn hóa.</p>}
             </section>
+
+            <RealWorldConsumptionPanel
+              officialTrimFuelLitresPer100Km={car.specifications.fuelLitresPer100Km}
+              references={detail.realWorldConsumption}
+            />
 
             <section className="detail-section" aria-labelledby="features-title">
               <header><p className="machine-label">FEATURES</p><h2 id="features-title">Trang bị</h2></header>

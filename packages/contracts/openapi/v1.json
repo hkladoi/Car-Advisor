@@ -5468,6 +5468,13 @@
             },
             "nullable": true
           },
+          "realWorldConsumption": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RealWorldConsumptionReference"
+            },
+            "nullable": true
+          },
           "primarySource": {
             "$ref": "#/components/schemas/SourceBadge"
           },
@@ -8316,6 +8323,84 @@
               "format": "uuid"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RealWorldConsumptionReference": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vehicleRegistrationYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "manufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "fuelType": {
+            "type": "string",
+            "nullable": true
+          },
+          "sampleSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "realWorldFuelWeightedLitresPer100Km": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "officialWltpFuelWeightedLitresPer100Km": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "fuelWeightedAbsoluteGapLitresPer100Km": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "fuelWeightedPercentageGap": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "realWorldCo2WeightedGramsPerKm": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "officialWltpCo2WeightedGramsPerKm": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "geography": {
+            "type": "string",
+            "nullable": true
+          },
+          "aggregationScope": {
+            "type": "string",
+            "nullable": true
+          },
+          "isTrimSpecific": {
+            "type": "boolean"
+          },
+          "methodologyUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribution": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceBadge"
           }
         },
         "additionalProperties": false

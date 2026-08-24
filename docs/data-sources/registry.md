@@ -11,11 +11,25 @@ Priority: `OFFICIAL_GOV > OFFICIAL_MANUFACTURER > OFFICIAL_DISTRIBUTOR > OFFICIA
 | MSRP/spec/warranty | Vietnam manufacturer/distributor | Price daily; specs weekly/change | Brand parser |
 | Dealer offer | Authorized dealer/branch | Daily for supported sources | Dealer parser |
 | Region | Province Open API v2 snapshot | Periodic/manual reviewed | Region importer |
+| Real-world fuel/CO2 cohort | EEA OBFCM official aggregate | Monthly snapshot | Strict CSV cohort parser |
 | Discovery | Brave Search | Budgeted only when missing/stale | Discovery client |
 
 V1.2 registers exact official domains, owners, robots notes, freshness SLA and fixture paths. No Brave snippet is persisted as a field fact.
 
-The machine-readable authority is `data/source-registry.v1.json`. It currently contains 21 exact source entries: official product/price sources, brand registries, MOIT, DMS, EVN, V-Green and a disabled discovery-only Brave entry. Each entry records authority, allowed redirect domains, content type, refresh SLA, priority, robots/access note and reuse note.
+The machine-readable authority is `data/source-registry.v1.json`. It contains
+exact official product/price sources, brand registries, government and energy
+sources, the EEA real-world aggregate, Open Charge Map and a disabled
+discovery-only Brave entry. Each entry records authority, allowed redirect
+domains, content type, refresh SLA, priority, robots/access note and reuse note.
+
+## V3.3 EEA real-world cohort
+
+`eea-real-world-cars-2023-aggregate` is a competent-authority CSV source. The
+worker snapshots the original bytes, validates all expected columns and
+publishes manufacturer × fuel × registration-year facts with sample size,
+methodology and attribution. It is not a trim source. Only reviewed exact
+manufacturer mappings may attach a cohort to a Vietnam catalog brand; ambiguous
+corporate groups remain unlinked. See ADR-011.
 
 ## V1.2 initial seed
 

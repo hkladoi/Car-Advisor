@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using VietnamCarPlatform.Domain.Catalog;
 using VietnamCarPlatform.Domain.Commerce;
 using VietnamCarPlatform.Domain.Common;
 using VietnamCarPlatform.Infrastructure.Catalog;
@@ -162,12 +163,36 @@ public sealed class CatalogService(
                 .Where(value => offerIds.Contains(value.OfferId))
                 .OrderBy(value => value.Type)
                 .ToListAsync(cancellationToken);
+        var realWorldCandidates = await database.RealWorldConsumptionAggregates
+            .AsNoTracking()
+            .Where(value => value.BrandId == car.BrandId)
+            .OrderByDescending(value => value.VehicleRegistrationYear)
+            .ThenBy(value => value.FuelType)
+            .ThenByDescending(value => value.SampleSize)
+            .ToListAsync(cancellationToken);
+        var powertrainFuelType = await database.PowertrainProfiles
+            .AsNoTracking()
+            .Where(value => value.TrimId == trimId)
+            .Select(value => value.FuelType)
+            .SingleOrDefaultAsync(cancellationToken);
+        var recommendedFuel = await database.EnergyProfiles
+            .AsNoTracking()
+            .Where(value => value.TrimId == trimId)
+            .Select(value => value.RecommendedFuel)
+            .SingleOrDefaultAsync(cancellationToken);
+        var realWorldRows = RealWorldConsumptionSelectionPolicy.LatestCohorts(
+            realWorldCandidates,
+            RealWorldConsumptionSelectionPolicy.ResolveFuel(
+                car.PowertrainType,
+                powertrainFuelType,
+                recommendedFuel));
 
         var sourceFactIds = priceRows.Select(value => value.SourceFactId)
             .Concat(specificationRows.Select(value => value.Value.SourceFactId))
             .Concat(featureRows.Select(value => value.Value.SourceFactId))
             .Concat(colorRows.Select(value => value.Value.SourceFactId))
             .Concat(offerRows.Select(value => value.Offer.SourceFactId))
+            .Concat(realWorldRows.Select(value => value.SourceFactId))
             .Append(warrantyRow?.SourceFactId)
             .Where(value => value.HasValue)
             .Select(value => value!.Value)
@@ -252,6 +277,28 @@ public sealed class CatalogService(
                     benefit.Note))
                 .ToList(),
             SourceFor(value.Offer.SourceFactId))).ToList();
+        var realWorldConsumption = realWorldRows
+            .Select(value => new { Value = value, Source = SourceFor(value.SourceFactId) })
+            .Where(value => value.Source is not null)
+            .Select(value => new RealWorldConsumptionReference(
+                value.Value.Id,
+                value.Value.VehicleRegistrationYear,
+                value.Value.Manufacturer,
+                value.Value.FuelType,
+                value.Value.SampleSize,
+                value.Value.RealWorldFuelWeightedLitresPer100Km,
+                value.Value.OfficialWltpFuelWeightedLitresPer100Km,
+                value.Value.FuelWeightedAbsoluteGapLitresPer100Km,
+                value.Value.FuelWeightedPercentageGap,
+                value.Value.RealWorldCo2WeightedGramsPerKm,
+                value.Value.OfficialWltpCo2WeightedGramsPerKm,
+                value.Value.Geography,
+                value.Value.AggregationScope,
+                false,
+                value.Value.MethodologyUrl,
+                value.Value.Attribution,
+                value.Source!))
+            .ToList();
         var trims = trimRows.Select(value => new TrimSwitchItem(
             value.TrimId,
             value.TrimName,
@@ -276,6 +323,7 @@ public sealed class CatalogService(
             colors,
             warranty,
             offers,
+            realWorldConsumption,
             primarySource,
             now);
         await cache.SetAsync(cacheKey, response, cancellationToken);

@@ -98,7 +98,10 @@ if [ "${SKIP_SEED:-0}" != "1" ]; then
   docker compose --project-directory "$ROOT_DIR" run --rm --no-deps --user "$uid_gid" --volume "$TEMP_DIR:/app/.tmp" ingestion-worker python -m ingestion.cli fetch-energy-seed --registry "$registry" --seed /app/data/seed/v1.6-energy.json --manifest /app/.tmp/v1.6-energy.json
   docker compose --project-directory "$ROOT_DIR" run --rm --no-deps --volume "$TEMP_DIR:/app/.tmp:ro" ingestion-worker python -m ingestion.cli publish-energy-seed --registry "$registry" --seed /app/data/seed/v1.6-energy.json --manifest /app/.tmp/v1.6-energy.json --dsn "$dsn"
 
-  for verification in verify_v1_3_catalog.py verify_v1_4_web.py verify_v1_5_onroad.py verify_v1_6_energy.py verify_v1_7_affordability.py verify_v1_8_financing.py verify_v1_9_compare.py verify_v1_10_admin.py verify_v1_final.py; do
+  docker compose --project-directory "$ROOT_DIR" run --rm --no-deps --user "$uid_gid" --volume "$TEMP_DIR:/app/.tmp" ingestion-worker python -m ingestion.cli fetch-real-world-consumption --registry "$registry" --manifest /app/.tmp/v3.3-real-world.json
+  docker compose --project-directory "$ROOT_DIR" run --rm --no-deps --volume "$TEMP_DIR:/app/.tmp:ro" ingestion-worker python -m ingestion.cli publish-real-world-consumption --registry "$registry" --manifest /app/.tmp/v3.3-real-world.json --dsn "$dsn"
+
+  for verification in verify_v1_3_catalog.py verify_v1_4_web.py verify_v1_5_onroad.py verify_v1_6_energy.py verify_v1_7_affordability.py verify_v1_8_financing.py verify_v1_9_compare.py verify_v1_10_admin.py verify_v1_final.py verify_v3_3_real_world.py; do
     "$PYTHON_BIN" "$ROOT_DIR/scripts/$verification"
   done
 fi

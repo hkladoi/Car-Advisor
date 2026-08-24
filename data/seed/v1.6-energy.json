@@ -194,6 +194,7 @@
       "model_slug": "yaris-cross",
       "model_year": 2026,
       "trim_slug": "yaris-cross",
+      "recommended_fuel": "Petrol",
       "official_fuel_litres_per_100_km": 5.95,
       "fuel_consumption_condition": "Combined manufacturer disclosure",
       "test_cycle": "Manufacturer disclosure",
