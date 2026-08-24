@@ -56,6 +56,20 @@ def require(status: int, expected: int, payload: object | None) -> None:
     assert status == expected, (status, expected, payload)
 
 
+def wait_for_detail_name(
+    trim_id: str, expected_name: str, timeout_seconds: float = 10
+) -> dict:
+    deadline = time.monotonic() + timeout_seconds
+    latest = None
+    while time.monotonic() < deadline:
+        status, latest, _ = call(f"/api/v1/cars/{trim_id}")
+        require(status, 200, latest)
+        if isinstance(latest, dict) and latest["car"]["trimName"] == expected_name:
+            return latest
+        time.sleep(0.1)
+    raise AssertionError(("catalog projection did not converge", expected_name, latest))
+
+
 def main() -> None:
     status, _, _ = call("/api/v1/admin/coverage")
     require(status, 401, None)
@@ -244,7 +258,9 @@ def main() -> None:
         require(status, 200, changed)
         assert isinstance(changed, dict) and changed["marketStatus"] == "Unknown"
 
-        # Prime public detail cache, mutate a real field, and require immediate cache invalidation.
+        # Prime the public detail cache, mutate a real field, then require the
+        # V3.4 async search projection and its post-refresh cache rotation to
+        # make the canonical value visible within the projection SLA.
         status, detail, _ = call(f"/api/v1/cars/{VF6}")
         require(status, 200, detail)
         assert isinstance(detail, dict)
@@ -267,9 +283,7 @@ def main() -> None:
         status, locks, _ = call("/api/v1/admin/field-locks", token=token)
         require(status, 200, locks)
         assert isinstance(locks, list) and any(item["id"] == lock_id for item in locks)
-        status, changed_detail, _ = call(f"/api/v1/cars/{VF6}")
-        require(status, 200, changed_detail)
-        assert isinstance(changed_detail, dict) and changed_detail["car"]["trimName"] == temporary_name
+        wait_for_detail_name(VF6, temporary_name)
     finally:
         if original_name is not None:
             status, restored, _ = call(
@@ -299,9 +313,8 @@ def main() -> None:
             )
             require(status, 204, deleted)
 
-    status, restored_detail, _ = call(f"/api/v1/cars/{VF6}")
-    require(status, 200, restored_detail)
-    assert isinstance(restored_detail, dict) and restored_detail["car"]["trimName"] == original_name
+    assert original_name is not None
+    wait_for_detail_name(VF6, original_name)
 
     status, queue, _ = call("/api/v1/admin/review-queue", token=token)
     require(status, 200, queue)
