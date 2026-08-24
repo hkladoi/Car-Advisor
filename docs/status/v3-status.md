@@ -2,12 +2,12 @@
 
 Last updated: 2026-08-24
 
-Overall: **IN PROGRESS — V3.4**
+Overall: **IN PROGRESS — V3.5**
 
 - [x] V3.1 Explainable recommendation
 - [x] V3.2 Accounts, privacy, watchlists and alerts
 - [x] V3.3 Trusted real-world data
-- [ ] V3.4 Search scale (only after benchmark evidence)
+- [x] V3.4 Search scale (only after benchmark evidence)
 - [ ] V3.5 Versioned public/partner API
 - [ ] V3 FINAL GATE
 
@@ -189,4 +189,61 @@ Gate evidence:
   the official/cohort visual hierarchy, zero console errors and no horizontal
   overflow at 390 px.
 
-V3.4 PostgreSQL-first search benchmarking is now the only unlocked milestone.
+## V3.4 — PostgreSQL-first search scale — PASS
+
+Delivered:
+
+- Reproducible `scripts/benchmark_v3_4_search.py` creates a uniquely named,
+  disposable PostgreSQL database; generates 100,000 performance-only search
+  rows outside every production data path; applies production-equivalent
+  trigram/facet/price/array indexes; runs five warm `EXPLAIN (ANALYZE, BUFFERS)`
+  measurements per query; and force-drops the database in `finally`.
+- Catalog candidate loading now stages exact phrase, all-token and strict-word
+  trigram fallback. Common exact requests avoid broad fuzzy evaluation while
+  typo recovery and the pre-existing honest partial-candidate semantics remain.
+- Migration `20260824023048_AddV34SearchSync` adds the durable
+  `published_data_events` outbox, retry lifecycle guards/routing indexes and an
+  advisory-locked `process_catalog_search_events(integer)` projector function.
+- Catalog seed, full-market scope, energy-profile, safe auto-publication and all
+  admin create/update/delete/review/rollback/override paths append a
+  `CatalogSearchSync.*` event in the same canonical-data transaction. No
+  publisher refreshes the materialized search view synchronously.
+- A horizontally safe API background worker coalesces pending events, refreshes
+  `current_searchable_trims`, marks success or schedules bounded exponential
+  retry on failure, and rotates Redis catalog cache only after success.
+- The V1.2 publisher was brought forward to the V2.8 `brand_scopes` identity
+  `(market, brand_id, effective_from)` and now records market/source/snapshot/
+  reviewer provenance, restoring clean-bootstrap idempotence.
+
+Measured decision:
+
+- The final accepted 100,000-row run stayed below the 150 ms p95/query gate:
+  substring 4.449 ms, typo-fuzzy 20.265 ms, faceted 0.431 ms and feature lookup
+  0.504 ms. PostgreSQL used GIN trigram and B-tree price/index plans for
+  the selective paths; its sub-millisecond limited feature scan was correctly
+  cheaper than an index plan.
+- Live Compose contains 49 reviewed searchable trims. A real publisher event
+  and an isolated gate probe both completed in one attempt; probe event-to-index
+  latency was 256 ms against the 10-second acceptance bound.
+- These measurements do not justify Typesense or Meilisearch. Per design and
+  ADR-002, neither service/dependency was added. Reconsider only after the same
+  benchmark plus target-traffic API load evidence fails.
+
+Gate evidence:
+
+- `python scripts/verify_v3_4_search.py` — PASS: benchmark, migration/table/
+  function/constraints/indexes, real catalog+energy publication events, async
+  probe lifecycle, exact/typo searches, no failed queue rows and no external
+  search service.
+- `dotnet build VietnamCarPlatform.sln --configuration Release` — PASS with 0
+  warnings/errors; .NET tests — 78/78 PASS, including outbox lifecycle and
+  transactional event construction.
+- Worker tests — 78/78 PASS, including the Python transactional enqueue helper.
+- Web tests — 19/19 PASS with no unhandled teardown errors; lint and the
+  26-route production build also PASS.
+- The live migration applied successfully and the API/DB stayed healthy. A
+  separate empty database applied every migration through V3.4, verified the
+  table/function/two lifecycle checks, then ran the V3.4 down migration and
+  verified both objects were removed before the isolated database was dropped.
+
+V3.5 versioned public/partner API is now the only unlocked milestone.

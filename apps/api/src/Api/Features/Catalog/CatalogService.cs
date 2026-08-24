@@ -52,8 +52,7 @@ public sealed class CatalogService(
             return cached;
         }
 
-        var query = SearchQuery(filter.Search);
-        var candidates = await query.ToListAsync(cancellationToken);
+        var candidates = await LoadSearchCandidatesAsync(filter.Search, cancellationToken);
         var filtered = candidates.Where(filter.Matches).ToList();
         var facets = CreateFacets(filtered);
         var sorted = Sort(filtered, filter);
@@ -360,27 +359,54 @@ public sealed class CatalogService(
                 value.Fact.Confidence.ToString()));
     }
 
-    private IQueryable<CurrentSearchableTrim> SearchQuery(string normalizedSearch)
+    private async Task<List<CurrentSearchableTrim>> LoadSearchCandidatesAsync(
+        string normalizedSearch,
+        CancellationToken cancellationToken)
     {
         if (normalizedSearch.Length == 0)
         {
-            return database.CurrentSearchableTrims.AsNoTracking();
+            return await database.CurrentSearchableTrims.AsNoTracking().ToListAsync(cancellationToken);
         }
 
-        var tokens = SearchNormalizer.Tokens(normalizedSearch);
-        return database.CurrentSearchableTrims
+        var exact = await database.CurrentSearchableTrims
             .FromSqlInterpolated($"""
                 SELECT searchable.*
                 FROM current_searchable_trims AS searchable
                 WHERE searchable.search_text LIKE '%' || {normalizedSearch} || '%'
-                   OR searchable.search_text % {normalizedSearch}
-                   OR EXISTS (
+                """)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+        if (exact.Count > 0)
+        {
+            return exact;
+        }
+
+        var tokens = SearchNormalizer.Tokens(normalizedSearch);
+        var tokenMatches = await database.CurrentSearchableTrims
+            .FromSqlInterpolated($"""
+                SELECT searchable.*
+                FROM current_searchable_trims AS searchable
+                WHERE NOT EXISTS (
                        SELECT 1
                        FROM unnest({tokens}) AS token(value)
-                       WHERE searchable.search_text LIKE '%' || token.value || '%'
+                       WHERE searchable.search_text NOT LIKE '%' || token.value || '%'
                    )
                 """)
-            .AsNoTracking();
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+        if (tokenMatches.Count > 0)
+        {
+            return tokenMatches;
+        }
+
+        return await database.CurrentSearchableTrims
+            .FromSqlInterpolated($"""
+                SELECT searchable.*
+                FROM current_searchable_trims AS searchable
+                WHERE {normalizedSearch} <<% searchable.search_text
+                """)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
     }
 
     private static IEnumerable<CurrentSearchableTrim> Sort(

@@ -286,6 +286,28 @@ internal static class CatalogModelConfiguration
             entity.HasIndex(value => new { value.DatasetVersion, value.VehicleRegistrationYear, value.NormalizedManufacturer, value.FuelType }).IsUnique();
             entity.HasIndex(value => new { value.BrandId, value.VehicleRegistrationYear, value.FuelType });
         });
+
+        modelBuilder.Entity<PublishedDataEvent>(entity =>
+        {
+            entity.ToTable("published_data_events", table =>
+            {
+                table.HasCheckConstraint("ck_published_data_events_attempts", "attempts >= 0");
+                table.HasCheckConstraint(
+                    "ck_published_data_events_lifecycle",
+                    "(status = 'Pending' AND processing_started_at IS NULL AND processed_at IS NULL AND last_error IS NULL) OR " +
+                    "(status = 'Processing' AND processing_started_at IS NOT NULL AND processed_at IS NULL) OR " +
+                    "(status = 'Completed' AND processing_started_at IS NOT NULL AND processed_at IS NOT NULL AND last_error IS NULL) OR " +
+                    "(status = 'Failed' AND processing_started_at IS NOT NULL AND processed_at IS NULL AND NULLIF(BTRIM(last_error), '') IS NOT NULL)");
+            });
+            entity.Property(value => value.EventType).HasMaxLength(160);
+            entity.Property(value => value.AggregateType).HasMaxLength(160);
+            entity.Property(value => value.PayloadJson).HasColumnType("jsonb");
+            entity.Property(value => value.LastError).HasMaxLength(4000);
+            entity.Property(value => value.CorrelationId).HasMaxLength(128);
+            entity.HasIndex(value => new { value.Status, value.AvailableAt, value.OccurredAt });
+            entity.HasIndex(value => new { value.AggregateType, value.AggregateId, value.OccurredAt });
+            entity.HasIndex(value => value.CorrelationId);
+        });
     }
 
     private static void ConfigureProfile<TEntity>(EntityTypeBuilder<TEntity> entity, string tableName)

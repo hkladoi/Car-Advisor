@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from ingestion.contracts import Confidence
 from ingestion.extraction import CandidateFact, CandidateFactRepository, ExtractionBatch, SupportedField
+from ingestion.search_sync import enqueue_catalog_search_sync
 
 
 class RiskAssessment(BaseModel):
@@ -213,7 +214,12 @@ class CandidateChangeRepository:
                 else:
                     queued += 1
             if auto_published:
-                cursor.execute("SELECT refresh_current_searchable_trims()")
+                enqueue_catalog_search_sync(
+                    connection,
+                    "AutomatedFactsPublished",
+                    "ExtractionBatch",
+                    payload={"auto_published": auto_published},
+                )
         return ChangeDetectionOutcome(
             detected=detected,
             auto_published=auto_published,

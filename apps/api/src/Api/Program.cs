@@ -51,6 +51,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "vcp:";
 });
 builder.Services.AddScoped<CatalogCache>();
+builder.Services.AddHostedService<CatalogSearchProjectionWorker>();
 builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<IEnergyService, EnergyService>();

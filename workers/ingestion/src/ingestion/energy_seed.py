@@ -14,6 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from ingestion.fetcher import Snapshot
 from ingestion.registration_seed import stable_id
 from ingestion.registry import SourceRegistry
+from ingestion.search_sync import enqueue_catalog_search_sync
 from ingestion.storage import ObjectStorage
 
 
@@ -265,6 +266,17 @@ class EnergySeedPublisher:
             for profile in batch.vehicle_profiles:
                 self._publish_profile(connection, batch, profile, snapshot_ids[profile.source_id])
             audit_id = self._publish_audit(connection, batch)
+            enqueue_catalog_search_sync(
+                connection,
+                "EnergyProfilesPublished",
+                "EnergySeedBatch",
+                correlation_id=f"energy:{audit_id}",
+                payload={
+                    "vehicle_profiles": len(batch.vehicle_profiles),
+                    "schema_version": batch.schema_version,
+                    "observed_at": batch.observed_at.isoformat(),
+                },
+            )
 
         return {
             "energy_prices": len(batch.energy_prices),

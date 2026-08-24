@@ -237,6 +237,8 @@ jobs:
           --dsn "host=/var/run/postgresql dbname=vietnam_car_platform user=vcp"
       - name: Verify V3.3 trustworthy real-world consumption gate
         run: python scripts/verify_v3_3_real_world.py
+      - name: Verify V3.4 PostgreSQL search scale and async projection gate
+        run: python scripts/verify_v3_4_search.py
       - run: curl --fail http://localhost:8080/health/live
       - run: curl --fail http://localhost:8080/health/ready
       - run: curl --fail http://localhost:3000

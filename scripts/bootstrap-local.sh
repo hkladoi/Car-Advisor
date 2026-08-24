@@ -101,7 +101,7 @@ if [ "${SKIP_SEED:-0}" != "1" ]; then
   docker compose --project-directory "$ROOT_DIR" run --rm --no-deps --user "$uid_gid" --volume "$TEMP_DIR:/app/.tmp" ingestion-worker python -m ingestion.cli fetch-real-world-consumption --registry "$registry" --manifest /app/.tmp/v3.3-real-world.json
   docker compose --project-directory "$ROOT_DIR" run --rm --no-deps --volume "$TEMP_DIR:/app/.tmp:ro" ingestion-worker python -m ingestion.cli publish-real-world-consumption --registry "$registry" --manifest /app/.tmp/v3.3-real-world.json --dsn "$dsn"
 
-  for verification in verify_v1_3_catalog.py verify_v1_4_web.py verify_v1_5_onroad.py verify_v1_6_energy.py verify_v1_7_affordability.py verify_v1_8_financing.py verify_v1_9_compare.py verify_v1_10_admin.py verify_v1_final.py verify_v3_3_real_world.py; do
+  for verification in verify_v1_3_catalog.py verify_v1_4_web.py verify_v1_5_onroad.py verify_v1_6_energy.py verify_v1_7_affordability.py verify_v1_8_financing.py verify_v1_9_compare.py verify_v1_10_admin.py verify_v1_final.py verify_v3_3_real_world.py verify_v3_4_search.py; do
     "$PYTHON_BIN" "$ROOT_DIR/scripts/$verification"
   done
 fi

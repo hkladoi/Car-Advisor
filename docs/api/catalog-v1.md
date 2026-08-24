@@ -11,7 +11,10 @@ Returns active brands represented by at least one current `Active`, `Announced` 
 Query parameters:
 
 - Paging/sort: `page`, `pageSize` (1–100), `sort` (`relevance`, `price_asc`, `price_desc`, `name_asc`, `newest`).
-- Search: `q`; input is lowercase/diacritic normalized, aliases are included, and PostgreSQL `pg_trgm` is used against the indexed read model.
+- Search: `q`; input is lowercase/diacritic normalized, aliases are included,
+  and PostgreSQL `pg_trgm` is used against the indexed read model. Candidate
+  loading is staged as full-phrase → all-token → strict-word fuzzy fallback so
+  ordinary exact searches do not pay the broad fuzzy-scan cost.
 - Taxonomy: comma-separated `brand`, `model`, `body`, `segment`, `powertrain`; exact `seats`.
 - Money: `msrpMin/Max`, `currentPriceMin/Max`, `onRoadMin/Max`.
 - Numeric specs: `lengthMin/Max`, `widthMin/Max`, `heightMin/Max`, `rangeMin/Max`, `batteryMin/Max`, `consumptionMin/Max`.
@@ -25,6 +28,19 @@ Every response contains the filtered facets, pagination metadata, data timestamp
 
 ## Read path and freshness
 
-`current_searchable_trims` is a PostgreSQL materialized view with trigram, facet, price, dimension, feature and color indexes. A reviewed ingestion transaction refreshes it only after all facts are published, then invalidates only `vcp:catalog:v1:*` Redis keys. Normal catalog reads never call manufacturer sites or discovery services.
+`current_searchable_trims` is a PostgreSQL materialized view with trigram,
+facet, price, dimension, feature and color indexes. Every transaction that
+publishes search-affecting data writes a `CatalogSearchSync.*` row to
+`published_data_events` in the same commit. The API background projector claims
+those rows with an advisory lock, refreshes the view, marks them completed and
+then rotates the Redis catalog generation. Failed refreshes retain an error and
+scheduled retry. Normal catalog reads never call manufacturer sites or
+discovery services.
 
-The reproducible gate is `scripts/verify_v1_3_catalog.py`; it verifies all three required queries, honest Tucson semantics, AND/OR behavior, validation, filters and warm-cache p95 below 300 ms.
+This read model is eventually consistent by design. Local/CI gates wait for the
+outbox event to complete; the configured target is at most 10 seconds and the
+V3.4 live gate measured 214 ms.
+
+The V1 reproducible gate is `scripts/verify_v1_3_catalog.py`. V3.4 adds
+`scripts/benchmark_v3_4_search.py` (isolated 100,000-row `EXPLAIN ANALYZE`
+benchmark) and `scripts/verify_v3_4_search.py` (live async projection gate).

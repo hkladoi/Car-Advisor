@@ -39,6 +39,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<PowertrainProfile> PowertrainProfiles => Set<PowertrainProfile>();
     public DbSet<EnergyProfile> EnergyProfiles => Set<EnergyProfile>();
     public DbSet<RealWorldConsumptionAggregate> RealWorldConsumptionAggregates => Set<RealWorldConsumptionAggregate>();
+    public DbSet<PublishedDataEvent> PublishedDataEvents => Set<PublishedDataEvent>();
     public DbSet<WarrantyProfile> WarrantyProfiles => Set<WarrantyProfile>();
     public DbSet<Price> Prices => Set<Price>();
     public DbSet<PriceHistory> PriceHistory => Set<PriceHistory>();
@@ -79,6 +80,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         configurationBuilder.Properties<BodyType>().HaveConversion<string>().HaveMaxLength(24);
         configurationBuilder.Properties<VehicleSegment>().HaveConversion<string>().HaveMaxLength(24);
         configurationBuilder.Properties<MarketStatus>().HaveConversion<string>().HaveMaxLength(24);
+        configurationBuilder.Properties<PublishedDataEventStatus>().HaveConversion<string>().HaveMaxLength(24);
         configurationBuilder.Properties<AvailabilityStatus>().HaveConversion<string>().HaveMaxLength(24);
         configurationBuilder.Properties<RightsStatus>().HaveConversion<string>().HaveMaxLength(24);
         configurationBuilder.Properties<PriceType>().HaveConversion<string>().HaveMaxLength(32);

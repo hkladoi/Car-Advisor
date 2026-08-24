@@ -14,6 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from ingestion.fetcher import Snapshot
 from ingestion.gate import normalize_text
 from ingestion.registry import Authority, SourceRegistry
+from ingestion.search_sync import enqueue_catalog_search_sync
 
 
 _NAMESPACE = uuid.UUID("a784c861-142c-4c73-96fb-efb241ac77c4")
@@ -233,7 +234,18 @@ class MarketScopePublisher:
                 cursor.execute("DELETE FROM market_candidates WHERE market=%s", (manifest.market,))
             for brand in manifest.brands:
                 self._publish_brand(connection, manifest, brand, source_ids, snapshot_ids)
-            self._refresh_catalog(connection)
+            enqueue_catalog_search_sync(
+                connection,
+                "MarketScopePublished",
+                "MarketScopeManifest",
+                correlation_id=f"market-scope:{audit_id}",
+                payload={
+                    "market": manifest.market,
+                    "model_candidates": report["model_candidates"],
+                    "trim_candidates": report["trim_candidates"],
+                    "observed_at": manifest.observed_at.isoformat(),
+                },
+            )
         return {**report, "audit_event_id": str(audit_id)}
 
     @staticmethod
@@ -688,14 +700,6 @@ class MarketScopePublisher:
                     manifest.reviewed_at, manifest.reviewed_by, manifest.reviewed_at, manifest.reviewed_at,
                 ),
             )
-
-    @staticmethod
-    def _refresh_catalog(connection: psycopg.Connection[Any]) -> None:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT to_regprocedure('refresh_current_searchable_trims()') IS NOT NULL")
-            if cursor.fetchone()[0]:
-                cursor.execute("SELECT refresh_current_searchable_trims()")
-
 
 def _stable_id(*parts: str) -> uuid.UUID:
     return uuid.uuid5(_NAMESPACE, "|".join(parts))

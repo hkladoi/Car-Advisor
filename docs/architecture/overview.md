@@ -10,13 +10,20 @@ The normal catalog path never calls Brave Search, Playwright, manufacturer sites
 
 ## Asynchronous path
 
-`Scheduler/API → Redis queue → Python worker → immutable snapshot → parse/normalize/validate → candidate change → risk policy → publish/review`
+`Scheduler/API → Redis queue → Python worker → immutable snapshot → parse/normalize/validate → candidate change → risk policy → publish/review → PostgreSQL outbox → search projector`
 
 Worker failure may mark a source stale or a job failed, but may not delete or mutate the currently published version.
 
 ## Module boundaries
 
-Catalog, Pricing, Registration, Energy, Ownership, Affordability, Financing, Compare, Sources, Admin and Coverage are separate module boundaries inside the API. Cross-module writes use explicit application services/transactions. Reviewed worker publication refreshes the catalog read model and invalidates catalog keys; admin publication refreshes the same read model and rotates a distributed cache generation after persistence succeeds. A transactional outbox is reserved for V2 automated change operations.
+Catalog, Pricing, Registration, Energy, Ownership, Affordability, Financing,
+Compare, Sources, Admin and Coverage are separate module boundaries inside the
+API. Cross-module writes use explicit application services/transactions.
+Worker/admin publications write a durable `CatalogSearchSync.*` event in the
+same transaction as canonical facts. Horizontally safe API projectors use a
+PostgreSQL advisory lock to coalesce events, refresh the materialized search
+view asynchronously, schedule failed retries and invalidate catalog cache only
+after a successful refresh.
 
 ## Runtime versions
 

@@ -45,7 +45,23 @@ docker compose run --rm --no-deps --volume "${PWD}/.tmp:/app/.tmp:ro" ingestion-
   --dsn "host=/var/run/postgresql dbname=vietnam_car_platform user=vcp"
 ```
 
-Publication is one PostgreSQL transaction. It writes source/snapshot/fact provenance, refreshes `current_searchable_trims` and invalidates the distributed catalog generation. Verify the new trim through `/api/v1/cars?q=<model>` and `/api/v1/cars/<trim-id>`; the detail must expose the accepted URL, fetch time and 64-character content hash.
+Publication is one PostgreSQL transaction. It writes source/snapshot/fact
+provenance and a durable `CatalogSearchSync.*` outbox event. The API projector
+then refreshes `current_searchable_trims` asynchronously and invalidates the
+distributed catalog generation after success. Before checking the API, confirm
+the new event reached `Completed` (normally below one second; gate maximum 10
+seconds):
+
+```sql
+SELECT event_type, status, attempts, processed_at, last_error
+FROM published_data_events
+ORDER BY occurred_at DESC
+LIMIT 10;
+```
+
+Verify the new trim through `/api/v1/cars?q=<model>` and
+`/api/v1/cars/<trim-id>`; the detail must expose the accepted URL, fetch time
+and 64-character content hash.
 
 The admin console can create an isolated `Draft` trim before the batch is ready. That path is for work-in-progress identity only; publish the actual facts with the reviewed snapshot pipeline above.
 
@@ -137,4 +153,3 @@ Before declaring onboarding complete:
 3. `GET /api/v1/admin/audit` contains actor, reason, timestamp and before/after for each admin change.
 4. Catalog and detail show the trim and only currently effective published offers. Offer/source disclosure opens correctly.
 5. Run `python scripts/verify_v1_final.py`. If schema changed, also run the migration and restore gates before release.
-

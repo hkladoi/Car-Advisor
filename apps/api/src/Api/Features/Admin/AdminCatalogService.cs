@@ -169,8 +169,10 @@ public sealed class AdminCatalogService(AppDbContext database, TimeProvider time
             Trim = trim.Name,
             MarketStatus = trim.MarketStatus.ToString(),
         }, request.Reason, context, now));
+        CatalogSearchSync.Enqueue(
+            database, "CatalogTrimCreated", "Trim", trim.Id, context.TraceIdentifier, now,
+            new { trim.Name, trim.Slug, MarketStatus = trim.MarketStatus.ToString() });
         await database.SaveChangesAsync(cancellationToken);
-        await RefreshCatalogReadModelAsync(database, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         await catalogCache.InvalidateAsync(cancellationToken);
         return new AdminTrimRow(trim.Id, brand.Name, model.Name, generation.Code, modelYear.Year, trim.Name, trim.Slug, trim.MarketStatus.ToString(), model.BodyType.ToString(), model.Segment.ToString(), trim.UpdatedAt);
@@ -193,6 +195,7 @@ public sealed class AdminCatalogService(AppDbContext database, TimeProvider time
         {
             throw new AdminOperationException(400, "ADMIN_CATALOG_INVALID", "Discontinued date cannot precede launch date.");
         }
+        await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
         var row = await (
                 from trim in database.Trims
                 join modelYear in database.ModelYears on trim.ModelYearId equals modelYear.Id
@@ -219,8 +222,11 @@ public sealed class AdminCatalogService(AppDbContext database, TimeProvider time
             row.Trim.LaunchedAt,
             row.Trim.DiscontinuedAt,
         }, request.Reason, context, row.Trim.UpdatedAt));
+        CatalogSearchSync.Enqueue(
+            database, "CatalogTrimUpdated", "Trim", row.Trim.Id, context.TraceIdentifier, row.Trim.UpdatedAt,
+            new { row.Trim.Name, row.Trim.Slug, MarketStatus = row.Trim.MarketStatus.ToString() });
         await database.SaveChangesAsync(cancellationToken);
-        await RefreshCatalogReadModelAsync(database, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         await catalogCache.InvalidateAsync(cancellationToken);
         return new AdminTrimRow(row.Trim.Id, row.Brand.Name, row.Model.Name, row.Generation.Code, row.ModelYear.Year, row.Trim.Name, row.Trim.Slug, row.Trim.MarketStatus.ToString(), row.Model.BodyType.ToString(), row.Model.Segment.ToString(), row.Trim.UpdatedAt);
     }
@@ -233,6 +239,7 @@ public sealed class AdminCatalogService(AppDbContext database, TimeProvider time
         CancellationToken cancellationToken)
     {
         ValidateReason(reason);
+        await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
         var trim = await database.Trims.SingleOrDefaultAsync(value => value.Id == id, cancellationToken)
             ?? throw new AdminOperationException(404, "ADMIN_TRIM_NOT_FOUND", "Trim was not found.");
         var hasDependents = await database.Prices.AnyAsync(value => value.TrimId == id, cancellationToken)
@@ -248,8 +255,11 @@ public sealed class AdminCatalogService(AppDbContext database, TimeProvider time
         var now = timeProvider.GetUtcNow();
         database.Trims.Remove(trim);
         database.AuditEvents.Add(Audit(actor, "CatalogTrimDeleted", "Trim", trim.Id, new { trim.Name, trim.Slug, MarketStatus = trim.MarketStatus.ToString() }, null, reason, context, now));
+        CatalogSearchSync.Enqueue(
+            database, "CatalogTrimDeleted", "Trim", trim.Id, context.TraceIdentifier, now,
+            new { trim.Name, trim.Slug, MarketStatus = trim.MarketStatus.ToString() });
         await database.SaveChangesAsync(cancellationToken);
-        await RefreshCatalogReadModelAsync(database, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         await catalogCache.InvalidateAsync(cancellationToken);
     }
 
@@ -372,9 +382,6 @@ public sealed class AdminCatalogService(AppDbContext database, TimeProvider time
             value.Active && (lastFetched is null || lastFetched + value.RefreshInterval < now),
             evidence?.Count ?? 0, value.RobotsNote, value.TermsNote);
     }
-
-    public static Task RefreshCatalogReadModelAsync(AppDbContext database, CancellationToken cancellationToken) =>
-        database.Database.ExecuteSqlRawAsync("SELECT refresh_current_searchable_trims()", cancellationToken);
 
     private static void ValidateSource(
         AdminSourceRequest request,

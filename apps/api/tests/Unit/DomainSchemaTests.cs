@@ -159,6 +159,23 @@ public sealed class DomainSchemaTests
             ]));
     }
 
+    [Fact]
+    public void PublishedDataEventsHaveRetryLifecycleAndProjectionQueueIndexes()
+    {
+        using var db = CreateContext();
+        var designModel = db.GetService<IDesignTimeModel>().Model;
+        var dataEvent = designModel.FindEntityType(typeof(PublishedDataEvent))!;
+
+        Assert.Contains(dataEvent.GetCheckConstraints(), check => check.Name == "ck_published_data_events_attempts");
+        Assert.Contains(dataEvent.GetCheckConstraints(), check => check.Name == "ck_published_data_events_lifecycle");
+        Assert.Contains(dataEvent.GetIndexes(), index => index.Properties.Select(property => property.Name)
+            .SequenceEqual([
+                nameof(PublishedDataEvent.Status),
+                nameof(PublishedDataEvent.AvailableAt),
+                nameof(PublishedDataEvent.OccurredAt),
+            ]));
+    }
+
     private static AppDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()

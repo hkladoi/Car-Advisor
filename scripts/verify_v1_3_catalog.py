@@ -38,7 +38,11 @@ def assert_search(query: str, expected_model: str) -> dict:
 
 
 def main() -> None:
+    deadline = time.monotonic() + 20
     brands = get("/api/v1/brands")
+    while len(brands["data"]) < 11 and time.monotonic() < deadline:
+        time.sleep(0.2)
+        brands = get("/api/v1/brands")
     assert len(brands["data"]) == 11, brands
 
     ex5 = assert_search("ex5", "EX5")

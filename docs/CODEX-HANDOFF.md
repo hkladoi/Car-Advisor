@@ -32,8 +32,14 @@ Decisions and gate evidence belong in `docs/status/`.
 - V3.3 trusted EEA real-world consumption is complete. The live data contains
   322 manufacturer/fuel/year cohorts representing 6,515,134 reported vehicles;
   only reviewed exact manufacturer mappings are linked, and every reference is
-  explicitly non-trim. V3.4 PostgreSQL-first search benchmarking is next. See
-  `docs/status/v3-status.md` and ADR-011.
+  explicitly non-trim.
+- V3.4 PostgreSQL-first search scale is complete. The isolated 100,000-row
+  benchmark passed the 150 ms/query p95 gate, so Typesense/Meilisearch was not
+  added. Search-affecting publications now synchronize through a transactional
+  outbox and retryable async projector; final gate event-to-index latency was
+  256 ms.
+  V3.5 public/partner API is next. See `docs/status/v3-status.md`, ADR-002 and
+  ADR-011.
 
 ## Architecture
 
@@ -73,7 +79,8 @@ The bootstrap is repeatable. It creates `.env`, securely merges local provider
 keys, installs dependencies, builds and starts the Compose stack, waits for
 readiness, checks schema constraints, validates/fetches/publishes the official
 V1 seeds plus the official EEA V3.3 cohort snapshot, runs their golden checks
-and checks web/API health. Use
+and the V3.4 isolated PostgreSQL benchmark/async projection gate, then checks
+web/API health. Use
 `-SkipInstall`/`SKIP_INSTALL=1` or `-SkipSeed`/`SKIP_SEED=1` only for an already
 prepared local environment.
 
@@ -93,6 +100,12 @@ Required for the core local stack: `DATABASE_URL`, `REDIS_URL`,
 `OBJECT_STORAGE_ENDPOINT`, `OBJECT_STORAGE_BUCKET`,
 `OBJECT_STORAGE_ACCESS_KEY`, `OBJECT_STORAGE_SECRET_KEY`. Compose supplies safe
 local defaults.
+
+`SEARCH_SYNC_INTERVAL_MILLISECONDS` (default 500) and
+`SEARCH_SYNC_BATCH_SIZE` (default 250) tune the PostgreSQL outbox projector.
+They are non-secret operational values; keep the interval within 100–10,000 ms
+and the batch within 1–1,000. Do not add Typesense/Meilisearch unless ADR-002's
+measured gate is exceeded.
 
 Required for V2.1 real discovery: `BRAVE_SEARCH_API_KEY`. Optional/non-critical
 enrichment and observability: `GOONG_API_KEY`, `GOONG_MAPTILES_KEY`,

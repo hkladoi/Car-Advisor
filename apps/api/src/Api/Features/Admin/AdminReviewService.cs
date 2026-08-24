@@ -154,6 +154,7 @@ public sealed class AdminReviewService(AppDbContext database, TimeProvider timeP
         CancellationToken cancellationToken)
     {
         AdminCatalogService.ValidateReason(request.Reason);
+        await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
         var change = await database.DataChanges.SingleOrDefaultAsync(value => value.Id == id, cancellationToken)
             ?? throw new AdminOperationException(404, "ADMIN_CHANGE_NOT_FOUND", "Review item was not found.");
         if (change.Status is not (ChangeStatus.PendingReview or ChangeStatus.Detected))
@@ -206,11 +207,21 @@ public sealed class AdminReviewService(AppDbContext database, TimeProvider timeP
             now);
         database.AuditEvents.Add(audit);
         change.ReviewedAuditEventId = audit.Id;
-        await database.SaveChangesAsync(cancellationToken);
-        if (publication is not null || (published is not null && IsCatalogReadModelEntity(change.EntityType)))
+        var searchProjectionChanged = publication is not null
+            || (published is not null && IsCatalogReadModelEntity(change.EntityType));
+        if (searchProjectionChanged)
         {
-            await AdminCatalogService.RefreshCatalogReadModelAsync(database, cancellationToken);
+            CatalogSearchSync.Enqueue(
+                database,
+                publication is null ? "ManualOverridePublished" : "ReviewedChangePublished",
+                change.EntityType,
+                change.EntityId,
+                context.TraceIdentifier,
+                now,
+                new { change.FieldPath, change.Status, publication?.Id });
         }
+        await database.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         await catalogCache.InvalidateAsync(cancellationToken);
     }
 
@@ -222,6 +233,7 @@ public sealed class AdminReviewService(AppDbContext database, TimeProvider timeP
         CancellationToken cancellationToken)
     {
         AdminCatalogService.ValidateReason(reason);
+        await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
         var publication = await database.PublicationVersions
             .SingleOrDefaultAsync(value => value.Id == publicationId, cancellationToken)
             ?? throw new AdminOperationException(404, "ADMIN_PUBLICATION_NOT_FOUND", "Published version was not found.");
@@ -274,8 +286,11 @@ public sealed class AdminReviewService(AppDbContext database, TimeProvider timeP
             reason,
             context,
             now));
+        CatalogSearchSync.Enqueue(
+            database, "PublicationRolledBack", publication.EntityType, publication.EntityId,
+            context.TraceIdentifier, now, new { publication.FieldPath, publication.Id });
         await database.SaveChangesAsync(cancellationToken);
-        await AdminCatalogService.RefreshCatalogReadModelAsync(database, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         await catalogCache.InvalidateAsync(cancellationToken);
     }
 
@@ -290,6 +305,7 @@ public sealed class AdminReviewService(AppDbContext database, TimeProvider timeP
         {
             throw new AdminOperationException(400, "ADMIN_LOCK_EXPIRY_INVALID", "Field lock expiry must be in the future.");
         }
+        await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
         var now = timeProvider.GetUtcNow();
         var beforeAfter = await ApplyOverrideValueAsync(request.EntityType, request.EntityId, request.FieldPath, request.NewValue, request.Reason, cancellationToken);
         FieldLock? created = null;
@@ -327,11 +343,14 @@ public sealed class AdminReviewService(AppDbContext database, TimeProvider timeP
             request.Reason,
             context,
             now));
-        await database.SaveChangesAsync(cancellationToken);
         if (IsCatalogReadModelEntity(request.EntityType))
         {
-            await AdminCatalogService.RefreshCatalogReadModelAsync(database, cancellationToken);
+            CatalogSearchSync.Enqueue(
+                database, "ManualOverridePublished", request.EntityType, request.EntityId,
+                context.TraceIdentifier, now, new { request.FieldPath, request.LockField });
         }
+        await database.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         await catalogCache.InvalidateAsync(cancellationToken);
         return created is null ? null : ToResponse(created);
     }

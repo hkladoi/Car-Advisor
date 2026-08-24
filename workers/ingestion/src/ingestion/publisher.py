@@ -12,6 +12,7 @@ from ingestion.fetcher import Snapshot
 from ingestion.gate import evaluate_seed_gate, normalize_text
 from ingestion.registry import RegistrySource, SourceRegistry
 from ingestion.risk import classify_change
+from ingestion.search_sync import enqueue_catalog_search_sync
 
 
 _NAMESPACE = uuid.UUID("f5a25127-52e6-4f59-a72c-d568ff5dca6e")
@@ -56,7 +57,17 @@ class PostgresPublisher:
                     snapshot_ids[record.source_id],
                     audit_id,
                 )
-            self._refresh_catalog_read_model(connection)
+            enqueue_catalog_search_sync(
+                connection,
+                "CatalogSeedPublished",
+                "ManualImportBatch",
+                correlation_id=f"seed:{audit_id}",
+                payload={
+                    "records": len(batch.records),
+                    "schema_version": batch.schema_version,
+                    "observed_at": batch.observed_at.isoformat(),
+                },
+            )
 
         return {
             "seeded_brands": report.seeded_brands,
@@ -65,18 +76,6 @@ class PostgresPublisher:
             "snapshots": len(snapshot_ids),
             "audit_event_id": str(audit_id),
         }
-
-    @staticmethod
-    def _refresh_catalog_read_model(connection: psycopg.Connection[Any]) -> None:
-        """Refresh only when the V1.3 read-model migration is present.
-
-        Keeping this inside the reviewed publish transaction ensures catalog readers
-        never see a partially published batch.
-        """
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT to_regprocedure('refresh_current_searchable_trims()') IS NOT NULL")
-            if cursor.fetchone()[0]:
-                cursor.execute("SELECT refresh_current_searchable_trims()")
 
     def _upsert_sources(
         self,
@@ -225,12 +224,28 @@ class PostgresPublisher:
             cursor.execute(
                 """
                 INSERT INTO brand_scopes
-                    (id, brand_id, included, reason, effective_from, effective_to, created_at, updated_at)
-                VALUES (%s, %s, TRUE, %s, %s, NULL, %s, %s)
-                ON CONFLICT (brand_id, effective_from) DO UPDATE SET included = TRUE, reason = EXCLUDED.reason,
+                    (id, brand_id, included, reason, effective_from, effective_to, market,
+                     source_id, evidence_snapshot_id, reviewed_at, reviewed_by, created_at, updated_at)
+                VALUES (%s, %s, TRUE, %s, %s, NULL, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (market, brand_id, effective_from) DO UPDATE SET included = TRUE,
+                    reason = EXCLUDED.reason, source_id = EXCLUDED.source_id,
+                    evidence_snapshot_id = EXCLUDED.evidence_snapshot_id,
+                    reviewed_at = EXCLUDED.reviewed_at, reviewed_by = EXCLUDED.reviewed_by,
                     updated_at = EXCLUDED.updated_at
                 """,
-                (_stable_id("brand-scope", str(brand_id), now.isoformat()), brand_id, batch.review_reason, now, now, now),
+                (
+                    _stable_id("brand-scope", batch.market, str(brand_id), now.isoformat()),
+                    brand_id,
+                    batch.review_reason,
+                    now,
+                    batch.market,
+                    source_id,
+                    snapshot_id,
+                    now,
+                    batch.reviewed_by,
+                    now,
+                    now,
+                ),
             )
             cursor.execute(
                 """
